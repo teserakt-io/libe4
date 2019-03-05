@@ -1,2 +1,7 @@
 *.o
 *.a
+dist/*
+build/*
+*~
+.*.swp
+.*.swo

@@ -1,16 +1,6 @@
 # Makefile
 # 2018-05-01  Markku-Juhani O. Saarinen <mjos@iki.fi>
-# 2018-
-
-LIB		= lib/libe4.a
-OBJS    = src/e4client.o			 \
-          src/e4c_store_file.o       \
-		  src/crypto/aes_siv.o		 \
-		  src/crypto/aes256enc_ref.o \
-		  src/crypto/sha3.o			 \
-		  src/crypto/keccakf1600.o
-
-DIST		= libe4
+# 2018-12-01  Antony Vennard <antony@teserakt.io>
 
 CC		    = gcc
 AR          = ar
@@ -19,20 +9,48 @@ CFLAGS		= -Wall -Werror -Ofast -DE4_STORE_FILE
 LDFLAGS		= -L.
 INCLUDES	= -Iinclude -Isrc/crypto -Ipaho.mqtt.c/src
 
-default: $(LIB)
+
+# BUILD environment
+GITCOMMIT=$(shell git rev-list -1 HEAD)
+NOW=$(shell date "+%Y%m%d%H%M")
+
+# OBJ paths match their src folder equivalents
+INCDIR = include
+OBJDIR  = build
+SRCDIR  = src
+LIBDIR  = lib
+LIBNAME = libe4
+LIB		= $(LIBDIR)/$(LIBNAME).a
+DISTDIR	= dist
+
+OBJS    = $(OBJDIR)/e4client.o			     \
+          $(OBJDIR)/e4c_store_file.o         \
+		  $(OBJDIR)/crypto/aes_siv.o	     \
+		  $(OBJDIR)/crypto/aes256enc_ref.o   \
+		  $(OBJDIR)/crypto/sha3.o 			 \
+		  $(OBJDIR)/crypto/keccakf1600.o
+
+
+
+default: setup $(LIB)
+
+setup:
+	mkdir -p $(OBJDIR); \
+	mkdir -p $(OBJDIR)/crypto; \
+	mkdir -p $(LIBDIR); \
+	mkdir -p $(DISTDIR); \
 
 $(LIB): $(OBJS)
-		mkdir lib; \
-		$(AR) $(ARFLAGS) $(LIB) $(OBJS)
+	mkdir -p lib; \
+	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
-%.o: %.c
-		$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+build/%.o: src/%.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-		rm -rf $(DIST)-*.t?z $(OBJS) $(LIB) *~ *.e4p
-		find . -name "*.o" -exec rm -f {} \;
+	rm -rf $(DISTDIR) $(OBJDIR) $(LIBDIR) $(OBJS) $(LIB) *~ *.e4p
+	find . -name "*.o" -exec rm -f {} \;
 
-dist:		clean
-		cd ..; \
-		tar cfvz $(DIST)/$(DIST)-`date "+%Y%m%d%H%M"`.tgz \
-			$(DIST)/* $(DIST)/.gitignore
+dist: $(LIB)
+	@echo 'Making $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2'
+	tar cfvj $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2 $(LIBDIR)/* $(INCDIR)/*
