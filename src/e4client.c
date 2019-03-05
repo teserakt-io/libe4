@@ -66,7 +66,7 @@ int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
 int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
     const uint8_t *cptr, size_t clen, const char *topic)
 {
-    int i, j;
+    int i = 0, j=0;
     uint8_t key[E4C_KEY_LEN];
     uint64_t tstamp;
 #ifndef __AVR__

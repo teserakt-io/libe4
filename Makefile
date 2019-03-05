@@ -1,11 +1,13 @@
 # Makefile
 # 2018-05-01  Markku-Juhani O. Saarinen <mjos@iki.fi>
+# 2018-
 
 LIB		= lib/libe4.a
-OBJS    = src/e4client.o			\
-		  src/crypto/aes_siv.o		\
-		  src/crypto/aes256enc_ref.o		\
-		  src/crypto/sha3.o			\
+OBJS    = src/e4client.o			 \
+          src/e4c_store_file.o       \
+		  src/crypto/aes_siv.o		 \
+		  src/crypto/aes256enc_ref.o \
+		  src/crypto/sha3.o			 \
 		  src/crypto/keccakf1600.o
 
 DIST		= libe4
@@ -13,7 +15,7 @@ DIST		= libe4
 CC		    = gcc
 AR          = ar
 ARFLAGS     = rcs
-CFLAGS		= -Wall -Werror -Ofast
+CFLAGS		= -Wall -Werror -Ofast -DE4_STORE_FILE
 LDFLAGS		= -L.
 INCLUDES	= -Iinclude -Isrc/crypto -Ipaho.mqtt.c/src
 

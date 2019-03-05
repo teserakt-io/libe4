@@ -36,7 +36,8 @@ int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
 int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
     const uint8_t *cptr, size_t clen, const char *topic);
 
-
-typedef int (*e4c_load_)
+#ifdef E4_STORE_FILE
+#include "e4/internal/e4c_store_file.h"
+#endif
 
 #endif
