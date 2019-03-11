@@ -37,10 +37,10 @@ int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
     *clen = mlen + 24;
 
     // get the key
-    /*i = e4c_getindex(topic);
+    i = e4c_getindex(topic);
     if (i < 0)
         return i;
-    e4c_getkey(key, i);*/
+    e4c_getkey(key, i);
 
 #ifdef __AVR__
     time_now = secs1970;                    // externally incremented
@@ -80,10 +80,10 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
         return E4ERR_TooShortCiphertext;
 
     // get the key
-    /*i = e4c_getindex(topic);
+    i = e4c_getindex(topic);
     if (i < 0)
         return i;
-    e4c_getkey(key, i);*/
+    e4c_getkey(key, i);
 
     // check timestamp
     tstamp = 0;
