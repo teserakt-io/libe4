@@ -39,15 +39,15 @@ typedef struct {
 } e4storage;
 
 
-/*! Initialize e4storage memory.
- * \param store structure representing storage.
- * \return 0 on success. Non-zero return values indicate errors.
+/** \brief Initialize e4storage memory.
+   \param store structure representing storage.
+   \return 0 on success. Non-zero return values indicate errors.
  */
 int e4c_init(e4storage* store);
-/*! Load e4storage from persistence file.
- * \param store structure representing storage.
- * \param path a string locating the file to be opened.
- * \return 0 on success. Non-zero return values indicate errors.
+/** \brief Load e4storage from persistence file.
+   \param store structure representing storage.
+   \param path a string locating the file to be opened.
+   \return 0 on success. Non-zero return values indicate errors.
  */
 int e4c_load(e4storage* store, const char *path);
 int e4c_sync(e4storage* store);

@@ -2,6 +2,7 @@
 *.a
 dist/*
 build/*
+doc/*
 *~
 .*.swp
 .*.swo

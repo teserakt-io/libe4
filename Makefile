@@ -2,13 +2,13 @@
 # 2018-05-01  Markku-Juhani O. Saarinen <mjos@iki.fi>
 # 2018-12-01  Antony Vennard <antony@teserakt.io>
 
-CC		    = gcc
-AR          = ar
-ARFLAGS     = rcs
-CFLAGS		= -Wall -Werror -Ofast -DE4_STORE_FILE
-LDFLAGS		= -L.
-INCLUDES	= -Iinclude 
-
+CC	 = gcc
+AR       = ar
+ARFLAGS  = rcs
+CFLAGS	 = -Wall -Werror -Ofast -DE4_STORE_FILE
+LDFLAGS	 = -L.
+INCLUDES = -Iinclude 
+DOC      = doxygen
 
 # BUILD environment
 GITCOMMIT=$(shell git rev-list -1 HEAD)
@@ -18,6 +18,7 @@ NOW=$(shell date "+%Y%m%d%H%M")
 INCDIR = include
 OBJDIR  = build
 SRCDIR  = src
+DOCDIR  = doc
 LIBDIR  = lib
 LIBNAME = libe4
 LIB		= $(LIBDIR)/$(LIBNAME).a
@@ -54,3 +55,8 @@ clean:
 dist: $(LIB)
 	@echo 'Making $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2'
 	tar cfvj $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2 $(LIBDIR)/* $(INCDIR)/*
+
+doc:
+	$(DOC)
+
+.PHONY: doc
