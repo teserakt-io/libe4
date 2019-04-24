@@ -14,7 +14,7 @@
 
 #define E4_TOPICS_MAX 100
 
-const char E4V1_MAGIC[] = "E41P";
+const char E4V1_MAGIC[4] = "E41P";
 
 // In memory structures that represent the file. This may need to become 
 typedef struct {
@@ -23,7 +23,7 @@ typedef struct {
 } identity;
 
 typedef struct {
-    uint8_t topic[E4C_TOPIC_LEN];
+    uint8_t topic[E4_TOPICHASH_LEN];
     uint8_t key[E4_KEY_LEN];
 } topic_key;
 
@@ -39,23 +39,27 @@ typedef struct {
 } e4storage;
 
 
-int e4c_init(e4storage* store, const char *path);
+/*! Initialize e4storage memory.
+ * \param store structure representing storage.
+ * \return 0 on success. Non-zero return values indicate errors.
+ */
+int e4c_init(e4storage* store);
+/*! Load e4storage from persistence file.
+ * \param store structure representing storage.
+ * \param path a string locating the file to be opened.
+ * \return 0 on success. Non-zero return values indicate errors.
+ */
+int e4c_load(e4storage* store, const char *path);
 int e4c_sync(e4storage* store);
-int e4c_free(e4storage* store);
-int e4c_reset_topics(e4storage* store);
-int e4c_reset_storage(e4storage* stor);
-
 int e4c_set_id(e4storage* store, const uint8_t *id);
 int e4c_set_idkey(e4storage* store, const uint8_t *key);
-
 int e4c_getindex(e4storage* store, const char *topic);
-int e4c_getkey(uint8_t *key, e4storage* store, const int index);
-
+int e4c_gettopickey(uint8_t *key, e4storage* store, const int index);
+int e4c_set_topic_key(e4storage* store, const uint8_t *topic_hash, const uint8_t *key);
 int e4c_remove_topic(e4storage* store, const uint8_t *topic_hash);
-int e4c_set_topic_key(e4storage* store, const uint8_t *, const uint8_t *key);
 
-// == Debug ==
-
-void e4c_debug_dumpkeys();
+#ifdef DEBUG
+void e4c_debug_dumpkeys(e4storage* store);
+#endif
 
 #endif

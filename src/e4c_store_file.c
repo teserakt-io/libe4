@@ -20,20 +20,20 @@
 #include "e4/crypto/sha3.h"
 
 #define ZERO(X) do {\
-    memset(X, 0, sizeof X); \
+    memset(&X, 0, sizeof X); \
 } while(0)
 
 int e4c_init(e4storage* store) 
 {
     ZERO(store->data.id);
-    ZERO(store->data.topiccount);
+    store->data.topiccount = 0;
     ZERO(store->data.topics);
+    return 0;
 }
 
 int e4c_load(e4storage* store, const char *path) 
 {
-
-    int fd;
+    int fd, i;
     size_t rlen = 0;
     char mbuf[4];
     
@@ -64,12 +64,12 @@ int e4c_load(e4storage* store, const char *path)
         goto err;
     }
 
-    rlen = read(fd, store->data.topiccount, sizeof store->data.topiccount);
+    rlen = read(fd, &store->data.topiccount, sizeof store->data.topiccount);
     if ( rlen != sizeof store->data.topiccount ) {
         goto err;
     }
 
-    for ( i=0; i < store.data.topiccount; i++ ) {
+    for ( i=0; i < store->data.topiccount; i++ ) {
 
     }
 
@@ -82,7 +82,7 @@ err:
 
 int e4c_sync(e4storage* store) 
 {   
-    int fd = NULL;
+    int fd = -1;
     uint16_t i = 0;
 
     if (store->filepath == NULL)
@@ -99,8 +99,8 @@ int e4c_sync(e4storage* store)
     write(fd, store->data.id.key, sizeof store->data.id.key);
     write(fd, &store->data.topiccount, sizeof store->data.topiccount);
 
-    for ( i=0; i < store.data.topiccount; i++ ) {
-        topic_key* t = &(data->topic[0]) + i;
+    for ( i=0; i < store->data.topiccount; i++ ) {
+        topic_key* t = &(store->data.topics[0]) + i;
 
         write(fd, t->topic, sizeof t->topic);
         write(fd, t->key, sizeof t->key);
@@ -114,13 +114,15 @@ int e4c_sync(e4storage* store)
 int e4c_set_id(e4storage* store, const uint8_t *id)
 {
     memmove(store->data.id.id, id, sizeof store->data.id.id);
+    return 0;
 }
 int e4c_set_idkey(e4storage* store, const uint8_t *key)
 {
-    memmove(store->data.id.key, id, sizeof store->data.id.key);
+    memmove(store->data.id.key, key, sizeof store->data.id.key);
+    return 0;
 }
 
-int e4c_getindex(e4storage* store, const char *topic);
+int e4c_getindex(e4storage* store, const char *topic)
 {
     int i;
     uint8_t hash[E4_TOPICHASH_LEN];
@@ -130,7 +132,7 @@ int e4c_getindex(e4storage* store, const char *topic);
 
     // look for it
     for (i = 0; i < store->data.topiccount; i++) {   // find the key
-        if (memcmp(topic_keys[i].topic, hash, E4_TOPICHASH_LEN) == 0) {
+        if (memcmp(store->data.topics[i].topic, hash, E4_TOPICHASH_LEN) == 0) {
             break;
         }
     }
@@ -146,12 +148,12 @@ int e4c_gettopickey(uint8_t *key, e4storage* store, const int index)
     if (index < 0 || index >= store->data.topiccount)
         return E4ERR_TopicKeyMissing;
 
-    memcpy(key, topic_keys[index].key, E4_KEY_LEN);
+    memcpy(key, store->data.topics[index].key, E4_KEY_LEN);
 
     return 0;
 }
 
-int e4c_set_topic_key(e4storage* store, const uint8_t *i topic_hash, const uint8_t *key)
+int e4c_set_topic_key(e4storage* store, const uint8_t *topic_hash, const uint8_t *key)
 {
     int i;
 
@@ -169,28 +171,33 @@ int e4c_set_topic_key(e4storage* store, const uint8_t *i topic_hash, const uint8
         store->data.topiccount++;
     }
 
-    return e4c_sync();
+    return e4c_sync(store);
 }
 
 int e4c_remove_topic(e4storage* store, const uint8_t *topic_hash) 
 {
     int i, j;
+    topic_key* topic_keys = store->data.topics;
 
     for (i = 0; i < store->data.topiccount; i++) {
+
         if (memcmp(topic_keys[i].topic, topic_hash, E4_TOPICHASH_LEN) == 0) {
             // remove this item and move list up
             for (j = i + 1; j < store->data.topiccount; j++) {
                 memcpy(&topic_keys[j - 1], &topic_keys[j],
                     sizeof(topic_key));
             }
+            ZERO(topic_keys[store->data.topiccount]);
             store->data.topiccount--;
 
-            return e4c_sync();
+            return e4c_sync(store);
         }
     }
 
     return E4ERR_TopicKeyMissing;
 }
+
+#ifdef DEBUG
 
 void e4c_debug_dumpkeys(e4storage* store)
 {
@@ -206,3 +213,5 @@ void e4c_debug_dumpkeys(e4storage* store)
         printf("\n");
     }
 }
+
+#endif
