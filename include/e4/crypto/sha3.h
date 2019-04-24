@@ -16,7 +16,7 @@
 #endif
 
 // state context
-typedef struct {
+typedef struct _sha3_ctx_tag {
 #ifdef __AVR__
     uint8_t b[240];                         // state + work bytes
 #else
@@ -26,7 +26,9 @@ typedef struct {
 } sha3_ctx_t;
 
 // this is the common context that should be used
+#ifndef E4_SHA3_INTERNAL
 extern sha3_ctx_t common_sha3_ctx;
+#endif
 
 // compression function, rc rounds
 void keccak_f1600(void *st, uint8_t rc);

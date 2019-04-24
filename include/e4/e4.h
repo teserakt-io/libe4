@@ -20,11 +20,14 @@
 #define E4ERR_InvalidCommand        -107
 #define E4ERR_PersistenceError      -108
 
-// Size of the topic hash
-#define E4C_TOPIC_LEN 32
+// Size of the ID, truncated sha3(alias) 
+#define E4_ID_LEN 16
 
 // Secret key size
-#define E4C_KEY_LEN 64
+#define E4_KEY_LEN 32
+
+// Topic Hash Length
+#define E4_TOPICHASH_LEN 32
 
 // == Local Client API ==
 

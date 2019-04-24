@@ -18,7 +18,7 @@
  */
 
 #include <stdint.h>
-#include "aes256enc.h"
+#include "e4/crypto/aes256enc.h"
 
 static const uint32_t Te0[256] = {
     0xc66363a5, 0xf87c7c84, 0xee777799, 0xf67b7b8d,

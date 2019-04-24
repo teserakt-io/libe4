@@ -5,8 +5,8 @@
 
 #include <string.h>
 
-#include "aes256enc.h"
-#include "aes_siv.h"
+#include "e4/crypto/aes256enc.h"
+#include "e4/crypto/aes_siv.h"
 
 static void cmac_dbl(uint8_t v[16])
 {

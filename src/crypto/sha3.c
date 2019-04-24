@@ -5,7 +5,8 @@
 
 //  From tiny_sha3 (dated 2011-11-19)
 
-#include "sha3.h"
+#define E4_SHA3_INTERNAL
+#include "e4/crypto/sha3.h"
 #include "string.h"
 
 #ifndef __AVR__

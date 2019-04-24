@@ -6,7 +6,7 @@
 //  OpenSSL wrapper
 
 #include <openssl/aes.h>
-#include "aes256enc.h"
+#include "e4/crypto/aes256enc.h"
 
 void aes256_enc_exp_key(void *eky, const void *key)
 {

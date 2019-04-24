@@ -1,6 +1,8 @@
-//  e4client.c
-//  2018-05-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
-//  (c) 2018 Copyright Teserakt AG
+/* e4client.c
+ * 2018-05-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
+ * 2018-12-01  Antony Vennard <antony@teserakt.io
+ * (c) 2018-2019 Copyright Teserakt AG
+ */
 
 #include <string.h>
 #ifndef __AVR__
@@ -10,8 +12,8 @@
 
 #include "e4/e4.h"
 
-#include "sha3.h"
-#include "aes_siv.h"
+#include "e4/crypto/sha3.h"
+#include "e4/crypto/aes_siv.h"
 
 #ifdef __AVR__
 // Wall-clock time, incremented exernally, calibrated from control message
@@ -23,13 +25,12 @@ uint64_t secs1970 = 0;
 #define E4C_TIME_TOO_OLD  (10 * 60)
 
 // Protect message
-
 int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
     const uint8_t *mptr, size_t mlen, const char *topic)
 {
     int i;
     size_t clen2;
-    uint8_t key[E4C_KEY_LEN];
+    uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
 
     if (mlen + 24 > cmax)                   // actually: not enough space
@@ -67,7 +68,7 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
     const uint8_t *cptr, size_t clen, const char *topic)
 {
     int i = 0, j=0;
-    uint8_t key[E4C_KEY_LEN];
+    uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
 #ifndef __AVR__
     uint64_t secs1970;
@@ -134,17 +135,30 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
             return e4c_reset_topics();
 
         case 0x02:                          // SetIdKey(key)
-            if (*mlen != (1 + E4C_KEY_LEN))
+            if (*mlen != (1 + E4_KEY_LEN))
                 return E4ERR_InvalidCommand;
             return e4c_set_id_key(NULL, mptr + 1);
 
         case 0x03:                          // SetTopicKey(topic, key)
-            if (*mlen != (1 + E4C_KEY_LEN + E4C_TOPIC_LEN))
+            if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN))
                 return E4ERR_InvalidCommand;
             return e4c_set_topic_key((const uint8_t *) 
-                mptr + E4C_KEY_LEN + 1, mptr + 1);
+                mptr + E4_KEY_LEN + 1, mptr + 1);
     }
 
     return E4ERR_InvalidCommand;
 }
+
+
+int e4c_derive_clientid(char* clientid, const size_t clientidlen, 
+        const char* clientname, const size_t clientnamelen) {
+
+    if ( clientidlen < E4_ID_LEN ) {
+        return E4_ID_LEN;
+    }
+
+    sha3(clientname, clientnamelen, clientid, E4_ID_LEN);
+    return 0;
+}
+
 

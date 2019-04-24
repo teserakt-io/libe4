@@ -7,7 +7,7 @@ AR          = ar
 ARFLAGS     = rcs
 CFLAGS		= -Wall -Werror -Ofast -DE4_STORE_FILE
 LDFLAGS		= -L.
-INCLUDES	= -Iinclude -Isrc/crypto -Ipaho.mqtt.c/src
+INCLUDES	= -Iinclude 
 
 
 # BUILD environment

@@ -1,5 +1,6 @@
 //  e4c_store_file.c
 //  2018-07-06  Markku-Juhani O. Saarinen <markku@teserakt.io>
+//  2019-04-15  Antony Vennard <antony@teserakt.io>
 
 //  (c) 2018 Copyright Teserakt AG
 
@@ -16,153 +17,173 @@
 
 #include "e4/e4.h"
 #include "e4/internal/e4c_store_file.h"
-#include "sha3.h"
+#include "e4/crypto/sha3.h"
 
-// number of topic keys
+#define ZERO(X) do {\
+    memset(X, 0, sizeof X); \
+} while(0)
 
-#define E4C_TOPICS_MAX 100
-
-static int topic_keys_no = 0;
-
-// This is the topic-key structure
-
-typedef struct {
-    uint8_t topic[E4C_TOPIC_LEN];
-    uint8_t key[E4C_KEY_LEN];
-} topic_key_t;
-
-static topic_key_t topic_keys[E4C_TOPICS_MAX];
-
-// Filename of the persistence file
-
-static char *persistence_file = NULL;
-
-// Initialize and check if persistent storage is valid. The path is 
-// optional -- default filename is used if set to NULL. Ignored with EEPROM.
-
-int e4c_init(const char *path)
+int e4c_init(e4storage* store) 
 {
+    ZERO(store->data.id);
+    ZERO(store->data.topiccount);
+    ZERO(store->data.topics);
+}
+
+int e4c_load(e4storage* store, const char *path) 
+{
+
     int fd;
-
-    topic_keys_no = 0;
-
+    size_t rlen = 0;
+    char mbuf[4];
+    
     if (path == NULL)
         path = "/tmp/persistence.e4p";
 
-    persistence_file = strdup(path);
+    store->filepath = strdup(path);
 
-    fd = open(path, O_RDONLY);
+    fd = open(store->filepath, O_RDONLY);
     if (fd < 0) {
         perror(path);
         return E4ERR_PersistenceError;
     }
 
-    topic_keys_no = read(fd, topic_keys, sizeof(topic_keys)) / 
-        sizeof(topic_key_t);
-
-    close(fd);
-
-    return topic_keys_no;
-}
-
-// Synchronize the persistent file, just overwriting to it
-
-int e4c_sync()
-{
-    int fd;
-    size_t siz;
-
-    if (persistence_file == NULL)
-        return E4ERR_PersistenceError;
-
-    fd = open(persistence_file, O_WRONLY | O_CREAT, 0600);
-    if (fd < 0) {
-        perror(persistence_file);
-        return E4ERR_PersistenceError;
+    memset(mbuf, 0, sizeof mbuf);
+    rlen = read(fd, mbuf, sizeof E4V1_MAGIC);
+    if ( memcmp(mbuf, E4V1_MAGIC, sizeof E4V1_MAGIC) != 0 ) {
+        goto err;
     }
 
-    siz = topic_keys_no * sizeof(topic_key_t);
-    if (write(fd, topic_keys, siz) != siz) {
-        perror(persistence_file);
-        close(fd);
-        return E4ERR_PersistenceError;
+    rlen = read(fd, store->data.id.id, sizeof store->data.id.id);
+    if ( rlen != sizeof store->data.id.id ) {
+        goto err;
     }
-    close(fd);
+
+    rlen = read(fd, store->data.id.key, sizeof store->data.id.key);
+    if ( rlen != sizeof store->data.id.key ) {
+        goto err;
+    }
+
+    rlen = read(fd, store->data.topiccount, sizeof store->data.topiccount);
+    if ( rlen != sizeof store->data.topiccount ) {
+        goto err;
+    }
+
+    for ( i=0; i < store.data.topiccount; i++ ) {
+
+    }
 
     return 0;
+err:
+    e4c_init(store);
+    perror(path);
+    return E4ERR_PersistenceError;
 }
 
-// This is the persistent storage format -- invoked with a physical button
-// or something
-
-int reset_storage()
-{
-    topic_keys_no = 0;
-
-    return e4c_sync();
-}
-
-// Free all resources
-
-int e4c_free()
+int e4c_sync(e4storage* store) 
 {   
-    if (persistence_file != NULL) {
-        e4c_sync();
-        free(persistence_file);
-        persistence_file = NULL;
+    int fd = NULL;
+    uint16_t i = 0;
+
+    if (store->filepath == NULL)
+        return E4ERR_PersistenceError;
+
+    fd = open(store->filepath, O_WRONLY | O_CREAT, 0600);
+    if (fd < 0) {
+        perror(store->filepath);
+        return E4ERR_PersistenceError;
     }
+
+    write(fd, E4V1_MAGIC, sizeof E4V1_MAGIC);
+    write(fd, store->data.id.id, sizeof store->data.id.id);
+    write(fd, store->data.id.key, sizeof store->data.id.key);
+    write(fd, &store->data.topiccount, sizeof store->data.topiccount);
+
+    for ( i=0; i < store.data.topiccount; i++ ) {
+        topic_key* t = &(data->topic[0]) + i;
+
+        write(fd, t->topic, sizeof t->topic);
+        write(fd, t->key, sizeof t->key);
+    }
+
+    close(fd);
+
     return 0;
 }
 
-// Fetch an index of a key of given hash. The command channel is 0.
-// Returns a negative on failure.
+int e4c_set_id(e4storage* store, const uint8_t *id)
+{
+    memmove(store->data.id.id, id, sizeof store->data.id.id);
+}
+int e4c_set_idkey(e4storage* store, const uint8_t *key)
+{
+    memmove(store->data.id.key, id, sizeof store->data.id.key);
+}
 
-int e4c_getindex(const char *topic)
+int e4c_getindex(e4storage* store, const char *topic);
 {
     int i;
-    uint8_t hash[E4C_TOPIC_LEN];
+    uint8_t hash[E4_TOPICHASH_LEN];
 
     // hash the topic
-    sha3(topic, strlen(topic), hash, E4C_TOPIC_LEN);
+    sha3(topic, strlen(topic), hash, E4_TOPICHASH_LEN);
 
     // look for it
-    for (i = 0; i < topic_keys_no; i++) {   // find the key
-        if (memcmp(topic_keys[i].topic, hash, E4C_TOPIC_LEN) == 0) {
+    for (i = 0; i < store->data.topiccount; i++) {   // find the key
+        if (memcmp(topic_keys[i].topic, hash, E4_TOPICHASH_LEN) == 0) {
             break;
         }
     }
-    if (i >= topic_keys_no)
+    if (i >= store->data.topiccount)
         return E4ERR_TopicKeyMissing;
 
     return i;
 }
 
-// get a key by index
-
-int e4c_getkey(uint8_t * key, int index)
+int e4c_gettopickey(uint8_t *key, e4storage* store, const int index) 
 {
-    if (index < 0 || index >= topic_keys_no)
+
+    if (index < 0 || index >= store->data.topiccount)
         return E4ERR_TopicKeyMissing;
 
-    memcpy(key, topic_keys[index].key, E4C_KEY_LEN);
+    memcpy(key, topic_keys[index].key, E4_KEY_LEN);
 
     return 0;
 }
 
-// Remove topic (hash)
+int e4c_set_topic_key(e4storage* store, const uint8_t *i topic_hash, const uint8_t *key)
+{
+    int i;
 
-int e4c_remove_topic(const uint8_t *topic_hash)
+    for (i = 0; i < store->data.topiccount; i++) {
+        if (memcmp(store->data.topics[i].topic, topic_hash, E4_TOPICHASH_LEN) == 0)
+            break;
+    }
+    if (i >= E4_TOPICS_MAX)                // out of space
+        return E4ERR_TopicKeyMissing;
+
+    memcpy(store->data.topics[i].topic, topic_hash, E4_TOPICHASH_LEN);
+    memcpy(store->data.topics[i].key, key, E4_KEY_LEN);
+
+    if (i == store->data.topiccount) {               // new topic
+        store->data.topiccount++;
+    }
+
+    return e4c_sync();
+}
+
+int e4c_remove_topic(e4storage* store, const uint8_t *topic_hash) 
 {
     int i, j;
 
-    for (i = 0; i < topic_keys_no; i++) {
-        if (memcmp(topic_keys[i].topic, topic_hash, E4C_TOPIC_LEN) == 0) {
+    for (i = 0; i < store->data.topiccount; i++) {
+        if (memcmp(topic_keys[i].topic, topic_hash, E4_TOPICHASH_LEN) == 0) {
             // remove this item and move list up
-            for (j = i + 1; j < topic_keys_no; j++) {
+            for (j = i + 1; j < store->data.topiccount; j++) {
                 memcpy(&topic_keys[j - 1], &topic_keys[j],
-                    sizeof(topic_key_t));
+                    sizeof(topic_key));
             }
-            topic_keys_no--;
+            store->data.topiccount--;
 
             return e4c_sync();
         }
@@ -171,66 +192,16 @@ int e4c_remove_topic(const uint8_t *topic_hash)
     return E4ERR_TopicKeyMissing;
 }
 
-// Clear all topics except ID key
-
-int e4c_reset_topics()
-{
-    if (topic_keys_no > 1)
-        topic_keys_no = 1;
-
-    return e4c_sync();
-}
-
-// set id key for this instance index 0
-
-int e4c_set_id_key(const uint8_t *cmd_topic_hash, const uint8_t *key)
-{
-    if (cmd_topic_hash != NULL)
-        memcpy(topic_keys[0].topic, cmd_topic_hash, E4C_TOPIC_LEN);
-    if (key != NULL)    
-        memcpy(topic_keys[0].key, key, E4C_KEY_LEN);
-
-    if (cmd_topic_hash != NULL && key != NULL) {
-        if (topic_keys_no < 1)
-            topic_keys_no = 1;
-    }
-
-    return e4c_sync();
-}
-
-// set key for given topic (hash)
-
-int e4c_set_topic_key(const uint8_t *topic_hash, const uint8_t *key)
-{
-    int i;
-
-    for (i = 0; i < topic_keys_no; i++) {
-        if (memcmp(topic_keys[i].topic, topic_hash, E4C_TOPIC_LEN) == 0)
-            break;
-    }
-    if (i >= E4C_TOPICS_MAX)                // out of space
-        return E4ERR_TopicKeyMissing;
-
-    memcpy(topic_keys[i].topic, topic_hash, E4C_TOPIC_LEN);
-    memcpy(topic_keys[i].key, key, E4C_KEY_LEN);
-
-    if (i == topic_keys_no) {               // new topic
-        topic_keys_no++;
-    }
-
-    return e4c_sync();
-}
-
-void e4c_debug_dumpkeys()
+void e4c_debug_dumpkeys(e4storage* store)
 {
     int i, j;
 
-    for (i = 0; i < topic_keys_no; i++) {
+    for (i = 0; i < store->data.topiccount; i++) {
         printf("!!! %2d topic hash = ", i);
-        for (j = 0; j < E4C_TOPIC_LEN; j++)
+        for (j = 0; j < E4_TOPICHASH_LEN; j++)
             printf("%02X", topic_keys[i].topic[j]);
         printf("\n!!! %2d  topic key = ", i);
-        for (j = 0; j < E4C_KEY_LEN; j++)
+        for (j = 0; j < E4_KEY_LEN; j++)
             printf("%02X", topic_keys[i].key[j]);
         printf("\n");
     }
