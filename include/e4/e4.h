@@ -1,7 +1,12 @@
-//  e4client.h
-//  2018-05-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
-
-//  (c) 2018 Copyright Teserakt AG
+/**
+ * \brief E4 main header, provides access to the E4 API.
+ * \detail Later
+ * @ingroup group_e4
+ *
+ * 2018-05-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
+ * 2019-04-15  Antony Vennard <antony@teserakt.io>
+ *  (c) 2018-2019 Copyright Teserakt AG
+ */
 
 #ifndef _E4CLIENT_H_
 #define _E4CLIENT_H_
