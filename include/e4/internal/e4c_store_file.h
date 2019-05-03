@@ -46,7 +46,17 @@ int e4c_init(e4storage* store);
    \return 0 on success. Non-zero return values indicate errors.
  */
 int e4c_load(e4storage* store, const char *path);
+/** \brief Sync e4storage with persistence file
+   \param store structure representing storage.
+   \return 0 on success. Non-zero return values indicate errors.
+ */
 int e4c_sync(e4storage* store);
+/** \brief Set the Identity of the device. An identifier can be generated 
+    from an alias using the utility function e4c_derive_clientid.
+   \param store structure representing storage.
+   \param id buffer representing the bytes for the identifier.
+   \return 0 on success. Non-zero return values indicate errors.
+ */
 int e4c_set_id(e4storage* store, const uint8_t *id);
 int e4c_set_idkey(e4storage* store, const uint8_t *key);
 int e4c_is_device_ctrltopic(e4storage* store, const char *topic);

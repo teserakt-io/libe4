@@ -1,5 +1,6 @@
 /**
  @defgroup group_e4 E4 Library
- @brief E4 Library Code
-
+ @brief E4 Protocol Library Code for embedded devices. You must include this 
+ header and use the relevant functions from this code to protect and unprotect 
+ messages.
 */
