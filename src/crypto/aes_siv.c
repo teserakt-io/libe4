@@ -102,7 +102,7 @@ int aes256_encrypt_siv(
         uint8_t *ct, size_t *ctlen,         // out: ciphertext
         const uint8_t *ad, size_t adlen,    // in: associated data / nonce
         const uint8_t *pt, size_t ptlen,    // in: plaintext
-        const uint8_t *key)                 // in: secret key (64 bytes)
+        const uint8_t *key)                 // in: secret key (32 bytes)
 {
     size_t i;
     uint8_t d[16], x[16];
@@ -133,7 +133,7 @@ int aes256_encrypt_siv(
 
     // CTR part
 
-    aes256_enc_exp_key(eky, key + 32);
+    aes256_enc_exp_key(eky, key);
 
     siv_ctr(ct + 16, pt, ptlen, ct, eky);   // (siv) counter mode
 
@@ -148,14 +148,14 @@ int aes256_decrypt_siv(
         uint8_t *pt, size_t *ptlen,         // out: plaintext
         const uint8_t *ad, size_t adlen,    // in: associated data / nonce
         const uint8_t *ct, size_t ctlen,    // in: ciphertext
-        const uint8_t *key)                 // in: secret key (64 bytes)
+        const uint8_t *key)                 // in: secret key (32 bytes)
 {
     size_t i;
     uint8_t d[16], x[16];
 
     uint8_t eky[AES256_EXPKEY_LEN];
 
-    aes256_enc_exp_key(eky, key + 32);
+    aes256_enc_exp_key(eky, key);
 
     ctlen -= 16;                            // ctlen is ptlen now
     *ptlen = ctlen;

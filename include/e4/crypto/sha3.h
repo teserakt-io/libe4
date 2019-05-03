@@ -38,7 +38,13 @@ int sha3_init(sha3_ctx_t *c, int mdlen);    // mdlen = hash output in bytes
 int sha3_update(sha3_ctx_t *c, const void *data, size_t len);
 int sha3_final(void *md, sha3_ctx_t *c);    // digest goes to md
 
-// compute a sha3 hash (md) of given byte length from "in"
+/** \brief compute a SHA3 hash 
+ \param[in] in input buffer to be hashed
+ \param[in] inlen length of input buffer to be hashed
+ \param[out] md message digest buffer to which the hash is written.
+ \param[in] mdlen length of message digest buffer to be written
+ \ingroup crypto
+*/
 void *sha3(const void *in, size_t inlen, void *md, int mdlen);
 
 // SHAKE128 and SHAKE256 extensible-output functions
