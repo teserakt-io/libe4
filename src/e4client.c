@@ -26,10 +26,10 @@ uint64_t secs1970 = 0;
 
 // Protect message
 int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
-    const uint8_t *mptr, size_t mlen, const char *topic)
+    const uint8_t *mptr, size_t mlen, const char *topic, e4storage* storage)
 {
-    int i;
-    size_t clen2;
+    int i = 0;
+    size_t clen2 = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
 
@@ -38,10 +38,15 @@ int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
     *clen = mlen + 24;
 
     // get the key
-    i = e4c_getindex(topic);
-    if (i < 0)
-        return i;
-    e4c_getkey(key, i);
+    if (i >= 0) {
+        e4c_gettopickey(key, storage, i);
+    } else {
+        if (e4c_is_device_ctrltopic(storage, topic)!=0) {
+            return -1;
+        }
+        // control topic being used:
+        memcpy(key, storage->key, E4_KEY_LEN);
+    }
 
 #ifdef __AVR__
     time_now = secs1970;                    // externally incremented
@@ -65,8 +70,9 @@ int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
 // Unprotect message
 
 int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
-    const uint8_t *cptr, size_t clen, const char *topic)
+    const uint8_t *cptr, size_t clen, const char *topic, e4storage* storage)
 {
+    uint8_t control=0;
     int i = 0, j=0;
     uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
@@ -81,10 +87,17 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
         return E4ERR_TooShortCiphertext;
 
     // get the key
-    i = e4c_getindex(topic);
-    if (i < 0)
-        return i;
-    e4c_getkey(key, i);
+    i = e4c_getindex(storage, topic);
+    if (i >= 0) {
+        e4c_gettopickey(key, storage, i);
+    } else {
+        if (e4c_is_device_ctrltopic(storage, topic)!=0) {
+            return -1;
+        }
+        // control topic being used:
+        memcpy(key, storage->key, E4_KEY_LEN);
+        control = 1;
+    }
 
     // check timestamp
     tstamp = 0;
@@ -117,7 +130,8 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
         }
     }
 
-    if (i != 0)                             // if not command, success
+    // if not control channel, we can exit now; no command to process.
+    if (!(control))
         return 0;
 
     // execute commands
@@ -127,38 +141,25 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
 
     switch (mptr[0]) {
         case 0x00:                          // RemoveTopic(topic);
-            return e4c_remove_topic((const uint8_t *) mptr + 1);
+            return e4c_remove_topic(storage, (const uint8_t *) mptr + 1);
 
         case 0x01:                          // ResetTopics();
             if (*mlen != 1)
                 return E4ERR_InvalidCommand;
-            return e4c_reset_topics();
+            return e4c_reset_topics(storage);
 
         case 0x02:                          // SetIdKey(key)
             if (*mlen != (1 + E4_KEY_LEN))
                 return E4ERR_InvalidCommand;
-            return e4c_set_id_key(NULL, mptr + 1);
+            return e4c_set_idkey(storage, mptr + 1);
 
         case 0x03:                          // SetTopicKey(topic, key)
             if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN))
                 return E4ERR_InvalidCommand;
-            return e4c_set_topic_key((const uint8_t *) 
+            return e4c_set_topic_key(storage, (const uint8_t *) 
                 mptr + E4_KEY_LEN + 1, mptr + 1);
     }
 
     return E4ERR_InvalidCommand;
 }
-
-
-int e4c_derive_clientid(char* clientid, const size_t clientidlen, 
-        const char* clientname, const size_t clientnamelen) {
-
-    if ( clientidlen < E4_ID_LEN ) {
-        return E4_ID_LEN;
-    }
-
-    sha3(clientname, clientnamelen, clientid, E4_ID_LEN);
-    return 0;
-}
-
 

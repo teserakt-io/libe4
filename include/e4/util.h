@@ -11,6 +11,6 @@ int e4c_derive_clientid(char* clientid, const size_t clientidlen,
 // clientid is assumed to be E4_ID_LEN bytes. Control topics are 
 // e4/<hex of clientid>.
 int e4c_derive_control_topic(char* topic, const size_t topiclen, 
-        const char* clientid);
+        const uint8_t* clientid);
 
 #endif

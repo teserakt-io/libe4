@@ -15,13 +15,12 @@ int e4c_derive_clientid(char* clientid, const size_t clientidlen,
 }
 
 int e4c_derive_control_topic(char* topic, const size_t topiclen, 
-        const char* clientid) {
+        const uint8_t* clientid) {
     
-    const REQ_TOPICSZ = (2*E4_ID_LEN) + 3; // "e4/<hex of hash>".
     int i = 0;
 
-    if ( topiclen < REQ_TOPICSZ+1 ) {
-        return REQ_TOPICSZ + 1;
+    if ( topiclen < E4_CTRLTOPIC_LEN+1 ) {
+        return E4_CTRLTOPIC_LEN + 1;
     }
 
     snprintf(topic, topiclen, "e4/", 3);
@@ -33,4 +32,3 @@ int e4c_derive_control_topic(char* topic, const size_t topiclen,
 
     return 0;
 }
-

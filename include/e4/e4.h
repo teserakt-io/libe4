@@ -1,6 +1,5 @@
 /**
  * \brief E4 main header, provides access to the E4 API.
- * \detail Later
  * @ingroup group_e4
  *
  * 2018-05-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
@@ -14,7 +13,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/// E4 Library Error codes
+/** E4 Library Error codes */
 #define E4ERR_Ok                    0
 #define E4ERR_InvalidTag            -101
 #define E4ERR_TimestampInFuture     -102
@@ -25,16 +24,27 @@
 #define E4ERR_InvalidCommand        -107
 #define E4ERR_PersistenceError      -108
 
-/// Size of the ID, truncated sha3(alias) 
+/** Size of the ID, truncated sha3(alias) */
 #define E4_ID_LEN 16
 
-/// Secret key size
+/** Secret key size */
 #define E4_KEY_LEN 32
 
-/// Topic Hash Length
+/** Topic Hash Length */
 #define E4_TOPICHASH_LEN 32
 
-// == Local Client API ==
+
+/** Define control topic length */
+#define E4_CTRLTOPIC_LEN (2*E4_ID_LEN) + 3
+
+/* Forward-declared struct and typedef
+   We do this to avoid the use of 
+   function pointers.
+
+   Testing for this is done by compiling the library with each possible define.
+*/
+struct _e4storage;
+typedef struct _e4storage e4storage;
 
 /** \brief e4c_protect_message produces a protected message for onwards transmission
    \param cptr Pointer to a ciphertext buffer
@@ -46,7 +56,7 @@
    \return 0 on success. Non-zero return values indicate errors.
  */
 int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
-    const uint8_t *mptr, size_t mlen, const char *topic);
+    const uint8_t *mptr, size_t mlen, const char *topic, e4storage* storage);
 
 /** \brief e4c_unprotect_message retrieves and authenticates a message that 
 was encrypted by E4.
@@ -59,7 +69,7 @@ was encrypted by E4.
    \return 0 on success. Non-zero return values indicate errors.
  */
 int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
-    const uint8_t *cptr, size_t clen, const char *topic);
+    const uint8_t *cptr, size_t clen, const char *topic, e4storage* storage);
 
 #ifdef E4_STORE_FILE
 #include "e4/internal/e4c_store_file.h"
