@@ -7,7 +7,7 @@ AR       = ar
 ARFLAGS  = rcs
 CFLAGS	 = -Wall -Werror -Ofast -DE4_STORE_FILE
 LDFLAGS	 = -L.
-INCLUDES = -Iinclude 
+INCLUDES = -Iinclude/
 DOC      = doxygen
 
 # BUILD environment
@@ -21,22 +21,24 @@ SRCDIR  = src
 DOCDIR  = doc
 LIBDIR  = lib
 LIBNAME = libe4
-LIB		= $(LIBDIR)/$(LIBNAME).a
+LIB	= $(LIBDIR)/$(LIBNAME).a
 DISTDIR	= dist
 
-OBJS    = $(OBJDIR)/e4client.o			     \
+OBJS    = $(OBJDIR)/e4client.o		     \
           $(OBJDIR)/e4c_store_file.o         \
-		  $(OBJDIR)/crypto/aes_siv.o	     \
-		  $(OBJDIR)/crypto/aes256enc_ref.o   \
-		  $(OBJDIR)/crypto/sha3.o 			 \
-		  $(OBJDIR)/crypto/keccakf1600.o
+          $(OBJDIR)/e4util.o                 \
+          $(OBJDIR)/crypto/aes_siv.o	     \
+	  $(OBJDIR)/crypto/aes256enc_ref.o   \
+	  $(OBJDIR)/crypto/sha3.o 	     \
+	  $(OBJDIR)/crypto/keccakf1600.o
 
-
+TESTS   = build/test/testutil 
 
 default: setup $(LIB)
 
 setup:
 	mkdir -p $(OBJDIR); \
+	mkdir -p $(OBJDIR)/test/; \
 	mkdir -p $(OBJDIR)/crypto; \
 	mkdir -p $(LIBDIR); \
 	mkdir -p $(DISTDIR); \
@@ -58,5 +60,12 @@ dist: $(LIB)
 
 doc:
 	$(DOC)
+
+test: clean setup $(LIB) $(TESTS)
+	@echo "=== TESTS ==="
+	@echo "Executing test: testutil"; ./build/test/testutil
+
+build/test/testutil: test/util.c
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< lib/libe4.a
 
 .PHONY: doc
