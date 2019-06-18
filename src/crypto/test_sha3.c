@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sha3.h"
+#include "e4/crypto/sha3.h"
 
 // read a hex string, return byte length or -1 on error.
 

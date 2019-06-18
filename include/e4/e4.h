@@ -52,6 +52,8 @@
 #define E4_CTRLTOPIC_LEN (2*E4_ID_LEN) + 3
 
 
+#define E4_MSGHDR_LEN 24
+
 struct _e4storage;
 /** This structure represents storage-specific data to be passed to the e4c 
  storage functions. It is forward-declared and implemented by the specific 

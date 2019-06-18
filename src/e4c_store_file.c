@@ -34,6 +34,12 @@ int e4c_init(e4storage* store)
     return 0;
 }
 
+int e4c_set_storagelocation(e4storage* store, const char *path) 
+{
+    store->filepath = strdup(path);
+    return 0;
+}
+
 int e4c_load(e4storage* store, const char *path) 
 {
     int fd, i, r;
@@ -45,7 +51,7 @@ int e4c_load(e4storage* store, const char *path)
     if (path == NULL)
         path = "/tmp/persistence.e4p";
 
-    store->filepath = strdup(path);
+    e4c_set_storagelocation(store, path);
 
     fd = open(store->filepath, O_RDONLY);
     if (fd < 0) {

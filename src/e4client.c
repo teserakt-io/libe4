@@ -33,9 +33,9 @@ int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
 
-    if (mlen + 24 > cmax)                   // actually: not enough space
+    if (mlen + E4_MSGHDR_LEN > cmax)                   // actually: not enough space
         return E4ERR_TooShortCiphertext;
-    *clen = mlen + 24;
+    *clen = mlen + E4_MSGHDR_LEN;
 
     // get the key
     if (i >= 0) {
@@ -83,7 +83,7 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
 #endif
 
     // bounds checking
-    if (clen < 24 || mmax < clen - 24)
+    if (clen < E4_MSGHDR_LEN || mmax < clen - E4_MSGHDR_LEN)
         return E4ERR_TooShortCiphertext;
 
     // get the key
