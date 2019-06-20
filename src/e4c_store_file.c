@@ -20,6 +20,8 @@
 #include "e4/internal/e4c_store_file.h"
 #include "e4/crypto/sha3.h"
 
+const char E4V1_MAGIC[4] = "E41P";
+
 #define ZERO(X) do {\
     memset(&X, 0, sizeof X); \
 } while(0)

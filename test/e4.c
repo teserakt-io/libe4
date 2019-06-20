@@ -7,6 +7,8 @@
 
 #include "e4/e4.h"
 #include "e4/util.h"
+#include "e4/strlcpy.h"
+#include "e4/crypto/sha3.h"
 
 const size_t ITER_MAX = 100;
 const size_t PT_MAX = 100;
@@ -17,19 +19,20 @@ int main(int argc, char** argv, char** envp) {
     int returncode = 0;
     int e4retcode = 0;
     int iteration = 0;
+    size_t bytes_read = 0;
     FILE* urand_fd = NULL;
     e4storage store;
 
-    char clientid[E4_ID_LEN];
-    char clientkey[E4_KEY_LEN];
-    char topickey_current[E4_KEY_LEN]; 
-    char topicname_tmp[SIZE_TOPICNAME/2];
+    unsigned char clientid[E4_ID_LEN];
+    unsigned char clientkey[E4_KEY_LEN];
+    unsigned char topickey_current[E4_KEY_LEN]; 
+    unsigned char topicname_tmp[SIZE_TOPICNAME/2];
     char topicname_current[SIZE_TOPICNAME+1];
-    char topichash[E4_TOPICHASH_LEN];
+    unsigned char topichash[E4_TOPICHASH_LEN];
 
     char topics[NUM_TOPICS][SIZE_TOPICNAME+1];
 
-    memset(&store, 0, sizeof e4storage);
+    memset(&store, 0, sizeof store);
 
     urand_fd = fopen("/dev/urandom", "r");
     if ( urand_fd == NULL  ) {
@@ -47,7 +50,7 @@ int main(int argc, char** argv, char** envp) {
     e4c_set_storagelocation(&store, "/tmp/unittests.e4c");
 
     /* set the identity key */
-    bytes_read = fread(clientid, sizeof clientid, 1, urand_fd);
+    bytes_read = fread(&clientid, sizeof clientid, 1, urand_fd);
     if ( bytes_read < sizeof clientid ) {
         returncode = 2;
         goto exit_close;
@@ -58,15 +61,16 @@ int main(int argc, char** argv, char** envp) {
         goto exit_close;
     }
     
-    e4retcode = e4c_set_id(store, clientid);
-    e4retcode = e4c_set_idkey(store, clientkey);
+    e4retcode = e4c_set_id(&store, clientid);
+    e4retcode = e4c_set_idkey(&store, clientkey);
 
     for ( iteration = 0; iteration<NUM_TOPICS; iteration++ ) {
 
         int j=0;
 
         memset(topics[iteration], 0, SIZE_TOPICNAME);
-        memset(topicname_current, 0, sizeof topickey_current);
+        memset(topicname_current, 0, sizeof topicname_current);
+        memset(topickey_current, 0, sizeof topickey_current);
 
         bytes_read = fread(topickey_current, sizeof topickey_current, 1, urand_fd);
         if ( bytes_read < sizeof topickey_current ) {
@@ -80,7 +84,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         for ( j = 0; j < SIZE_TOPICNAME/2; j++ ) {
-            snprintf(&topicname_current[2*j], "%02X", topicname_tmp[j]);
+            snprintf(&topicname_current[2*j], SIZE_TOPICNAME-(2*j), "%02X", topicname_tmp[j]);
         }
 
         bytes_read = strlcpy(topics[iteration], topicname_current, SIZE_TOPICNAME);
@@ -106,10 +110,10 @@ int main(int argc, char** argv, char** envp) {
 
         size_t bytes_read = 0;
         size_t ciphertext_len = 0;
-        size_t plaintext_len = 0;
-        char plaintext_buffer[PT_MAX+1];
-        char ciphertext_buffer[PT_MAX + E4_MSGHDR_LEN + 1];
-        char recovered_buffer[PT_MAX + + 1];
+        size_t recovered_len = 0;
+        unsigned char plaintext_buffer[PT_MAX+1];
+        unsigned char ciphertext_buffer[PT_MAX + E4_MSGHDR_LEN + 1];
+        unsigned char recovered_buffer[PT_MAX + + 1];
         uint8_t topicindex = 0;
 
         char* topicname;
@@ -132,11 +136,23 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
-        e4retcode = e4c_protect_message(ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, ciphertext_len,
+        e4retcode = e4c_protect_message(ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, &ciphertext_len,
             plaintext_buffer, PT_MAX, topicname, &store);
 
-        e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX, recovered_len,
+        if ( ciphertext_len != PT_MAX + E4_MSGHDR_LEN ) {
+            returncode = 2;
+            goto exit_close;
+        }
+
+
+        e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX, &recovered_len,
             ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, topicname, &store);
+        
+        if ( recovered_len != PT_MAX ) {
+            returncode = 2;
+            goto exit_close;
+        }
+
 
         if ( memcmp(recovered_buffer, plaintext_buffer, sizeof plaintext_buffer) != 0 ) {
             returncode = 3;

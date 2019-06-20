@@ -14,8 +14,6 @@
 
 #define E4_TOPICS_MAX 100
 
-const char E4V1_MAGIC[4] = "E41P";
-
 // In memory structures that represent the file. This may need to become 
 
 typedef struct {

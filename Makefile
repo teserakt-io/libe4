@@ -32,7 +32,10 @@ OBJS    = $(OBJDIR)/e4client.o		     \
 	  $(OBJDIR)/crypto/sha3.o 	     \
 	  $(OBJDIR)/crypto/keccakf1600.o
 
-TESTS   = build/test/testutil build/test/testaessiv build/test/testsha3 build/test/teste4file 
+TESTS   = build/test/util \
+	  build/test/aessiv \
+	  build/test/sha3 \
+	  build/test/e4file 
 
 default: setup $(LIB)
 
@@ -65,16 +68,16 @@ test: clean setup $(LIB) $(TESTS)
 	@echo "Executing test: testutil"; ./build/test/testutil
 	@echo "Executing test: teste4file"; ./build/test/teste4file
 
-build/test/testaessiv: test/testaessiv.c
+build/test/aessiv: test/testaessiv.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< lib/libe4.a
 
-build/test/testsha3: test/testsha3.c
+build/test/sha3: test/testsha3.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< lib/libe4.a
 
-build/test/testutil: test/util.c
+build/test/util: test/util.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< lib/libe4.a
 
-build/test/teste4file: test/e4.c
+build/test/e4file: test/e4.c
 	$(CC) $(CFLAGS) $(INCLUDES) -DE4_STORE_FILE=1 -o $@ $< lib/libe4.a
 
 .PHONY: doc
