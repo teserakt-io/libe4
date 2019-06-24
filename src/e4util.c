@@ -28,7 +28,7 @@ int e4c_derive_control_topic(char* topic, const size_t topiclen,
     snprintf(topic, topiclen, "e4/");
     for ( i = 0; i < E4_ID_LEN; i++ ) {
         const size_t adjust = 3 + 2*i;
-        snprintf((char*)(topic + adjust), topiclen-adjust, "%02X", clientid[i]);
+        snprintf((char*)(topic + adjust), topiclen-adjust, "%02x", clientid[i]);
     }
 
     return 0;

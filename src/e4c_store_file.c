@@ -19,6 +19,7 @@
 #include "e4/util.h"
 #include "e4/internal/e4c_store_file.h"
 #include "e4/crypto/sha3.h"
+#include "e4/strlcpy.h"
 
 const char E4V1_MAGIC[4] = "E41P";
 
@@ -33,12 +34,18 @@ int e4c_init(e4storage* store)
     ZERO(store->ctrltopic);
     store->topiccount = 0;
     ZERO(store->topics);
+    ZERO(store->filepath);
     return 0;
 }
 
 int e4c_set_storagelocation(e4storage* store, const char *path) 
 {
-    store->filepath = strdup(path);
+    size_t pathlen = strlen(path);
+    size_t copied_bytes = strlcpy(store->filepath, path, E4_MAX_PATH);
+    if ( pathlen >= copied_bytes ) {
+        return 1;
+    }
+    printf("Set storage location to: %s\n", store->filepath);
     return 0;
 }
 
@@ -61,21 +68,29 @@ int e4c_load(e4storage* store, const char *path)
         return E4ERR_PersistenceError;
     }
 
+    /*size_t filesize = */lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);
+
     memset(mbuf, 0, sizeof mbuf);
     rlen = read(fd, mbuf, sizeof E4V1_MAGIC);
     if ( memcmp(mbuf, E4V1_MAGIC, sizeof E4V1_MAGIC) != 0 ) {
         goto err;
     }
 
+    lseek(fd, 4, SEEK_CUR);
+
     rlen = read(fd, store->id, sizeof store->id);
     if ( rlen != sizeof store->id ) {
         goto err;
     }
+    
+    lseek(fd, 4, SEEK_CUR);
 
     r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN+1, store->id);
     if ( r!=0 ) {
         goto err;
     }
+
 
     // derive a topichash for the control topic.
     sha3(controltopic, E4_CTRLTOPIC_LEN, store->ctrltopic, E4_ID_LEN);
@@ -84,20 +99,40 @@ int e4c_load(e4storage* store, const char *path)
     if ( rlen != sizeof store->key ) {
         goto err;
     }
+    
+    lseek(fd, 4, SEEK_CUR);
 
     rlen = read(fd, &store->topiccount, sizeof store->topiccount);
     if ( rlen != sizeof store->topiccount ) {
         goto err;
     }
 
-    for ( i=0; i < store->topiccount; i++ ) {
+    lseek(fd, 4, SEEK_CUR);
+    // TODO: detect if we cannot read everything based on the topiccount 
+    
 
+    for ( i=0; i < store->topiccount; i++ ) {
+        rlen = read(fd, store->topics[i].topic, E4_TOPICHASH_LEN);
+        if ( rlen != E4_TOPICHASH_LEN ) {
+            goto err;        
+        }
+
+        lseek(fd, 4, SEEK_CUR);
+        rlen = read(fd, store->topics[i].key, E4_KEY_LEN);
+        if ( rlen != E4_KEY_LEN ) {
+            goto err;        
+        }
+        lseek(fd, 4, SEEK_CUR);
     }
 
+    e4c_debug_print(store);
+
+    close(fd);
     return 0;
 err:
-    e4c_init(store);
+    printf("An error occurred during load.\n");
     perror(path);
+    close(fd);
     return E4ERR_PersistenceError;
 }
 
@@ -115,18 +150,25 @@ int e4c_sync(e4storage* store)
         return E4ERR_PersistenceError;
     }
 
+    uint32_t zero = 0;
+
     write(fd, E4V1_MAGIC, sizeof E4V1_MAGIC);
+    write(fd, &zero, sizeof zero);
     write(fd, store->id, sizeof store->id);
+    write(fd, &zero, sizeof zero);
     write(fd, store->key, sizeof store->key);
+    write(fd, &zero, sizeof zero);
     write(fd, &store->topiccount, sizeof store->topiccount);
+    write(fd, &zero, sizeof zero);
 
     for ( i=0; i < store->topiccount; i++ ) {
         topic_key* t = &(store->topics[0]) + i;
 
         write(fd, t->topic, sizeof t->topic);
+        write(fd, &zero, sizeof zero);
         write(fd, t->key, sizeof t->key);
+        write(fd, &zero, sizeof zero);
     }
-
     close(fd);
 
     return 0;
@@ -238,21 +280,42 @@ int e4c_reset_topics(e4storage* store) {
     return 0;
 }
 
-#ifdef DEBUG
+//#ifdef DEBUG
 
-void e4c_debug_dumpkeys(e4storage* store)
+void e4c_debug_print(e4storage* store)
 {
     int i, j;
+    char controltopic[E4_CTRLTOPIC_LEN+1];
+
+    printf("Client\n");
+    printf("  ID=");
+    for (j = 0; j < E4_ID_LEN; j++)
+    {
+        printf("%02x", store->id[j]);
+    }
+    printf("\n");
+    printf("  Key=");
+    for (j = 0; j < E4_KEY_LEN; j++)
+    {
+        printf("%02x", store->key[j]);
+    }
+    printf("\n"); 
+    e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN+1, store->id);
+    printf("  ControlTopic=%s\n", controltopic);
 
     for (i = 0; i < store->topiccount; i++) {
-        printf("!!! %2d topic hash = ", i);
+        printf("  Topic %d\n", i);
+        printf("    Hash=");
         for (j = 0; j < E4_TOPICHASH_LEN; j++)
-            printf("%02X", topic_keys[i].topic[j]);
-        printf("\n!!! %2d  topic key = ", i);
+        {
+            printf("%02x", store->topics[i].topic[j]);
+        }
+        printf("\n");
+        printf("    Key=");
         for (j = 0; j < E4_KEY_LEN; j++)
-            printf("%02X", topic_keys[i].key[j]);
+            printf("%02x", store->topics[i].key[j]);
         printf("\n");
     }
 }
 
-#endif
+//#endif

@@ -13,6 +13,7 @@
 
 
 #define E4_TOPICS_MAX 100
+#define E4_MAX_PATH 255
 
 // In memory structures that represent the file. This may need to become 
 
@@ -23,13 +24,15 @@ typedef struct {
 
 
 struct _e4storage {
+    /* These fields are persisted by the sync command */
     uint8_t id[E4_ID_LEN];
     uint8_t key[E4_KEY_LEN];
-    /* this field is never syned to disk. */
-    uint8_t ctrltopic[E4_TOPICHASH_LEN];
     uint16_t topiccount;
     topic_key topics[E4_TOPICS_MAX]; 
-    char* filepath;
+
+    /* These fields are set at run time only */
+    char filepath[E4_MAX_PATH+1];
+    uint8_t ctrltopic[E4_TOPICHASH_LEN];
 };
 
 
@@ -46,8 +49,8 @@ int e4c_set_topic_key(e4storage* store, const uint8_t *topic_hash, const uint8_t
 int e4c_remove_topic(e4storage* store, const uint8_t *topic_hash);
 int e4c_reset_topics(e4storage* store);
 
-#ifdef DEBUG
-void e4c_debug_dumpkeys(e4storage* store);
-#endif
+//#ifdef DEBUG
+void e4c_debug_print(e4storage* store);
+//#endif
 
 #endif

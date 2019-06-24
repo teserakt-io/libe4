@@ -5,7 +5,7 @@
 CC	 = gcc
 AR       = ar
 ARFLAGS  = rcs
-CFLAGS	 = -Wall -Werror -Ofast -DE4_STORE_FILE
+CFLAGS	 = -Wall -Werror -g -DE4_STORE_FILE
 LDFLAGS	 = -L.
 INCLUDES = -Iinclude/
 DOC      = doxygen
@@ -30,7 +30,8 @@ OBJS    = $(OBJDIR)/e4client.o		     \
           $(OBJDIR)/crypto/aes_siv.o	     \
 	  $(OBJDIR)/crypto/aes256enc_ref.o   \
 	  $(OBJDIR)/crypto/sha3.o 	     \
-	  $(OBJDIR)/crypto/keccakf1600.o
+	  $(OBJDIR)/crypto/keccakf1600.o     \
+	  $(OBJDIR)/strlcpy.o
 
 TESTS   = build/test/util \
 	  build/test/aessiv \
@@ -46,7 +47,7 @@ setup:
 	mkdir -p $(LIBDIR); \
 	mkdir -p $(DISTDIR); \
 
-$(LIB): $(OBJS)
+$(LIB): setup $(OBJS)
 	mkdir -p lib; \
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
@@ -54,8 +55,12 @@ build/%.o: src/%.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -rf $(DISTDIR) $(OBJDIR) $(LIBDIR) $(OBJS) $(LIB) *~ *.e4p
-	find . -name "*.o" -exec rm -f {} \;
+	find . -name "*.o" -exec rm -vf {} \;
+	rm -rf $(DISTDIR) 
+	rm -rf $(OBJDIR) 
+	rm -rf $(LIB)
+	rm -rf $(LIBDIR)
+
 
 dist: $(LIB)
 	@echo 'Making $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2'
@@ -68,16 +73,16 @@ test: clean setup $(LIB) $(TESTS)
 	@echo "Executing test: testutil"; ./build/test/testutil
 	@echo "Executing test: teste4file"; ./build/test/teste4file
 
-build/test/aessiv: test/testaessiv.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< lib/libe4.a
+build/test/aessiv: test/testaessiv.c $(LIB)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB)
 
 build/test/sha3: test/testsha3.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< lib/libe4.a
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB) 
 
 build/test/util: test/util.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< lib/libe4.a
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB)
 
-build/test/e4file: test/e4.c
-	$(CC) $(CFLAGS) $(INCLUDES) -DE4_STORE_FILE=1 -o $@ $< lib/libe4.a
+build/test/e4file: test/e4.c $(LIB)
+	$(CC) $(CFLAGS) $(INCLUDES) -DE4_STORE_FILE=1 -o $@ $< $(LIB)
 
 .PHONY: doc

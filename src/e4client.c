@@ -88,11 +88,12 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
 
     // get the key
     i = e4c_getindex(storage, topic);
+    printf("i=%d\n", i);
     if (i >= 0) {
         e4c_gettopickey(key, storage, i);
     } else {
-        if (e4c_is_device_ctrltopic(storage, topic)!=0) {
-            return -1;
+        if (e4c_is_device_ctrltopic(storage, topic) !=0) {
+            return E4ERR_TopicKeyMissing;
         }
         // control topic being used:
         memcpy(key, storage->key, E4_KEY_LEN);
