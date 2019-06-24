@@ -51,8 +51,10 @@
  */
 #define E4_CTRLTOPIC_LEN (2*E4_ID_LEN) + 3
 
+#define E4_TAG_LEN 16
+#define E4_TIMESTAMP_LEN 8
 
-#define E4_MSGHDR_LEN 24
+#define E4_MSGHDR_LEN (E4_TAG_LEN+E4_TIMESTAMP_LEN)
 
 struct _e4storage;
 /** This structure represents storage-specific data to be passed to the e4c 
