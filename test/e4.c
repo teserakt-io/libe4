@@ -119,7 +119,7 @@ int main(int argc, char** argv, char** envp) {
         size_t recovered_len = 0;
         unsigned char plaintext_buffer[PT_MAX+1];
         unsigned char ciphertext_buffer[PT_MAX + E4_MSGHDR_LEN + 1];
-        unsigned char recovered_buffer[PT_MAX + + 1];
+        unsigned char recovered_buffer[PT_MAX+1];
         uint8_t topicindex = 0;
 
         char* topicname;
@@ -132,10 +132,10 @@ int main(int argc, char** argv, char** envp) {
         }
         topicindex = topicindex % NUM_TOPICS;
         topicname = topics[topicindex];
-        printf("Using topic: %s\n", topicname);
-        memset(plaintext_buffer, 0, sizeof plaintext_buffer);
-        memset(ciphertext_buffer, 0, sizeof ciphertext_buffer);
-        memset(recovered_buffer, 0, sizeof recovered_buffer);
+
+        memset(plaintext_buffer, 0, PT_MAX+1);
+        memset(ciphertext_buffer, 0, PT_MAX+E4_MSGHDR_LEN+1);
+        memset(recovered_buffer, 0, PT_MAX+1);
 
         bytes_read = fread(plaintext_buffer, 1, PT_MAX, urand_fd);
         if ( bytes_read < PT_MAX ) {
@@ -159,9 +159,12 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
-        e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX, &recovered_len,
+		/* e4c_unprotect_message zero-pads the output buffer. Perhaps we should 
+           get rid of this functionality and leave it to the user. For now, 
+           we fix it by passing the correct length of the recovered buffer. */
+        e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX+1, &recovered_len,
             ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, topicname, &store);
-       
+
         if (e4retcode != E4ERR_Ok) {
             returncode = 13;
             printf("Failed: E4 Error %d\n", e4retcode);

@@ -68,12 +68,6 @@ dist: $(LIB)
 	tar cfvj $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2 $(LIBDIR)/* $(INCDIR)/*
 
 test: clean setup $(LIB) $(TESTS)
-	@echo "=== TESTS ==="
-	@echo "Executing test: testaessiv"; ./build/test/testaessiv
-	@echo "Executing test: testsha3"; ./build/test/testsha3
-	@echo "Executing test: testutil"; ./build/test/testutil
-	@echo "Executing test: teste4file"; ./build/test/teste4file
-
 
 # Generic test rule.
 build/test/%: test/%.c $(LIB)

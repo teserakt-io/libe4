@@ -38,11 +38,12 @@ int e4c_protect_message(uint8_t *cptr, size_t cmax, size_t *clen,
     *clen = mlen + E4_MSGHDR_LEN;
 
     // get the key
+    i = e4c_getindex(storage, topic);
     if (i >= 0) {
         e4c_gettopickey(key, storage, i);
     } else {
         if (e4c_is_device_ctrltopic(storage, topic)!=0) {
-            return -1;
+            return E4ERR_TopicKeyMissing;
         }
         // control topic being used:
         memcpy(key, storage->key, E4_KEY_LEN);
@@ -83,12 +84,14 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
 #endif
 
     // bounds checking
-    if (clen < E4_MSGHDR_LEN || mmax < clen - E4_MSGHDR_LEN)
+
+    if (clen < E4_MSGHDR_LEN || mmax < clen - E4_MSGHDR_LEN) 
+    {
         return E4ERR_TooShortCiphertext;
+    }
 
     // get the key
     i = e4c_getindex(storage, topic);
-    printf("i=%d\n", i);
     if (i >= 0) {
         e4c_gettopickey(key, storage, i);
     } else {
@@ -108,9 +111,14 @@ int e4c_unprotect_message(uint8_t *mptr, size_t mmax, size_t *mlen,
     }
 
     // decrypt
-    if (aes256_decrypt_siv(mptr, mlen, cptr, 8, cptr + 8, clen - 8,  key) != 0)
+    if (aes256_decrypt_siv(mptr, mlen, cptr, 8, cptr + 8, clen - 8,  key) != 0) {
         return E4ERR_InvalidTag;
+    }
 
+	// TODO: this is only valuable for string-type data
+    // we should consider removing it, as it requires that 
+    // the plaintext buffer be 1 byte bigger than that which was 
+    // encrypted, which is very unnecessary.
     if (*mlen + 1 > mmax)                   // zero-pad it in place..
         return E4ERR_TooShortCiphertext;
     mptr[*mlen] = 0;

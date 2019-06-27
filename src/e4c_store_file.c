@@ -45,7 +45,6 @@ int e4c_set_storagelocation(e4storage* store, const char *path)
     if ( pathlen >= copied_bytes ) {
         return 1;
     }
-    printf("Set storage location to: %s\n", store->filepath);
     return 0;
 }
 
@@ -130,7 +129,6 @@ int e4c_load(e4storage* store, const char *path)
     close(fd);
     return 0;
 err:
-    printf("An error occurred during load.\n");
     perror(path);
     close(fd);
     return E4ERR_PersistenceError;
@@ -192,19 +190,8 @@ int e4c_getindex(e4storage* store, const char *topic)
 
     // hash the topic
     sha3(topic, strlen(topic), hash, E4_TOPICHASH_LEN);
-    printf("Looking for topic %s\n", topic);
-    printf("Has hash ");
-    for (int j = 0; j < E4_TOPICHASH_LEN; j++ ) {
-        printf("%02x", hash[j]);
-    }
-    printf("\n");
     // look for it
     for (i = 0; i < store->topiccount; i++) {   // find the key
-        printf("Comparing with ");
-        for (int j = 0; j < E4_TOPICHASH_LEN; j++ ) {
-            printf("%02x", store->topics[i].topic[j]);
-        }
-        printf("\n");
         if (memcmp(store->topics[i].topic, hash, E4_TOPICHASH_LEN) == 0) {
             break;
         }
