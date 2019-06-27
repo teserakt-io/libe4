@@ -31,11 +31,12 @@ OBJS    = $(OBJDIR)/e4client.o		     \
 	  $(OBJDIR)/crypto/aes256enc_ref.o   \
 	  $(OBJDIR)/crypto/sha3.o 	     \
 	  $(OBJDIR)/crypto/keccakf1600.o     \
+	  $(OBJDIR)/crypto/test_aes_siv.o    \
+	  $(OBJDIR)/crypto/test_sha3.o       \
 	  $(OBJDIR)/strlcpy.o
 
 TESTS   = build/test/util \
-	  build/test/aessiv \
-	  build/test/sha3 \
+          build/test/crypto \
 	  build/test/e4file 
 
 default: setup $(LIB)
@@ -73,14 +74,10 @@ test: clean setup $(LIB) $(TESTS)
 	@echo "Executing test: testutil"; ./build/test/testutil
 	@echo "Executing test: teste4file"; ./build/test/teste4file
 
-build/test/aessiv: test/testaessiv.c $(LIB)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB)
 
-build/test/sha3: test/testsha3.c
+# Generic test rule.
+build/test/%: test/%.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB) 
-
-build/test/util: test/util.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB)
 
 build/test/e4file: test/e4.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -DE4_STORE_FILE=1 -o $@ $< $(LIB)
