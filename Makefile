@@ -5,7 +5,7 @@
 CC	 ?= gcc
 AR       ?= ar
 ARFLAGS  = rcs
-CFLAGS	 = -Wall -Werror -g -DE4_STORE_FILE
+CFLAGS	 = -Wall -Werror -g -DE4_STORE_FILE -std=c99
 LDFLAGS	 = -L.
 INCLUDES = -Iinclude/
 DOC      = doxygen
