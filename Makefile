@@ -69,6 +69,9 @@ dist: $(LIB)
 
 test: clean setup $(LIB) $(TESTS)
 
+format:
+	clang-format -i src/*.c src/crypto/*.c include/e4/*.h include/e4/crypto/*.h include/e4/internal/*.h
+
 # Generic test rule.
 build/test/%: test/%.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB) 

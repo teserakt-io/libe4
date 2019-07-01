@@ -8,10 +8,9 @@
 // expand 256-bit key. ek[] needs 240 bytes of storage
 #define AES256_EXPKEY_LEN 240
 
-void aes256_enc_exp_key(void *ek, const void *key);
+void aes256_enc_exp_key (void *ek, const void *key);
 
 // encrypt a block
-void aes256_encrypt_ecb(void *v, const void *ek);
+void aes256_encrypt_ecb (void *v, const void *ek);
 
 #endif
-

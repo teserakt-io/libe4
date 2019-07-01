@@ -12,28 +12,24 @@
 
 // read a hex string, return byte length or -1 on error.
 
-static int test_hexdigit(char ch)
+static int test_hexdigit (char ch)
 {
-    if (ch >= '0' && ch <= '9')
-        return  ch - '0';
-    if (ch >= 'A' && ch <= 'F')
-        return  ch - 'A' + 10;
-    if (ch >= 'a' && ch <= 'f')
-        return  ch - 'a' + 10;
+    if (ch >= '0' && ch <= '9') return ch - '0';
+    if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
+    if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
     return -1;
 }
 
-static int test_readhex(uint8_t *buf, const char *str, int maxbytes)
+static int test_readhex (uint8_t *buf, const char *str, int maxbytes)
 {
     int i, h, l;
 
-    for (i = 0; i < maxbytes; i++) {
-        h = test_hexdigit(str[2 * i]);
-        if (h < 0)
-            return i;
-        l = test_hexdigit(str[2 * i + 1]);
-        if (l < 0)
-            return i;
+    for (i = 0; i < maxbytes; i++)
+    {
+        h = test_hexdigit (str[2 * i]);
+        if (h < 0) return i;
+        l = test_hexdigit (str[2 * i + 1]);
+        if (l < 0) return i;
         buf[i] = (h << 4) + l;
     }
 
@@ -42,59 +38,55 @@ static int test_readhex(uint8_t *buf, const char *str, int maxbytes)
 
 // returns zero on success, nonzero + stderr messages on failure
 
-int test_sha3()
+int test_sha3 ()
 {
     // message / digest pairs, lifted from ShortMsgKAT_SHA3-xxx.txt files
     // in the official package: https://github.com/gvanas/KeccakCodePackage
 
     const char *testvec[][2] = {
-        {   // SHA3-224, corner case with 0-length message
-            "",
-            "6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7"
-        },
-        {   // SHA3-256, short message
-            "9F2FCC7C90DE090D6B87CD7E9718C1EA6CB21118FC2D5DE9F97E5DB6AC1E9C10",
-            "2F1A5F7159E34EA19CDDC70EBF9B81F1A66DB40615D7EAD3CC1F1B954D82A3AF"
-        },
-        {   // SHA3-384, exact block size
-            "E35780EB9799AD4C77535D4DDB683CF33EF367715327CF4C4A58ED9CBDCDD486"
-            "F669F80189D549A9364FA82A51A52654EC721BB3AAB95DCEB4A86A6AFA93826D"
-            "B923517E928F33E3FBA850D45660EF83B9876ACCAFA2A9987A254B137C6E140A"
-            "21691E1069413848",
-            "D1C0FA85C8D183BEFF99AD9D752B263E286B477F79F0710B0103170173978133"
-            "44B99DAF3BB7B1BC5E8D722BAC85943A"
-        },
-        {   // SHA3-512, multiblock message
-            "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F5"
-            "623CB66B23346775D386B50E982C493ADBBFC54B9A3CD383382336A1A0B2150A"
-            "15358F336D03AE18F666C7573D55C4FD181C29E6CCFDE63EA35F0ADF5885CFC0"
-            "A3D84A2B2E4DD24496DB789E663170CEF74798AA1BBCD4574EA0BBA40489D764"
-            "B2F83AADC66B148B4A0CD95246C127D5871C4F11418690A5DDF01246A0C80A43"
-            "C70088B6183639DCFDA4125BD113A8F49EE23ED306FAAC576C3FB0C1E256671D"
-            "817FC2534A52F5B439F72E424DE376F4C565CCA82307DD9EF76DA5B7C4EB7E08"
-            "5172E328807C02D011FFBF33785378D79DC266F6A5BE6BB0E4A92ECEEBAEB1",
-            "6E8B8BD195BDD560689AF2348BDC74AB7CD05ED8B9A57711E9BE71E9726FDA45"
-            "91FEE12205EDACAF82FFBBAF16DFF9E702A708862080166C2FF6BA379BC7FFC2"
-        }
+        { // SHA3-224, corner case with 0-length message
+          "", "6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7" },
+        { // SHA3-256, short message
+          "9F2FCC7C90DE090D6B87CD7E9718C1EA6CB21118FC2D5DE9F97E5DB6AC1E9C10",
+          "2F1A5F7159E34EA19CDDC70EBF9B81F1A66DB40615D7EAD3CC1F1B954D82A3AF" },
+        { // SHA3-384, exact block size
+          "E35780EB9799AD4C77535D4DDB683CF33EF367715327CF4C4A58ED9CBDCDD486"
+          "F669F80189D549A9364FA82A51A52654EC721BB3AAB95DCEB4A86A6AFA93826D"
+          "B923517E928F33E3FBA850D45660EF83B9876ACCAFA2A9987A254B137C6E140A"
+          "21691E1069413848",
+          "D1C0FA85C8D183BEFF99AD9D752B263E286B477F79F0710B0103170173978133"
+          "44B99DAF3BB7B1BC5E8D722BAC85943A" },
+        { // SHA3-512, multiblock message
+          "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F5"
+          "623CB66B23346775D386B50E982C493ADBBFC54B9A3CD383382336A1A0B2150A"
+          "15358F336D03AE18F666C7573D55C4FD181C29E6CCFDE63EA35F0ADF5885CFC0"
+          "A3D84A2B2E4DD24496DB789E663170CEF74798AA1BBCD4574EA0BBA40489D764"
+          "B2F83AADC66B148B4A0CD95246C127D5871C4F11418690A5DDF01246A0C80A43"
+          "C70088B6183639DCFDA4125BD113A8F49EE23ED306FAAC576C3FB0C1E256671D"
+          "817FC2534A52F5B439F72E424DE376F4C565CCA82307DD9EF76DA5B7C4EB7E08"
+          "5172E328807C02D011FFBF33785378D79DC266F6A5BE6BB0E4A92ECEEBAEB1",
+          "6E8B8BD195BDD560689AF2348BDC74AB7CD05ED8B9A57711E9BE71E9726FDA45"
+          "91FEE12205EDACAF82FFBBAF16DFF9E702A708862080166C2FF6BA379BC7FFC"
+          "2" }
     };
 
     int i, fails, msg_len, sha_len;
     uint8_t sha[64], buf[64], msg[256];
 
     fails = 0;
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++)
+    {
 
-        memset(sha, 0, sizeof(sha));
-        memset(buf, 0, sizeof(buf));
-        memset(msg, 0, sizeof(msg));
+        memset (sha, 0, sizeof (sha));
+        memset (buf, 0, sizeof (buf));
+        memset (msg, 0, sizeof (msg));
 
-        msg_len = test_readhex(msg, testvec[i][0], sizeof(msg));
-        sha_len = test_readhex(sha, testvec[i][1], sizeof(sha));
+        msg_len = test_readhex (msg, testvec[i][0], sizeof (msg));
+        sha_len = test_readhex (sha, testvec[i][1], sizeof (sha));
 
-        sha3(msg, msg_len, buf, sha_len);
+        sha3 (msg, msg_len, buf, sha_len);
 
-        if (memcmp(sha, buf, sha_len) != 0)
-            fails++;
+        if (memcmp (sha, buf, sha_len) != 0) fails++;
     }
 
     return fails;
@@ -102,7 +94,7 @@ int test_sha3()
 
 // test for SHAKE128 and SHAKE256
 
-int test_shake()
+int test_shake ()
 {
     // Test vectors have bytes 480..511 of XOF output for given inputs.
     // From http://csrc.nist.gov/groups/ST/toolkit/examples.html#aHashing
@@ -123,31 +115,34 @@ int test_shake()
 
     fails = 0;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++)
+    {
 
-        if ((i & 1) == 0) {             // test each twice
-            shake128_init(&common_sha3_ctx);
-        } else {
-            shake256_init(&common_sha3_ctx);
+        if ((i & 1) == 0)
+        { // test each twice
+            shake128_init (&common_sha3_ctx);
+        }
+        else
+        {
+            shake256_init (&common_sha3_ctx);
         }
 
-        if (i >= 2) {                   // 1600-bit test pattern
-            memset(buf, 0xA3, 20);
+        if (i >= 2)
+        { // 1600-bit test pattern
+            memset (buf, 0xA3, 20);
             for (j = 0; j < 200; j += 20)
-                shake_update(&common_sha3_ctx, buf, 20);
+                shake_update (&common_sha3_ctx, buf, 20);
         }
 
-        shake_xof(&common_sha3_ctx);    // switch to extensible output
+        shake_xof (&common_sha3_ctx); // switch to extensible output
 
-        for (j = 0; j < 512; j += 32)   // output. discard bytes 0..479
-            shake_out(&common_sha3_ctx, buf, 32);
+        for (j = 0; j < 512; j += 32) // output. discard bytes 0..479
+            shake_out (&common_sha3_ctx, buf, 32);
 
         // compare to reference
-        test_readhex(ref, testhex[i], sizeof(ref));
-        if (memcmp(buf, ref, 32) != 0)
-            fails++;
+        test_readhex (ref, testhex[i], sizeof (ref));
+        if (memcmp (buf, ref, 32) != 0) fails++;
     }
 
     return fails;
 }
-
