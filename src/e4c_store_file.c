@@ -72,6 +72,9 @@ int e4c_load(e4storage* store, const char *path)
 
     memset(mbuf, 0, sizeof mbuf);
     rlen = read(fd, mbuf, sizeof E4V1_MAGIC);
+    if ( rlen != sizeof E4V1_MAGIC) {
+        goto err;
+    }
     if ( memcmp(mbuf, E4V1_MAGIC, sizeof E4V1_MAGIC) != 0 ) {
         goto err;
     }
