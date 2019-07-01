@@ -14,8 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdlib.h>
 
+#ifndef strlcpy
+#include <stdlib.h>
 size_t strlcpy(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
@@ -37,3 +38,4 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
 	}
 	return(s - src - 1);	/* count does not include NUL */
 }
+#endif
