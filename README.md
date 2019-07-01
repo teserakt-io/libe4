@@ -3,7 +3,7 @@
 
 ## Documentation
 
-Documentation for this library [is available here](doc/release/index.html).
+Documentation for this library [is available here](doc/rendered/index.html)
 
 ## License
 

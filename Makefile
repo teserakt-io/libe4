@@ -2,8 +2,8 @@
 # 2018-05-01  Markku-Juhani O. Saarinen <mjos@iki.fi>
 # 2018-12-01  Antony Vennard <antony@teserakt.io>
 
-CC	 = gcc
-AR       = ar
+CC	 ?= gcc
+AR       ?= ar
 ARFLAGS  = rcs
 CFLAGS	 = -Wall -Werror -g -DE4_STORE_FILE
 LDFLAGS	 = -L.

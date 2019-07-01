@@ -35,7 +35,6 @@ struct _e4storage {
     uint8_t ctrltopic[E4_TOPICHASH_LEN];
 };
 
-
 int e4c_init(e4storage* store);
 int e4c_set_storagelocation(e4storage* store, const char* path);
 int e4c_load(e4storage* store, const char *path);

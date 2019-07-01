@@ -139,8 +139,9 @@ int e4c_sync(e4storage* store)
     int fd = -1;
     uint16_t i = 0;
 
-    if (store->filepath == NULL)
+    if (strlen(store->filepath) == 0) {
         return E4ERR_PersistenceError;
+    }
 
     fd = open(store->filepath, O_WRONLY | O_CREAT, 0600);
     if (fd < 0) {
