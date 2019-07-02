@@ -8,9 +8,9 @@
 #include "e4/crypto/aes256enc.h"
 #include <openssl/aes.h>
 
-void aes256_enc_exp_key (void *eky, const void *key)
+void aes256_enc_exp_key(void *eky, const void *key)
 {
-    AES_set_encrypt_key (key, 256, eky);
+    AES_set_encrypt_key(key, 256, eky);
 }
 
-void aes256_encrypt_ecb (void *v, const void *eky) { AES_encrypt (v, v, eky); }
+void aes256_encrypt_ecb(void *v, const void *eky) { AES_encrypt(v, v, eky); }

@@ -12,7 +12,7 @@
 
 // read a hex string, return byte length or -1 on error.
 
-static int test_hexdigit (char ch)
+static int test_hexdigit(char ch)
 {
     if (ch >= '0' && ch <= '9') return ch - '0';
     if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
@@ -20,15 +20,15 @@ static int test_hexdigit (char ch)
     return -1;
 }
 
-static int test_readhex (uint8_t *buf, const char *str, int maxbytes)
+static int test_readhex(uint8_t *buf, const char *str, int maxbytes)
 {
     int i, h, l;
 
     for (i = 0; i < maxbytes; i++)
     {
-        h = test_hexdigit (str[2 * i]);
+        h = test_hexdigit(str[2 * i]);
         if (h < 0) return i;
-        l = test_hexdigit (str[2 * i + 1]);
+        l = test_hexdigit(str[2 * i + 1]);
         if (l < 0) return i;
         buf[i] = (h << 4) + l;
     }
@@ -38,7 +38,7 @@ static int test_readhex (uint8_t *buf, const char *str, int maxbytes)
 
 // returns zero on success, nonzero + stderr messages on failure
 
-int test_sha3 ()
+int test_sha3()
 {
     // message / digest pairs, lifted from ShortMsgKAT_SHA3-xxx.txt files
     // in the official package: https://github.com/gvanas/KeccakCodePackage
@@ -77,16 +77,16 @@ int test_sha3 ()
     for (i = 0; i < 4; i++)
     {
 
-        memset (sha, 0, sizeof (sha));
-        memset (buf, 0, sizeof (buf));
-        memset (msg, 0, sizeof (msg));
+        memset(sha, 0, sizeof(sha));
+        memset(buf, 0, sizeof(buf));
+        memset(msg, 0, sizeof(msg));
 
-        msg_len = test_readhex (msg, testvec[i][0], sizeof (msg));
-        sha_len = test_readhex (sha, testvec[i][1], sizeof (sha));
+        msg_len = test_readhex(msg, testvec[i][0], sizeof(msg));
+        sha_len = test_readhex(sha, testvec[i][1], sizeof(sha));
 
-        sha3 (msg, msg_len, buf, sha_len);
+        sha3(msg, msg_len, buf, sha_len);
 
-        if (memcmp (sha, buf, sha_len) != 0) fails++;
+        if (memcmp(sha, buf, sha_len) != 0) fails++;
     }
 
     return fails;
@@ -94,7 +94,7 @@ int test_sha3 ()
 
 // test for SHAKE128 and SHAKE256
 
-int test_shake ()
+int test_shake()
 {
     // Test vectors have bytes 480..511 of XOF output for given inputs.
     // From http://csrc.nist.gov/groups/ST/toolkit/examples.html#aHashing
@@ -120,28 +120,28 @@ int test_shake ()
 
         if ((i & 1) == 0)
         { // test each twice
-            shake128_init (&common_sha3_ctx);
+            shake128_init(&common_sha3_ctx);
         }
         else
         {
-            shake256_init (&common_sha3_ctx);
+            shake256_init(&common_sha3_ctx);
         }
 
         if (i >= 2)
         { // 1600-bit test pattern
-            memset (buf, 0xA3, 20);
+            memset(buf, 0xA3, 20);
             for (j = 0; j < 200; j += 20)
-                shake_update (&common_sha3_ctx, buf, 20);
+                shake_update(&common_sha3_ctx, buf, 20);
         }
 
-        shake_xof (&common_sha3_ctx); // switch to extensible output
+        shake_xof(&common_sha3_ctx); // switch to extensible output
 
         for (j = 0; j < 512; j += 32) // output. discard bytes 0..479
-            shake_out (&common_sha3_ctx, buf, 32);
+            shake_out(&common_sha3_ctx, buf, 32);
 
         // compare to reference
-        test_readhex (ref, testhex[i], sizeof (ref));
-        if (memcmp (buf, ref, 32) != 0) fails++;
+        test_readhex(ref, testhex[i], sizeof(ref));
+        if (memcmp(buf, ref, 32) != 0) fails++;
     }
 
     return fails;

@@ -34,7 +34,7 @@ PenaltyBreakString: 100
 PenaltyExcessCharacter: 1
 PenaltyReturnTypeOnItsOwnLine: 20
 SpaceBeforeAssignmentOperators: true
-SpaceBeforeParens: Always
+SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: false

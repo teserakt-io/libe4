@@ -26,7 +26,7 @@ static const uint64_t KeccakF_RoundConstants[NROUNDS] = {
     (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL
 };
 
-static uint64_t load64 (const unsigned char *x)
+static uint64_t load64(const unsigned char *x)
 {
     unsigned long long r = 0, i;
 
@@ -37,7 +37,7 @@ static uint64_t load64 (const unsigned char *x)
     return r;
 }
 
-static void store64 (uint8_t *x, uint64_t u)
+static void store64(uint8_t *x, uint64_t u)
 {
     unsigned int i;
 
@@ -48,31 +48,31 @@ static void store64 (uint8_t *x, uint64_t u)
     }
 }
 
-void KeccakF1600_StateExtractBytes (uint64_t *state,
-                                    unsigned char *data,
-                                    unsigned int __attribute__ ((unused)) offset,
-                                    unsigned int length)
+void KeccakF1600_StateExtractBytes(uint64_t *state,
+                                   unsigned char *data,
+                                   unsigned int __attribute__((unused)) offset,
+                                   unsigned int length)
 {
     unsigned int i;
     for (i = 0; i < (length >> 3); i++)
     {
-        store64 (data + 8 * i, state[i]);
+        store64(data + 8 * i, state[i]);
     }
 }
 
-void KeccakF1600_StateXORBytes (uint64_t *state,
-                                const unsigned char *data,
-                                unsigned int __attribute__ ((unused)) offset,
-                                unsigned int length)
+void KeccakF1600_StateXORBytes(uint64_t *state,
+                               const unsigned char *data,
+                               unsigned int __attribute__((unused)) offset,
+                               unsigned int length)
 {
     unsigned int i;
     for (i = 0; i < length / 8; ++i)
     {
-        state[i] ^= load64 (data + 8 * i);
+        state[i] ^= load64(data + 8 * i);
     }
 }
 
-void keccak_f1600 (void *st, uint8_t rc)
+void keccak_f1600(void *st, uint8_t rc)
 {
     int round;
     uint64_t *state = st;
@@ -128,22 +128,22 @@ void keccak_f1600 (void *st, uint8_t rc)
         BCu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
 
         // thetaRhoPiChiIotaPrepareTheta(round  , A, E)
-        Da = BCu ^ ROL (BCe, 1);
-        De = BCa ^ ROL (BCi, 1);
-        Di = BCe ^ ROL (BCo, 1);
-        Do = BCi ^ ROL (BCu, 1);
-        Du = BCo ^ ROL (BCa, 1);
+        Da = BCu ^ ROL(BCe, 1);
+        De = BCa ^ ROL(BCi, 1);
+        Di = BCe ^ ROL(BCo, 1);
+        Do = BCi ^ ROL(BCu, 1);
+        Du = BCo ^ ROL(BCa, 1);
 
         Aba ^= Da;
         BCa = Aba;
         Age ^= De;
-        BCe = ROL (Age, 44);
+        BCe = ROL(Age, 44);
         Aki ^= Di;
-        BCi = ROL (Aki, 43);
+        BCi = ROL(Aki, 43);
         Amo ^= Do;
-        BCo = ROL (Amo, 21);
+        BCo = ROL(Amo, 21);
         Asu ^= Du;
-        BCu = ROL (Asu, 14);
+        BCu = ROL(Asu, 14);
         Eba = BCa ^ ((~BCe) & BCi);
         Eba ^= (uint64_t)KeccakF_RoundConstants[round];
         Ebe = BCe ^ ((~BCi) & BCo);
@@ -152,15 +152,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Ebu = BCu ^ ((~BCa) & BCe);
 
         Abo ^= Do;
-        BCa = ROL (Abo, 28);
+        BCa = ROL(Abo, 28);
         Agu ^= Du;
-        BCe = ROL (Agu, 20);
+        BCe = ROL(Agu, 20);
         Aka ^= Da;
-        BCi = ROL (Aka, 3);
+        BCi = ROL(Aka, 3);
         Ame ^= De;
-        BCo = ROL (Ame, 45);
+        BCo = ROL(Ame, 45);
         Asi ^= Di;
-        BCu = ROL (Asi, 61);
+        BCu = ROL(Asi, 61);
         Ega = BCa ^ ((~BCe) & BCi);
         Ege = BCe ^ ((~BCi) & BCo);
         Egi = BCi ^ ((~BCo) & BCu);
@@ -168,15 +168,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Egu = BCu ^ ((~BCa) & BCe);
 
         Abe ^= De;
-        BCa = ROL (Abe, 1);
+        BCa = ROL(Abe, 1);
         Agi ^= Di;
-        BCe = ROL (Agi, 6);
+        BCe = ROL(Agi, 6);
         Ako ^= Do;
-        BCi = ROL (Ako, 25);
+        BCi = ROL(Ako, 25);
         Amu ^= Du;
-        BCo = ROL (Amu, 8);
+        BCo = ROL(Amu, 8);
         Asa ^= Da;
-        BCu = ROL (Asa, 18);
+        BCu = ROL(Asa, 18);
         Eka = BCa ^ ((~BCe) & BCi);
         Eke = BCe ^ ((~BCi) & BCo);
         Eki = BCi ^ ((~BCo) & BCu);
@@ -184,15 +184,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Eku = BCu ^ ((~BCa) & BCe);
 
         Abu ^= Du;
-        BCa = ROL (Abu, 27);
+        BCa = ROL(Abu, 27);
         Aga ^= Da;
-        BCe = ROL (Aga, 36);
+        BCe = ROL(Aga, 36);
         Ake ^= De;
-        BCi = ROL (Ake, 10);
+        BCi = ROL(Ake, 10);
         Ami ^= Di;
-        BCo = ROL (Ami, 15);
+        BCo = ROL(Ami, 15);
         Aso ^= Do;
-        BCu = ROL (Aso, 56);
+        BCu = ROL(Aso, 56);
         Ema = BCa ^ ((~BCe) & BCi);
         Eme = BCe ^ ((~BCi) & BCo);
         Emi = BCi ^ ((~BCo) & BCu);
@@ -200,15 +200,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Emu = BCu ^ ((~BCa) & BCe);
 
         Abi ^= Di;
-        BCa = ROL (Abi, 62);
+        BCa = ROL(Abi, 62);
         Ago ^= Do;
-        BCe = ROL (Ago, 55);
+        BCe = ROL(Ago, 55);
         Aku ^= Du;
-        BCi = ROL (Aku, 39);
+        BCi = ROL(Aku, 39);
         Ama ^= Da;
-        BCo = ROL (Ama, 41);
+        BCo = ROL(Ama, 41);
         Ase ^= De;
-        BCu = ROL (Ase, 2);
+        BCu = ROL(Ase, 2);
         Esa = BCa ^ ((~BCe) & BCi);
         Ese = BCe ^ ((~BCi) & BCo);
         Esi = BCi ^ ((~BCo) & BCu);
@@ -223,22 +223,22 @@ void keccak_f1600 (void *st, uint8_t rc)
         BCu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
 
         // thetaRhoPiChiIotaPrepareTheta(round+1, E, A)
-        Da = BCu ^ ROL (BCe, 1);
-        De = BCa ^ ROL (BCi, 1);
-        Di = BCe ^ ROL (BCo, 1);
-        Do = BCi ^ ROL (BCu, 1);
-        Du = BCo ^ ROL (BCa, 1);
+        Da = BCu ^ ROL(BCe, 1);
+        De = BCa ^ ROL(BCi, 1);
+        Di = BCe ^ ROL(BCo, 1);
+        Do = BCi ^ ROL(BCu, 1);
+        Du = BCo ^ ROL(BCa, 1);
 
         Eba ^= Da;
         BCa = Eba;
         Ege ^= De;
-        BCe = ROL (Ege, 44);
+        BCe = ROL(Ege, 44);
         Eki ^= Di;
-        BCi = ROL (Eki, 43);
+        BCi = ROL(Eki, 43);
         Emo ^= Do;
-        BCo = ROL (Emo, 21);
+        BCo = ROL(Emo, 21);
         Esu ^= Du;
-        BCu = ROL (Esu, 14);
+        BCu = ROL(Esu, 14);
         Aba = BCa ^ ((~BCe) & BCi);
         Aba ^= (uint64_t)KeccakF_RoundConstants[round + 1];
         Abe = BCe ^ ((~BCi) & BCo);
@@ -247,15 +247,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Abu = BCu ^ ((~BCa) & BCe);
 
         Ebo ^= Do;
-        BCa = ROL (Ebo, 28);
+        BCa = ROL(Ebo, 28);
         Egu ^= Du;
-        BCe = ROL (Egu, 20);
+        BCe = ROL(Egu, 20);
         Eka ^= Da;
-        BCi = ROL (Eka, 3);
+        BCi = ROL(Eka, 3);
         Eme ^= De;
-        BCo = ROL (Eme, 45);
+        BCo = ROL(Eme, 45);
         Esi ^= Di;
-        BCu = ROL (Esi, 61);
+        BCu = ROL(Esi, 61);
         Aga = BCa ^ ((~BCe) & BCi);
         Age = BCe ^ ((~BCi) & BCo);
         Agi = BCi ^ ((~BCo) & BCu);
@@ -263,15 +263,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Agu = BCu ^ ((~BCa) & BCe);
 
         Ebe ^= De;
-        BCa = ROL (Ebe, 1);
+        BCa = ROL(Ebe, 1);
         Egi ^= Di;
-        BCe = ROL (Egi, 6);
+        BCe = ROL(Egi, 6);
         Eko ^= Do;
-        BCi = ROL (Eko, 25);
+        BCi = ROL(Eko, 25);
         Emu ^= Du;
-        BCo = ROL (Emu, 8);
+        BCo = ROL(Emu, 8);
         Esa ^= Da;
-        BCu = ROL (Esa, 18);
+        BCu = ROL(Esa, 18);
         Aka = BCa ^ ((~BCe) & BCi);
         Ake = BCe ^ ((~BCi) & BCo);
         Aki = BCi ^ ((~BCo) & BCu);
@@ -279,15 +279,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Aku = BCu ^ ((~BCa) & BCe);
 
         Ebu ^= Du;
-        BCa = ROL (Ebu, 27);
+        BCa = ROL(Ebu, 27);
         Ega ^= Da;
-        BCe = ROL (Ega, 36);
+        BCe = ROL(Ega, 36);
         Eke ^= De;
-        BCi = ROL (Eke, 10);
+        BCi = ROL(Eke, 10);
         Emi ^= Di;
-        BCo = ROL (Emi, 15);
+        BCo = ROL(Emi, 15);
         Eso ^= Do;
-        BCu = ROL (Eso, 56);
+        BCu = ROL(Eso, 56);
         Ama = BCa ^ ((~BCe) & BCi);
         Ame = BCe ^ ((~BCi) & BCo);
         Ami = BCi ^ ((~BCo) & BCu);
@@ -295,15 +295,15 @@ void keccak_f1600 (void *st, uint8_t rc)
         Amu = BCu ^ ((~BCa) & BCe);
 
         Ebi ^= Di;
-        BCa = ROL (Ebi, 62);
+        BCa = ROL(Ebi, 62);
         Ego ^= Do;
-        BCe = ROL (Ego, 55);
+        BCe = ROL(Ego, 55);
         Eku ^= Du;
-        BCi = ROL (Eku, 39);
+        BCi = ROL(Eku, 39);
         Ema ^= Da;
-        BCo = ROL (Ema, 41);
+        BCo = ROL(Ema, 41);
         Ese ^= De;
-        BCu = ROL (Ese, 2);
+        BCu = ROL(Ese, 2);
         Asa = BCa ^ ((~BCe) & BCi);
         Ase = BCe ^ ((~BCi) & BCo);
         Asi = BCi ^ ((~BCo) & BCu);

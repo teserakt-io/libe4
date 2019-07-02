@@ -8,7 +8,7 @@
 #include "e4/crypto/aes256enc.h"
 #include "e4/crypto/aes_siv.h"
 
-static void cmac_dbl (uint8_t v[16])
+static void cmac_dbl(uint8_t v[16])
 {
     int i;
     uint16_t x;
@@ -24,16 +24,16 @@ static void cmac_dbl (uint8_t v[16])
 }
 
 static void
-siv_cmac (uint8_t res[16], const uint8_t *data, size_t len, const uint8_t xorend[16], const void *eky)
+siv_cmac(uint8_t res[16], const uint8_t *data, size_t len, const uint8_t xorend[16], const void *eky)
 {
     size_t i, j;
     uint8_t k12[16], blk[16];
 
-    memset (blk, 0x00, 16);
-    memset (k12, 0x00, 16);
-    aes256_encrypt_ecb (k12, eky);
+    memset(blk, 0x00, 16);
+    memset(k12, 0x00, 16);
+    aes256_encrypt_ecb(k12, eky);
 
-    cmac_dbl (k12);
+    cmac_dbl(k12);
 
     j = 0;
 
@@ -41,7 +41,7 @@ siv_cmac (uint8_t res[16], const uint8_t *data, size_t len, const uint8_t xorend
     { // process blocks
         if (j >= 16)
         {
-            aes256_encrypt_ecb (blk, eky);
+            aes256_encrypt_ecb(blk, eky);
             j = 0;
         }
         blk[j++] ^= data[i];
@@ -51,7 +51,7 @@ siv_cmac (uint8_t res[16], const uint8_t *data, size_t len, const uint8_t xorend
     { // last 16 bytes
         if (j >= 16)
         {
-            aes256_encrypt_ecb (blk, eky);
+            aes256_encrypt_ecb(blk, eky);
             j = 0;
         }
         if (xorend != NULL) // xor 16 chaining bytes at end
@@ -62,25 +62,25 @@ siv_cmac (uint8_t res[16], const uint8_t *data, size_t len, const uint8_t xorend
     if (j < 16)
     { // padding
         blk[j] ^= 0x80;
-        cmac_dbl (k12);
+        cmac_dbl(k12);
     }
     for (i = 0; i < 16; i++) blk[i] ^= k12[i];
 
-    aes256_encrypt_ecb (blk, eky);
+    aes256_encrypt_ecb(blk, eky);
 
-    memcpy (res, blk, 16);
+    memcpy(res, blk, 16);
 }
 
 // counter mode encryption / decryption
 
 static void
-siv_ctr (uint8_t *dst, const uint8_t *src, size_t len, const uint8_t iv[16], void *eky)
+siv_ctr(uint8_t *dst, const uint8_t *src, size_t len, const uint8_t iv[16], void *eky)
 {
     size_t i;
     int j;
     uint8_t cnt[16], blk[16];
 
-    memcpy (cnt, iv, 16);
+    memcpy(cnt, iv, 16);
     cnt[8] &= 0x7F;
     cnt[12] &= 0x7F;
 
@@ -89,8 +89,8 @@ siv_ctr (uint8_t *dst, const uint8_t *src, size_t len, const uint8_t iv[16], voi
     {
         if (j >= 16)
         {
-            memcpy (blk, cnt, 16);
-            aes256_encrypt_ecb (blk, eky);
+            memcpy(blk, cnt, 16);
+            aes256_encrypt_ecb(blk, eky);
 
             for (j = 15; j >= 0; j--)
             { // will actually terminate early
@@ -105,13 +105,13 @@ siv_ctr (uint8_t *dst, const uint8_t *src, size_t len, const uint8_t iv[16], voi
 
 // AES256-SIV Encrypt
 
-int aes256_encrypt_siv (uint8_t *ct,
-                        size_t *ctlen, // out: ciphertext
-                        const uint8_t *ad,
-                        size_t adlen, // in: associated data / nonce
-                        const uint8_t *pt,
-                        size_t ptlen,       // in: plaintext
-                        const uint8_t *key) // in: secret key (32 bytes)
+int aes256_encrypt_siv(uint8_t *ct,
+                       size_t *ctlen, // out: ciphertext
+                       const uint8_t *ad,
+                       size_t adlen, // in: associated data / nonce
+                       const uint8_t *pt,
+                       size_t ptlen,       // in: plaintext
+                       const uint8_t *key) // in: secret key (32 bytes)
 {
     size_t i;
     uint8_t d[16], x[16];
@@ -120,32 +120,32 @@ int aes256_encrypt_siv (uint8_t *ct,
 
     // CMAC part
 
-    aes256_enc_exp_key (eky, key);
+    aes256_enc_exp_key(eky, key);
 
-    memset (d, 0, 16); // zero
-    siv_cmac (d, d, 16, NULL, eky);
+    memset(d, 0, 16); // zero
+    siv_cmac(d, d, 16, NULL, eky);
 
-    cmac_dbl (d);
-    siv_cmac (x, ad, adlen, NULL, eky); // cmac associated data
+    cmac_dbl(d);
+    siv_cmac(x, ad, adlen, NULL, eky); // cmac associated data
     for (i = 0; i < 16; i++) d[i] ^= x[i];
 
     if (ptlen >= 16)
     { // cmac plaintext
-        siv_cmac (ct, pt, ptlen, d, eky);
+        siv_cmac(ct, pt, ptlen, d, eky);
     }
     else
     {
-        cmac_dbl (d);
+        cmac_dbl(d);
         for (i = 0; i < ptlen; i++) d[i] ^= pt[i];
         d[i] ^= 0x80;
-        siv_cmac (ct, d, 16, NULL, eky);
+        siv_cmac(ct, d, 16, NULL, eky);
     }
 
     // CTR part
 
-    aes256_enc_exp_key (eky, key);
+    aes256_enc_exp_key(eky, key);
 
-    siv_ctr (ct + 16, pt, ptlen, ct, eky); // (siv) counter mode
+    siv_ctr(ct + 16, pt, ptlen, ct, eky); // (siv) counter mode
 
     *ctlen = ptlen + 16; // set the length
 
@@ -154,46 +154,46 @@ int aes256_encrypt_siv (uint8_t *ct,
 
 // AES256-SIV Decrypt
 
-int aes256_decrypt_siv (uint8_t *pt,
-                        size_t *ptlen, // out: plaintext
-                        const uint8_t *ad,
-                        size_t adlen, // in: associated data / nonce
-                        const uint8_t *ct,
-                        size_t ctlen,       // in: ciphertext
-                        const uint8_t *key) // in: secret key (32 bytes)
+int aes256_decrypt_siv(uint8_t *pt,
+                       size_t *ptlen, // out: plaintext
+                       const uint8_t *ad,
+                       size_t adlen, // in: associated data / nonce
+                       const uint8_t *ct,
+                       size_t ctlen,       // in: ciphertext
+                       const uint8_t *key) // in: secret key (32 bytes)
 {
     size_t i;
     uint8_t d[16], x[16];
 
     uint8_t eky[AES256_EXPKEY_LEN];
 
-    aes256_enc_exp_key (eky, key);
+    aes256_enc_exp_key(eky, key);
 
     ctlen -= 16; // ctlen is ptlen now
     *ptlen = ctlen;
 
-    siv_ctr (pt, ct + 16, ctlen, ct, eky);
+    siv_ctr(pt, ct + 16, ctlen, ct, eky);
 
-    aes256_enc_exp_key (eky, key); // CMAC part
+    aes256_enc_exp_key(eky, key); // CMAC part
 
-    memset (d, 0, 16); // zero
-    siv_cmac (d, d, 16, NULL, eky);
+    memset(d, 0, 16); // zero
+    siv_cmac(d, d, 16, NULL, eky);
 
-    cmac_dbl (d);
-    siv_cmac (x, ad, adlen, NULL, eky); // cmac associated data
+    cmac_dbl(d);
+    siv_cmac(x, ad, adlen, NULL, eky); // cmac associated data
     for (i = 0; i < 16; i++) d[i] ^= x[i];
 
     if (ctlen >= 16)
     { // cmac plaintext
-        siv_cmac (x, pt, ctlen, d, eky);
+        siv_cmac(x, pt, ctlen, d, eky);
     }
     else
     {
-        cmac_dbl (d);
+        cmac_dbl(d);
         for (i = 0; i < ctlen; i++) d[i] ^= pt[i];
         d[i] ^= 0x80;
-        siv_cmac (x, d, 16, NULL, eky);
+        siv_cmac(x, d, 16, NULL, eky);
     }
 
-    return memcmp (ct, x, 16);
+    return memcmp(ct, x, 16);
 }

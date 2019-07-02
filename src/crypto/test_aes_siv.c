@@ -10,7 +10,7 @@
 
 // AES_Test triplet lifted from FIPS-197
 
-int test_aes256 ()
+int test_aes256()
 {
     const uint8_t test_pt[16] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55,
                                   0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB,
@@ -29,11 +29,11 @@ int test_aes256 ()
     size_t i;
     uint8_t v[16], ek[AES256_EXPKEY_LEN];
 
-    aes256_enc_exp_key (ek, test_key); // expand key
+    aes256_enc_exp_key(ek, test_key); // expand key
 
     for (i = 0; i < 16; i++) v[i] = test_pt[i];
 
-    aes256_encrypt_ecb (v, ek); // encrypt
+    aes256_encrypt_ecb(v, ek); // encrypt
 
     for (i = 0; i < 16; i++)
     {
@@ -47,7 +47,7 @@ int test_aes256 ()
 
 // An AES256-SIV Test vector
 
-int test_aes_siv ()
+int test_aes_siv()
 {
     // self generated
     const uint8_t test_key[64] = {
@@ -85,45 +85,45 @@ int test_aes_siv ()
     size_t len2;
     int i, fails;
 
-    memset (buf1, 0x55, sizeof (buf1));
+    memset(buf1, 0x55, sizeof(buf1));
     len1 = 0;
-    memset (buf2, 0xAA, sizeof (buf2));
+    memset(buf2, 0xAA, sizeof(buf2));
     len2 = 0;
 
     fails = 0;
 
     // encrypt test
-    aes256_encrypt_siv (buf1, &len1, test_ad, 24, test_pt, 14, test_key);
-    if (len1 != 30 || memcmp (buf1, test_ivc, len1) != 0)
+    aes256_encrypt_siv(buf1, &len1, test_ad, 24, test_pt, 14, test_key);
+    if (len1 != 30 || memcmp(buf1, test_ivc, len1) != 0)
     {
         fails++;
     }
 
     // decrypt test
-    if (aes256_decrypt_siv (buf2, &len2, test_ad, 24, buf1, len1, test_key))
+    if (aes256_decrypt_siv(buf2, &len2, test_ad, 24, buf1, len1, test_key))
     {
         fails++;
     }
 
-    if (len2 != 14 || memcmp (buf2, test_pt, len2) != 0)
+    if (len2 != 14 || memcmp(buf2, test_pt, len2) != 0)
     {
         fails++;
     }
 
     // corrupt test
     buf1[25] ^= 1;
-    if (aes256_decrypt_siv (buf2, &len2, test_ad, 24, buf1, len1, test_key) == 0)
+    if (aes256_decrypt_siv(buf2, &len2, test_ad, 24, buf1, len1, test_key) == 0)
     {
         fails++;
     }
 
     // encrypt test with JP's test vector
-    for (i = 0; i < sizeof (buf1); i++) buf1[i] = i;
+    for (i = 0; i < sizeof(buf1); i++) buf1[i] = i;
 
     len2 = 0;
-    aes256_encrypt_siv (buf2, &len2, buf1, 8, buf1, 64, buf1);
+    aes256_encrypt_siv(buf2, &len2, buf1, 8, buf1, 64, buf1);
 
-    if (len2 != 80 || memcmp (buf2, test_jp, 80) != 0)
+    if (len2 != 80 || memcmp(buf2, test_jp, 80) != 0)
     {
         fails++;
     }

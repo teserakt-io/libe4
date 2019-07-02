@@ -253,30 +253,30 @@ static const uint32_t rcon[] = {
     /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */
 };
 
-#define SWAP(x) (_lrotl (x, 8) & 0x00ff00ff | _lrotr (x, 8) & 0xff00ff00)
+#define SWAP(x) (_lrotl(x, 8) & 0x00ff00ff | _lrotr(x, 8) & 0xff00ff00)
 
 #ifdef _MSC_VER
-#define GETuint32_t(p) SWAP (*((uint32_t *)(p)))
+#define GETuint32_t(p) SWAP(*((uint32_t *)(p)))
 #define PUTuint32_t(ct, st)                                                    \
     {                                                                          \
-        *((uint32_t *)(ct)) = SWAP ((st));                                     \
+        *((uint32_t *)(ct)) = SWAP((st));                                      \
     }
 #else
 #define GETuint32_t(pt)                                                        \
-    (((uint32_t) (pt)[0] << 24) ^ ((uint32_t) (pt)[1] << 16) ^                 \
-     ((uint32_t) (pt)[2] << 8) ^ ((uint32_t) (pt)[3]))
+    (((uint32_t)(pt)[0] << 24) ^ ((uint32_t)(pt)[1] << 16) ^                   \
+     ((uint32_t)(pt)[2] << 8) ^ ((uint32_t)(pt)[3]))
 #define PUTuint32_t(ct, st)                                                    \
     {                                                                          \
-        (ct)[0] = (uint8_t) ((st) >> 24);                                      \
-        (ct)[1] = (uint8_t) ((st) >> 16);                                      \
-        (ct)[2] = (uint8_t) ((st) >> 8);                                       \
-        (ct)[3] = (uint8_t) (st);                                              \
+        (ct)[0] = (uint8_t)((st) >> 24);                                       \
+        (ct)[1] = (uint8_t)((st) >> 16);                                       \
+        (ct)[2] = (uint8_t)((st) >> 8);                                        \
+        (ct)[3] = (uint8_t)(st);                                               \
     }
 #endif
 
 // Expand the cipher key into the encryption key schedule.
 
-void aes256_enc_exp_key (void *ek_out, const void *key_in)
+void aes256_enc_exp_key(void *ek_out, const void *key_in)
 {
     int i = 0;
     uint32_t temp;
@@ -284,15 +284,15 @@ void aes256_enc_exp_key (void *ek_out, const void *key_in)
     uint32_t *rk = ek_out;
     const uint8_t *cipherKey = key_in;
 
-    rk[0] = GETuint32_t (cipherKey);
-    rk[1] = GETuint32_t (cipherKey + 4);
-    rk[2] = GETuint32_t (cipherKey + 8);
-    rk[3] = GETuint32_t (cipherKey + 12);
+    rk[0] = GETuint32_t(cipherKey);
+    rk[1] = GETuint32_t(cipherKey + 4);
+    rk[2] = GETuint32_t(cipherKey + 8);
+    rk[3] = GETuint32_t(cipherKey + 12);
 
-    rk[4] = GETuint32_t (cipherKey + 16);
-    rk[5] = GETuint32_t (cipherKey + 20);
-    rk[6] = GETuint32_t (cipherKey + 24);
-    rk[7] = GETuint32_t (cipherKey + 28);
+    rk[4] = GETuint32_t(cipherKey + 16);
+    rk[5] = GETuint32_t(cipherKey + 20);
+    rk[6] = GETuint32_t(cipherKey + 24);
+    rk[7] = GETuint32_t(cipherKey + 28);
 
     for (;;)
     {
@@ -319,7 +319,7 @@ void aes256_enc_exp_key (void *ek_out, const void *key_in)
 }
 
 
-void aes256_encrypt_ecb (void *v, const void *ek_in)
+void aes256_encrypt_ecb(void *v, const void *ek_in)
 {
     uint32_t s0, s1, s2, s3, t0, t1, t2, t3;
 #ifndef FULL_UNROLL
@@ -334,10 +334,10 @@ void aes256_encrypt_ecb (void *v, const void *ek_in)
      * map byte array block to cipher state
      * and add initial round key:
      */
-    s0 = GETuint32_t (pt) ^ rk[0];
-    s1 = GETuint32_t (pt + 4) ^ rk[1];
-    s2 = GETuint32_t (pt + 8) ^ rk[2];
-    s3 = GETuint32_t (pt + 12) ^ rk[3];
+    s0 = GETuint32_t(pt) ^ rk[0];
+    s1 = GETuint32_t(pt + 4) ^ rk[1];
+    s2 = GETuint32_t(pt + 8) ^ rk[2];
+    s3 = GETuint32_t(pt + 12) ^ rk[3];
     /*
      * Nr - 1 full rounds:
      */
@@ -374,14 +374,14 @@ void aes256_encrypt_ecb (void *v, const void *ek_in)
      */
     s0 = (Te4[(t0 >> 24)] & 0xff000000) ^ (Te4[(t1 >> 16) & 0xff] & 0x00ff0000) ^
          (Te4[(t2 >> 8) & 0xff] & 0x0000ff00) ^ (Te4[(t3)&0xff] & 0x000000ff) ^ rk[0];
-    PUTuint32_t (ct, s0);
+    PUTuint32_t(ct, s0);
     s1 = (Te4[(t1 >> 24)] & 0xff000000) ^ (Te4[(t2 >> 16) & 0xff] & 0x00ff0000) ^
          (Te4[(t3 >> 8) & 0xff] & 0x0000ff00) ^ (Te4[(t0)&0xff] & 0x000000ff) ^ rk[1];
-    PUTuint32_t (ct + 4, s1);
+    PUTuint32_t(ct + 4, s1);
     s2 = (Te4[(t2 >> 24)] & 0xff000000) ^ (Te4[(t3 >> 16) & 0xff] & 0x00ff0000) ^
          (Te4[(t0 >> 8) & 0xff] & 0x0000ff00) ^ (Te4[(t1)&0xff] & 0x000000ff) ^ rk[2];
-    PUTuint32_t (ct + 8, s2);
+    PUTuint32_t(ct + 8, s2);
     s3 = (Te4[(t3 >> 24)] & 0xff000000) ^ (Te4[(t0 >> 16) & 0xff] & 0x00ff0000) ^
          (Te4[(t1 >> 8) & 0xff] & 0x0000ff00) ^ (Te4[(t2)&0xff] & 0x000000ff) ^ rk[3];
-    PUTuint32_t (ct + 12, s3);
+    PUTuint32_t(ct + 12, s3);
 }
