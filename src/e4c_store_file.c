@@ -67,7 +67,7 @@ int e4c_load (e4storage *store, const char *path)
     if (fd < 0)
     {
         perror (path);
-        return E4ERR_PersistenceError;
+        return E4_ERROR_PERSISTENCE_ERROR;
     }
 
     /*size_t filesize = */ lseek (fd, 0, SEEK_END);
@@ -146,7 +146,7 @@ int e4c_load (e4storage *store, const char *path)
 err:
     perror (path);
     close (fd);
-    return E4ERR_PersistenceError;
+    return E4_ERROR_PERSISTENCE_ERROR;
 }
 
 int e4c_sync (e4storage *store)
@@ -156,14 +156,14 @@ int e4c_sync (e4storage *store)
 
     if (strlen (store->filepath) == 0)
     {
-        return E4ERR_PersistenceError;
+        return E4_ERROR_PERSISTENCE_ERROR;
     }
 
     fd = open (store->filepath, O_WRONLY | O_CREAT, 0600);
     if (fd < 0)
     {
         perror (store->filepath);
-        return E4ERR_PersistenceError;
+        return E4_ERROR_PERSISTENCE_ERROR;
     }
 
     uint32_t zero = 0;
@@ -194,12 +194,12 @@ int e4c_sync (e4storage *store)
 int e4c_set_id (e4storage *store, const uint8_t *id)
 {
     memmove (store->id, id, sizeof store->id);
-    return 0;
+    return E4_ERROR_OK;
 }
 int e4c_set_idkey (e4storage *store, const uint8_t *key)
 {
     memmove (store->key, key, sizeof store->key);
-    return 0;
+    return E4_ERROR_OK;
 }
 
 int e4c_getindex (e4storage *store, const char *topic)
@@ -217,7 +217,7 @@ int e4c_getindex (e4storage *store, const char *topic)
             break;
         }
     }
-    if (i >= store->topiccount) return E4ERR_TopicKeyMissing;
+    if (i >= store->topiccount) return E4_ERROR_TOPICKEY_MISSING;
 
     return i;
 }
@@ -235,7 +235,7 @@ int e4c_is_device_ctrltopic (e4storage *store, const char *topic)
 int e4c_gettopickey (uint8_t *key, e4storage *store, const int index)
 {
 
-    if (index < 0 || index >= store->topiccount) return E4ERR_TopicKeyMissing;
+    if (index < 0 || index >= store->topiccount) return E4_ERROR_TOPICKEY_MISSING;
 
     memcpy (key, store->topics[index].key, E4_KEY_LEN);
 
@@ -252,7 +252,7 @@ int e4c_set_topic_key (e4storage *store, const uint8_t *topic_hash, const uint8_
             break;
     }
     if (i >= E4_TOPICS_MAX) // out of space
-        return E4ERR_TopicKeyMissing;
+        return E4_ERROR_TOPICKEY_MISSING;
 
     memcpy (store->topics[i].topic, topic_hash, E4_TOPICHASH_LEN);
     memcpy (store->topics[i].key, key, E4_KEY_LEN);
@@ -287,7 +287,7 @@ int e4c_remove_topic (e4storage *store, const uint8_t *topic_hash)
         }
     }
 
-    return E4ERR_TopicKeyMissing;
+    return E4_ERROR_TOPICKEY_MISSING;
 }
 
 int e4c_reset_topics (e4storage *store)

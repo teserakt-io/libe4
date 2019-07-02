@@ -39,7 +39,7 @@ int e4c_protect_message (uint8_t *cptr,
     uint64_t time_now = 0;
 
     if (mlen + E4_MSGHDR_LEN > cmax) // actually: not enough space
-        return E4ERR_TooShortCiphertext;
+        return E4_ERROR_CIPHERTEXT_TOO_SHORT;
     *clen = mlen + E4_MSGHDR_LEN;
 
     // get the key
@@ -52,7 +52,7 @@ int e4c_protect_message (uint8_t *cptr,
     {
         if (e4c_is_device_ctrltopic (storage, topic) != 0)
         {
-            return E4ERR_TopicKeyMissing;
+            return E4_ERROR_TOPICKEY_MISSING;
         }
         // control topic being used:
         memcpy (key, storage->key, E4_KEY_LEN);
@@ -89,7 +89,7 @@ int e4c_unprotect_message (uint8_t *mptr,
                            e4storage *storage)
 {
     uint8_t control = 0;
-    int i = 0, j = 0;
+    int i = 0, j = 0, r = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
 #ifndef __AVR__
@@ -102,7 +102,7 @@ int e4c_unprotect_message (uint8_t *mptr,
 
     if (clen < E4_MSGHDR_LEN || mmax < clen - E4_MSGHDR_LEN)
     {
-        return E4ERR_TooShortCiphertext;
+        return E4_ERROR_CIPHERTEXT_TOO_SHORT;
     }
 
     // get the key
@@ -115,7 +115,7 @@ int e4c_unprotect_message (uint8_t *mptr,
     {
         if (e4c_is_device_ctrltopic (storage, topic) != 0)
         {
-            return E4ERR_TopicKeyMissing;
+            return E4_ERROR_TOPICKEY_MISSING;
         }
         // control topic being used:
         memcpy (key, storage->key, E4_KEY_LEN);
@@ -133,7 +133,7 @@ int e4c_unprotect_message (uint8_t *mptr,
     // decrypt
     if (aes256_decrypt_siv (mptr, mlen, cptr, 8, cptr + 8, clen - 8, key) != 0)
     {
-        return E4ERR_InvalidTag;
+        return E4_ERROR_INVALID_TAG;
     }
 
     // TODO: this is only valuable for string-type data
@@ -141,7 +141,7 @@ int e4c_unprotect_message (uint8_t *mptr,
     // the plaintext buffer be 1 byte bigger than that which was
     // encrypted, which is very unnecessary.
     if (*mlen + 1 > mmax) // zero-pad it in place..
-        return E4ERR_TooShortCiphertext;
+        return E4_ERROR_CIPHERTEXT_TOO_SHORT;
     mptr[*mlen] = 0;
 
 
@@ -157,39 +157,43 @@ int e4c_unprotect_message (uint8_t *mptr,
         if (tstamp >= secs1970)
         {
             if (tstamp - secs1970 > E4C_TIME_FUTURE)
-                return E4ERR_TimestampInFuture;
+                return E4_ERROR_TIMESTAMP_IN_FUTURE;
         }
         else
         {
             if (secs1970 - tstamp > E4C_TIME_TOO_OLD)
-                return E4ERR_TooOldTimestamp;
+                return E4_ERROR_TIMESTAMP_TOO_OLD;
         }
     }
 
     // if not control channel, we can exit now; no command to process.
-    if (!(control)) return 0;
+    if (!(control)) return E4_ERROR_OK;
 
     // execute commands
 
-    if (*mlen == 0) return E4ERR_InvalidCommand;
+    if (*mlen == 0) return E4_ERROR_INVALID_COMMAND;
 
     switch (mptr[0])
     {
     case 0x00: // RemoveTopic(topic);
-        return e4c_remove_topic (storage, (const uint8_t *)mptr + 1);
+        r = e4c_remove_topic (storage, (const uint8_t *)mptr + 1);
+        return r == 0 ? E4_ERROR_OK_CONTROL : r;
 
     case 0x01: // ResetTopics();
-        if (*mlen != 1) return E4ERR_InvalidCommand;
-        return e4c_reset_topics (storage);
+        if (*mlen != 1) return E4_ERROR_INVALID_COMMAND;
+        r = e4c_reset_topics (storage);
+        return r == 0 ? E4_ERROR_OK_CONTROL : r;
 
     case 0x02: // SetIdKey(key)
-        if (*mlen != (1 + E4_KEY_LEN)) return E4ERR_InvalidCommand;
-        return e4c_set_idkey (storage, mptr + 1);
+        if (*mlen != (1 + E4_KEY_LEN)) return E4_ERROR_INVALID_COMMAND;
+        r = e4c_set_idkey (storage, mptr + 1);
+        return r == 0 ? E4_ERROR_OK_CONTROL : r;
 
     case 0x03: // SetTopicKey(topic, key)
-        if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN)) return E4ERR_InvalidCommand;
-        return e4c_set_topic_key (storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
+        if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN)) return E4_ERROR_INVALID_COMMAND;
+        r = e4c_set_topic_key (storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
+        return r == 0 ? E4_ERROR_OK_CONTROL : r;
     }
 
-    return E4ERR_InvalidCommand;
+    return E4_ERROR_INVALID_COMMAND;
 }

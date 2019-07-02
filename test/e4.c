@@ -147,7 +147,7 @@ int main(int argc, char** argv, char** envp) {
         e4retcode = e4c_protect_message(ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, &ciphertext_len,
             plaintext_buffer, PT_MAX, topicname, &store);
 
-        if (e4retcode != E4ERR_Ok) {
+        if (e4retcode != E4_ERROR_OK) {
             returncode = 12;
             printf("Failed: E4 Error %d\n", e4retcode);
             goto exit_close;
@@ -165,7 +165,7 @@ int main(int argc, char** argv, char** envp) {
         e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX+1, &recovered_len,
             ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, topicname, &store);
 
-        if (e4retcode != E4ERR_Ok) {
+        if (e4retcode != E4_ERROR_OK) {
             returncode = 13;
             printf("Failed: E4 Error %d\n", e4retcode);
             goto exit_close;

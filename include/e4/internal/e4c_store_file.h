@@ -37,21 +37,4 @@ struct _e4storage
     uint8_t ctrltopic[E4_TOPICHASH_LEN];
 };
 
-int e4c_init (e4storage *store);
-int e4c_set_storagelocation (e4storage *store, const char *path);
-int e4c_load (e4storage *store, const char *path);
-int e4c_sync (e4storage *store);
-int e4c_set_id (e4storage *store, const uint8_t *id);
-int e4c_set_idkey (e4storage *store, const uint8_t *key);
-int e4c_is_device_ctrltopic (e4storage *store, const char *topic);
-int e4c_getindex (e4storage *store, const char *topic);
-int e4c_gettopickey (uint8_t *key, e4storage *store, const int index);
-int e4c_set_topic_key (e4storage *store, const uint8_t *topic_hash, const uint8_t *key);
-int e4c_remove_topic (e4storage *store, const uint8_t *topic_hash);
-int e4c_reset_topics (e4storage *store);
-
-//#ifdef DEBUG
-void e4c_debug_print (e4storage *store);
-//#endif
-
 #endif
