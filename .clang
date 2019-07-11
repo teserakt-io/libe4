@@ -1,1 +1,1 @@
--Iinclude/
+flags = -I$(pwd)/include/ -Wall -Werror -std=c99

@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #ifndef strlcpy
 #include <stdlib.h>
 size_t strlcpy(char *dst, const char *src, size_t siz)

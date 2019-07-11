@@ -40,7 +40,7 @@ int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *
 char hex_lower[] = "0123456789abcdef";
 char hex_upper[] = "0123456789ABCDEF";
 
-int e4c_hex_decode(char *bytes, const size_t byteslen, char *hexstring, const size_t hexstringlen)
+int e4c_hex_decode(char *bytes, const size_t byteslen, const char *hexstring, const size_t hexstringlen)
 {
 
     size_t reqbytes = 0;

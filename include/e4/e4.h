@@ -13,9 +13,9 @@
 
 /* E4 Library Error codes */
 /** Operation succeeded without error \ingroup e4 */
-#define E4_ERROR_OK 0
+#define E4_RESULT_OK 0
 /** A control message was handled. Applications may discard the resulting buffer */
-#define E4_ERROR_OK_CONTROL -1
+#define E4_RESULT_OK_CONTROL -1
 /** Invalid authentication tag indicates corrupted ciphertext \ingroup e4 */
 #define E4_ERROR_INVALID_TAG -101
 /** Message received outside of error window for clock. \ingroup e4 */

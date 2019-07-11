@@ -194,12 +194,12 @@ int e4c_sync(e4storage *store)
 int e4c_set_id(e4storage *store, const uint8_t *id)
 {
     memmove(store->id, id, sizeof store->id);
-    return E4_ERROR_OK;
+    return E4_RESULT_OK;
 }
 int e4c_set_idkey(e4storage *store, const uint8_t *key)
 {
     memmove(store->key, key, sizeof store->key);
-    return E4_ERROR_OK;
+    return E4_RESULT_OK;
 }
 
 int e4c_getindex(e4storage *store, const char *topic)

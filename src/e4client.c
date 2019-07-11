@@ -74,7 +74,7 @@ int e4c_protect_message(uint8_t *cptr,
     clen2 = 0;
     aes256_encrypt_siv(cptr + 8, &clen2, cptr, 8, mptr, mlen, key);
 
-    return 0;
+    return E4_RESULT_OK;
 }
 
 
@@ -167,7 +167,7 @@ int e4c_unprotect_message(uint8_t *mptr,
     }
 
     // if not control channel, we can exit now; no command to process.
-    if (!(control)) return E4_ERROR_OK;
+    if (!(control)) return E4_RESULT_OK;
 
     // execute commands
 
@@ -177,23 +177,23 @@ int e4c_unprotect_message(uint8_t *mptr,
     {
     case 0x00: // RemoveTopic(topic);
         r = e4c_remove_topic(storage, (const uint8_t *)mptr + 1);
-        return r == 0 ? E4_ERROR_OK_CONTROL : r;
+        return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x01: // ResetTopics();
         if (*mlen != 1) return E4_ERROR_INVALID_COMMAND;
         r = e4c_reset_topics(storage);
-        return r == 0 ? E4_ERROR_OK_CONTROL : r;
+        return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x02: // SetIdKey(key)
         if (*mlen != (1 + E4_KEY_LEN)) return E4_ERROR_INVALID_COMMAND;
         r = e4c_set_idkey(storage, mptr + 1);
-        return r == 0 ? E4_ERROR_OK_CONTROL : r;
+        return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x03: // SetTopicKey(topic, key)
         if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN))
             return E4_ERROR_INVALID_COMMAND;
         r = e4c_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
-        return r == 0 ? E4_ERROR_OK_CONTROL : r;
+        return r == 0 ? E4_RESULT_OK_CONTROL : r;
     }
 
     return E4_ERROR_INVALID_COMMAND;
