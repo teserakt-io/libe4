@@ -46,7 +46,7 @@
 /** Topic Hash Length
  \ingroup e4
  */
-#define E4_TOPICHASH_LEN 32
+#define E4_TOPICHASH_LEN 16
 
 /** Define control topic length
  \ingroup e4

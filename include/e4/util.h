@@ -2,12 +2,11 @@
 #ifndef E4UTIL_H
 #define E4UTIL_H
 
-// Takes a client name or some other value identifying the client and produces
-// a unique ID by taking the sha3 of this value.
-int e4c_derive_clientid(char *clientid,
-                        const size_t clientidlen,
-                        const char *clientname,
-                        const size_t clientnamelen);
+/* Derives a ClientID. Depends on the constant E4_ID_LEN */
+int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen);
+
+/* Derives a TopicHash. Depends on the constant E4_TOPICHASH_LEN */
+int e4c_derive_topichash(uint8_t* topichash, const size_t topichash_len, const char* topic);
 
 // Produces a control topic from a E4_ID_LEN byte clientid. Length of
 // clientid is assumed to be E4_ID_LEN bytes. Control topics are

@@ -15,7 +15,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "e4/crypto/sha3.h"
 #include "e4/e4.h"
 #include "e4/internal/e4c_store_file.h"
 #include "e4/strlcpy.h"
@@ -100,9 +99,8 @@ int e4c_load(e4storage *store, const char *path)
         goto err;
     }
 
-
     // derive a topichash for the control topic.
-    sha3(controltopic, E4_CTRLTOPIC_LEN, store->ctrltopic, E4_ID_LEN);
+    e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
 
     rlen = read(fd, store->key, sizeof store->key);
     if (rlen != sizeof store->key)
@@ -193,8 +191,23 @@ int e4c_sync(e4storage *store)
 
 int e4c_set_id(e4storage *store, const uint8_t *id)
 {
+    int r = E4_RESULT_OK;
+    char controltopic[E4_CTRLTOPIC_LEN+1];
+    ZERO(controltopic);
+
+    r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, id);
+    if ( r != E4_RESULT_OK ) goto exit;
+
+    r = e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
+    if ( r != E4_RESULT_OK ) {
+        ZERO(store->ctrltopic);
+        goto exit;
+    }
+
     memmove(store->id, id, sizeof store->id);
-    return E4_RESULT_OK;
+    r = E4_RESULT_OK;
+exit:
+    return r;
 }
 int e4c_set_idkey(e4storage *store, const uint8_t *key)
 {
@@ -208,7 +221,9 @@ int e4c_getindex(e4storage *store, const char *topic)
     uint8_t hash[E4_TOPICHASH_LEN];
 
     // hash the topic
-    sha3(topic, strlen(topic), hash, E4_TOPICHASH_LEN);
+    if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
+        return E4_ERROR_PERSISTENCE_ERROR;
+    }
     // look for it
     for (i = 0; i < store->topiccount; i++)
     { // find the key
@@ -224,11 +239,14 @@ int e4c_getindex(e4storage *store, const char *topic)
 
 int e4c_is_device_ctrltopic(e4storage *store, const char *topic)
 {
-
     uint8_t hash[E4_TOPICHASH_LEN];
 
     // hash the topic
-    sha3(topic, strlen(topic), hash, E4_TOPICHASH_LEN);
+    if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
+        return E4_ERROR_PERSISTENCE_ERROR;
+    }
+
+    // hash the topic
     return memcmp(store->ctrltopic, hash, E4_TOPICHASH_LEN);
 }
 

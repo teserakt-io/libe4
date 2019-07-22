@@ -5,15 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-int e4c_derive_clientid(char *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen)
-{
 
-    if (clientidlen < E4_ID_LEN)
-    {
+int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen)
+{
+    if (clientidlen != E4_ID_LEN ) {
         return E4_ID_LEN;
     }
-
-    sha3(clientname, clientnamelen, clientid, E4_ID_LEN);
+    sha3_256_trunc((char*)clientid, clientidlen, clientname, clientnamelen);
     return 0;
 }
 
@@ -34,6 +32,16 @@ int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *
         snprintf((char *)(topic + adjust), topiclen - adjust, "%02x", clientid[i]);
     }
 
+    return 0;
+}
+
+/* Computes the topichash, which is currently SHA3-256/128. */
+int e4c_derive_topichash(uint8_t* topichash, const size_t topichash_len, const char* topic) {
+    size_t topiclen = strlen(topic);
+    if (topichash_len != E4_ID_LEN ) {
+        return E4_ID_LEN;
+    }
+    sha3_256_trunc((char*)topichash, topichash_len, topic, topiclen);
     return 0;
 }
 

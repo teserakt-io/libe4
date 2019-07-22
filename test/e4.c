@@ -99,7 +99,7 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
-        sha3(topicname_current, strlen(topicname_current), topichash, E4_TOPICHASH_LEN);
+        e4c_derive_topichash(topichash, E4_TOPICHASH_LEN, topicname_current);
         e4c_set_topic_key(&store, topichash, topickey_current); 
     }
 

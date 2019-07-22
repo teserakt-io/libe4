@@ -77,6 +77,12 @@ void *sha3(const void *in, size_t inlen, void *md, int mdlen)
     return md;
 }
 
+void sha3_256_trunc(char* output, const size_t outputlen, const char* input, const size_t inputlen) {
+    char hash[SHA3_256_DIGEST_LEN];
+    sha3(input, inputlen, hash, SHA3_256_DIGEST_LEN);
+    memcpy(output, hash, outputlen);
+}
+
 // SHAKE128 and SHAKE256 extensible-output functionality
 
 void shake_xof(sha3_ctx_t *c)

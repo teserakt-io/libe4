@@ -48,6 +48,9 @@ int sha3_final(void *md, sha3_ctx_t *c); // digest goes to md
 */
 void *sha3(const void *in, size_t inlen, void *md, int mdlen);
 
+#define SHA3_256_DIGEST_LEN 32
+void sha3_256_trunc(char* output, const size_t outputlen, const char* input, const size_t inputlen);
+
 // SHAKE128 and SHAKE256 extensible-output functions
 #define shake128_init(c) sha3_init(c, 16)
 #define shake256_init(c) sha3_init(c, 32)
