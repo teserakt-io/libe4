@@ -19,8 +19,8 @@ int main(int argc, char** argv, char** envp) {
     printf("Testing AES-256:\t\t%s\n", r_aes != 0 ? "failed" : "ok");
     r_siv = test_aes_siv(); result += r_siv;
     printf("Testing SIV-AES-256:\t\t%s\n", r_siv != 0 ? "failed" : "ok");
-
-	printf("\n");
+    
+    printf("\n");
 	printf("Tests %s\n", result == 0 ? "Passed" : "Failed");
     return result;
 }
