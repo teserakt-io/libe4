@@ -1,4 +1,5 @@
 
+
 build/%.$O: src/%.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
@@ -22,16 +23,6 @@ clean:
 	rm -rf $(LIB)
 	rm -rf $(LIBDIR)
 
-
-release: $(LIB)
-	@echo 'Making $(DISTDIR)/$(LIBNAME)-$(VERSION).tar.bz2'
-	tar cfvj $(DISTDIR)/$(LIBNAME)-$(VERSION).tar.bz2 $(LIBDIR)/* $(INCDIR)/*
-
-dist: $(LIB)
-	@echo 'Making $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2'
-	tar cfvj $(DISTDIR)/$(LIBNAME)-$(NOW)-$(GITCOMMIT).tar.bz2 $(LIBDIR)/* $(INCDIR)/*
-
-test: clean setup $(LIB) $(TESTS)
 
 format:
 	clang-format -i src/*.c src/crypto/*.c include/e4/*.h include/e4/crypto/*.h include/e4/internal/*.h
