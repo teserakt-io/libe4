@@ -1,6 +1,7 @@
 
 # LICENSE
 
+```
 Code in this repository is licensed under the following license. This may 
 also be found as [gpl.txt](gpl.txt).
 
@@ -345,16 +346,20 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
+```
 
+## Open source components and libraries
 
-## Exempted components
+These components are under their own licenses, which are included in the 
+file (where a single file is appropriate) or in the file headers (where 
+a single file is used):
 
-### src/crypto/curve25519/
+### curve25519-donna
    
 This is curve25519-donna, available under the following terms: 
 [src/crypto/curve25519/LICENSE.TXT](src/crypto/curve25519/LICENSE.TXT)  
 
-### src/crypto/ed25519/
+### Orson Peter's Portable Ed25519
 
 This is Orson Peter's Portable Ed25519 implementation, licensed under the terms 
 in: [src/crypto/ed25519/LICENSE.TXT](src/crypto/ed25519/LICENSE.TXT)
