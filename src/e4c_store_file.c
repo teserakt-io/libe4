@@ -1,11 +1,10 @@
-//  e4c_store_file.c
-//  2018-07-06  Markku-Juhani O. Saarinen <markku@teserakt.io>
-//  2019-04-15  Antony Vennard <antony@teserakt.io>
-
-//  (c) 2018 Copyright Teserakt AG
-
-//  Persistent key storage for POSIX devices. Really a toy version
-//  intended for little embedded devices.
+/* e4c_store_file.c
+ * (c) 2018 Copyright Teserakt AG
+ *
+ * Persistent key storage for POSIX devices. 
+ * This is implemented as a demonstrator of what is possible. Real 
+ * implementations may wish to do something more serious.
+ */
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -99,7 +98,7 @@ int e4c_load(e4storage *store, const char *path)
         goto err;
     }
 
-    // derive a topichash for the control topic.
+    /* derive a topichash for the control topic. */
     e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
 
     rlen = read(fd, store->key, sizeof store->key);
@@ -117,7 +116,7 @@ int e4c_load(e4storage *store, const char *path)
     }
 
     lseek(fd, 4, SEEK_CUR);
-    // TODO: detect if we cannot read everything based on the topiccount
+    /* TODO: detect if we cannot read everything based on the topiccount */
 
 
     for (i = 0; i < store->topiccount; i++)
@@ -220,13 +219,13 @@ int e4c_getindex(e4storage *store, const char *topic)
     int i;
     uint8_t hash[E4_TOPICHASH_LEN];
 
-    // hash the topic
+    /* hash the topic */
     if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
         return E4_ERROR_PERSISTENCE_ERROR;
     }
-    // look for it
+    /* look for it */
     for (i = 0; i < store->topiccount; i++)
-    { // find the key
+    { 
         if (memcmp(store->topics[i].topic, hash, E4_TOPICHASH_LEN) == 0)
         {
             break;
@@ -241,12 +240,11 @@ int e4c_is_device_ctrltopic(e4storage *store, const char *topic)
 {
     uint8_t hash[E4_TOPICHASH_LEN];
 
-    // hash the topic
+    /* hash the topic */
     if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    // hash the topic
     return memcmp(store->ctrltopic, hash, E4_TOPICHASH_LEN);
 }
 
@@ -270,14 +268,15 @@ int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t
         if (memcmp(store->topics[i].topic, topic_hash, E4_TOPICHASH_LEN) == 0)
             break;
     }
-    if (i >= E4_TOPICS_MAX) // out of space
+    if (i >= E4_TOPICS_MAX) /* out of space */
         return E4_ERROR_TOPICKEY_MISSING;
 
     memcpy(store->topics[i].topic, topic_hash, E4_TOPICHASH_LEN);
     memcpy(store->topics[i].key, key, E4_KEY_LEN);
 
     if (i == store->topiccount)
-    { // new topic
+    { 
+        /* new topic */
         store->topiccount++;
     }
 
@@ -294,7 +293,7 @@ int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash)
 
         if (memcmp(topic_keys[i].topic, topic_hash, E4_TOPICHASH_LEN) == 0)
         {
-            // remove this item and move list up
+            /* remove this item and move list up */
             for (j = i + 1; j < store->topiccount; j++)
             {
                 memcpy(&topic_keys[j - 1], &topic_keys[j], sizeof(topic_key));
@@ -322,7 +321,7 @@ int e4c_reset_topics(e4storage *store)
     return 0;
 }
 
-//#ifdef DEBUG
+/*#ifdef DEBUG */
 
 void e4c_debug_print(e4storage *store)
 {
@@ -361,4 +360,4 @@ void e4c_debug_print(e4storage *store)
     }
 }
 
-//#endif
+/*#endif*/

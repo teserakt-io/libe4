@@ -32,6 +32,6 @@ $(TESTDIR)/%: test/%.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB) 
 
 # Configuration mode tests
-build/test/e4file: test/e4.c $(LIB)
+build/test/e4_symkey_file: test/e4.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -DE4_STORE_FILE=1 -o $@ $< $(LIB)
 

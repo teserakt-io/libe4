@@ -117,9 +117,9 @@ int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t
 int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash);
 int e4c_reset_topics(e4storage *store);
 
-//#ifdef DEBUG
+/*#ifdef DEBUG*/
 void e4c_debug_print(e4storage *store);
-//#endif
+/*#endif*/
 
 #ifdef E4_STORE_FILE
 #include "e4/internal/e4c_store_file.h"

@@ -1,7 +1,8 @@
-//  aes_siv.c
-//  2018-07-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
+/*  aes_siv.c
+ *  2018-07-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
 
-//  (c) 2018 Copyright Teserakt AG
+ *  (c) 2018 Copyright Teserakt AG
+ */
 
 #include <string.h>
 

@@ -1,5 +1,5 @@
 
-OBJS = $(OBJDIR)/e4client.$O              \
+OBJS = $(OBJDIR)/e4symclient.$O           \
        $(OBJDIR)/e4c_store_file.$O        \
        $(OBJDIR)/e4util.$O                \
        $(OBJDIR)/crypto/aes_siv.$O        \
@@ -9,6 +9,19 @@ OBJS = $(OBJDIR)/e4client.$O              \
        $(OBJDIR)/crypto/test_aes_siv.$O   \
        $(OBJDIR)/crypto/test_sha3.$O      \
        $(OBJDIR)/strlcpy.$O
+
+
+OBJS += $(OBJDIR)/crypto/curve25519/curve25519.$O \
+        $(OBJDIR)/crypto/ed25519/add_scalar.$O \
+	$(OBJDIR)/crypto/ed25519/ed25519_test.$O \
+	$(OBJDIR)/crypto/ed25519/fe.$O \
+	$(OBJDIR)/crypto/ed25519/ge.$O \
+	$(OBJDIR)/crypto/ed25519/key_exchange.$O \
+	$(OBJDIR)/crypto/ed25519/keypair.$O \
+	$(OBJDIR)/crypto/ed25519/sc.$O \
+	$(OBJDIR)/crypto/ed25519/seed.$O \
+	$(OBJDIR)/crypto/ed25519/sign.$O \
+	$(OBJDIR)/crypto/ed25519/verify.$O
 
 TESTS = \
     $(TESTDIR)/util          \

@@ -1,6 +1,5 @@
 
-
-CC	 = clang
+CC	     = clang
 AR       = ar
 ARFLAGS  = rcs
 CFLAGS	 = -Wall -Werror -g -std=c89 -fsanitize=address,memory,undefined -fno-omit-frame-pointer

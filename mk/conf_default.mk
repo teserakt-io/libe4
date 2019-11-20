@@ -12,10 +12,11 @@ NOW=$(shell date "+%Y%m%d%H%M")
 
 # OBJ paths match their src folder equivalents
 INCDIR = include
-OBJDIR  = out/build
+OBJDIR  = tmp/default
 SRCDIR  = src
 DOCDIR  = doc
-LIBDIR  = lib
+LIBDIR  = build/lib
+OUTINCDIR = build/include
 LIBNAME = libe4
 LIB	= $(LIBDIR)/$(LIBNAME).a
 DISTDIR	= dist

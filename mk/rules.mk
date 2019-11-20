@@ -1,5 +1,5 @@
 
-build/%.$O: src/%.c
+$(OBJDIR)/%.$O: src/%.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 default: setup $(LIB)
@@ -8,11 +8,14 @@ setup:
 	mkdir -p $(OBJDIR); \
 	mkdir -p $(OBJDIR)/test/; \
 	mkdir -p $(OBJDIR)/crypto; \
+	mkdir -p $(OBJDIR)/crypto/curve25519; \
+	mkdir -p $(OBJDIR)/crypto/ed25519; \
 	mkdir -p $(LIBDIR); \
 	mkdir -p $(DISTDIR); \
 
 $(LIB): setup $(OBJS)
-	mkdir -p lib; \
+	mkdir -p $(LIBDIR); \
+        cp -rfv $(INCDIR) $(OUTINCDIR); \
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
 clean:
@@ -41,6 +44,6 @@ $(TESTDIR)/%: test/%.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB) 
 
 # Configuration mode tests
-build/test/e4file: test/e4.c $(LIB)
+build/test/e4symmetric: test/e4.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -DE4_STORE_FILE=1 -o $@ $< $(LIB)
 

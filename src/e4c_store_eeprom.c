@@ -1,9 +1,8 @@
-//  e4c_store_eeprom.c
-//  2018-07-06  Markku-Juhani O. Saarinen <markku@teserakt.io>
-
-//  (c) 2018 Copyright Teserakt AG
-
-//  Persistent key storage for Arduino -- uses EEPROM
+/* 
+   e4c_store_eeprom.c
+   (c) 2018 Copyright Teserakt AG
+   Persistent key storage for Arduino -- uses EEPROM
+*/
 
 #include <string.h>
 #include <avr/eeprom.h>

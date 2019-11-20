@@ -1,10 +1,13 @@
 #include "e4/crypto/sha3.h"
 #include "e4/e4.h"
-#include <stdint.h>
+#include <e4/stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+/* #ifdef DEBUG */
+
+/* #endif */
 
 int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen)
 {
@@ -25,11 +28,25 @@ int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *
         return E4_CTRLTOPIC_LEN + 1;
     }
 
+#if __STDC_VERSION__ >= 199901L
     snprintf(topic, topiclen, "e4/");
+#else
+    if ( topiclen < 3 ) {
+        return -1;
+    }
+    sprintf(topic, "e4/");
+#endif
     for (i = 0; i < E4_ID_LEN; i++)
     {
         const size_t adjust = 3 + 2 * i;
+    #if __STDC_VERSION__ >= 199901L
         snprintf((char *)(topic + adjust), topiclen - adjust, "%02x", clientid[i]);
+    #else
+        if ( adjust >= topiclen ) {
+            return -1;
+        }
+        sprintf((char *)(topic + adjust), "%02x", clientid[i]);
+    #endif
     }
 
     return 0;
@@ -54,7 +71,7 @@ int e4c_hex_decode(char *bytes, const size_t byteslen, const char *hexstring, co
     size_t reqbytes = 0;
     int i = 0;
 
-    // can't decode empty string; can't decode odd bytes,
+    /* can't decode empty string; can't decode odd bytes, */
     if (hexstringlen == 0 || hexstringlen % 2 == 1)
     {
         printf("length condition failed.\n");

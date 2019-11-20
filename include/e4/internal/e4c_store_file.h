@@ -1,9 +1,4 @@
-//  e4c_store.h
-//  2018-07-06  Markku-Juhani O. Saarinen <markku@teserakt.io>
-
-//  (c) 2018 Copyright Teserakt AG
-
-//  Persistent key storage.
+/* (c) 2018 Copyright Teserakt AG */
 
 #ifndef _E4C_STORE_H_
 #define _E4C_STORE_H_
@@ -15,7 +10,7 @@
 #define E4_TOPICS_MAX 100
 #define E4_MAX_PATH 255
 
-// In memory structures that represent the file. This may need to become
+/* In memory structures that represent the file. */
 
 typedef struct
 {
