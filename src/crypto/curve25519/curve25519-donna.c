@@ -47,10 +47,7 @@
 
 #include <string.h>
 #include "e4/stdint.h" /* if you are re-using this code you may want <stdint.h> */
-
-#ifdef _MSC_VER
-#define inline __inline
-#endif
+#include "e4/inline.h" /* INLINE defined here */
 
 typedef uint8_t u8;
 typedef int32_t s32;
@@ -244,8 +241,7 @@ static void freduce_degree(limb *output) {
 /* return v / 2^26, using only shifts and adds.
  *
  * On entry: v can take any value. */
-static inline limb
-div_by_2_26(const limb v)
+INLINE limb div_by_2_26(const limb v)
 {
   /* High word of v; no shift needed. */
   const uint32_t highword = (uint32_t) (((uint64_t) v) >> 32);
@@ -260,8 +256,7 @@ div_by_2_26(const limb v)
 /* return v / (2^25), using only shifts and adds.
  *
  * On entry: v can take any value. */
-static inline limb
-div_by_2_25(const limb v)
+INLINE limb div_by_2_25(const limb v)
 {
   /* High word of v; no shift needed*/
   const uint32_t highword = (uint32_t) (((uint64_t) v) >> 32);
