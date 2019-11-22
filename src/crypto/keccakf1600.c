@@ -1,12 +1,12 @@
 /* Based on the public domain implementation in
- * crypto_hash/keccakc512/simple/ from http://bench.cr.yp.to/supercop.html
+ * crypto_hash/keccakc512/simple/ from http://bench.cr.yp.to/supercop.html 
  * by Ronny Van Keer
  * and the public domain "TweetFips202" implementation
- * from https://twitter.com/tweetfips202
+ * from https://twitter.com/tweetfips202 
  * by Gilles Van Assche, Daniel J. Bernstein, and Peter Schwabe */
 
 #include <stdint.h>
-//#include <assert.h>
+/*#include <assert.h> */
 
 #define NROUNDS 24
 #define ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
@@ -91,7 +91,7 @@ void keccak_f1600(void *st, uint8_t rc)
     uint64_t Esa, Ese, Esi, Eso, Esu;
 
 
-    // copyFromState(A, state)
+    /* copyFromState(A, state) */
     Aba = state[0];
     Abe = state[1];
     Abi = state[2];
@@ -120,14 +120,14 @@ void keccak_f1600(void *st, uint8_t rc)
 
     for (round = 0; round < rc; round += 2)
     {
-        //    prepareTheta
+        /*    prepareTheta */
         BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
         BCe = Abe ^ Age ^ Ake ^ Ame ^ Ase;
         BCi = Abi ^ Agi ^ Aki ^ Ami ^ Asi;
         BCo = Abo ^ Ago ^ Ako ^ Amo ^ Aso;
         BCu = Abu ^ Agu ^ Aku ^ Amu ^ Asu;
 
-        // thetaRhoPiChiIotaPrepareTheta(round  , A, E)
+        /* thetaRhoPiChiIotaPrepareTheta(round  , A, E) */
         Da = BCu ^ ROL(BCe, 1);
         De = BCa ^ ROL(BCi, 1);
         Di = BCe ^ ROL(BCo, 1);
@@ -215,14 +215,14 @@ void keccak_f1600(void *st, uint8_t rc)
         Eso = BCo ^ ((~BCu) & BCa);
         Esu = BCu ^ ((~BCa) & BCe);
 
-        //    prepareTheta
+        /*    prepareTheta */
         BCa = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
         BCe = Ebe ^ Ege ^ Eke ^ Eme ^ Ese;
         BCi = Ebi ^ Egi ^ Eki ^ Emi ^ Esi;
         BCo = Ebo ^ Ego ^ Eko ^ Emo ^ Eso;
         BCu = Ebu ^ Egu ^ Eku ^ Emu ^ Esu;
 
-        // thetaRhoPiChiIotaPrepareTheta(round+1, E, A)
+        /* thetaRhoPiChiIotaPrepareTheta(round+1, E, A) */
         Da = BCu ^ ROL(BCe, 1);
         De = BCa ^ ROL(BCi, 1);
         Di = BCe ^ ROL(BCo, 1);
@@ -311,7 +311,7 @@ void keccak_f1600(void *st, uint8_t rc)
         Asu = BCu ^ ((~BCa) & BCe);
     }
 
-    // copyToState(state, A)
+    /* copyToState(state, A) */
     state[0] = Aba;
     state[1] = Abe;
     state[2] = Abi;

@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-int test_sha3(); // test_sha3.c
+int test_sha3(); /* test_sha3.c */
 int test_shake();
 
-int test_aes256(); // in test_aes_siv.c
+int test_aes256(); /* in test_aes_siv.c */
 int test_aes_siv();
 
 int main(int argc, char **argv)

@@ -1,5 +1,5 @@
 
-CC	     ?= clang
+CC	 ?= clang
 AR       ?= ar
 ARFLAGS  = rcs
 CFLAGS	 = -Wall -Werror -g -DE4_STORE_FILE -std=c89

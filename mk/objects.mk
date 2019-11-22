@@ -11,7 +11,7 @@ OBJS = $(OBJDIR)/e4symclient.$O           \
        $(OBJDIR)/strlcpy.$O
 
 
-OBJS += $(OBJDIR)/crypto/curve25519/curve25519.$O \
+OBJS += $(OBJDIR)/crypto/curve25519/curve25519-donna.$O \
         $(OBJDIR)/crypto/ed25519/add_scalar.$O \
 	$(OBJDIR)/crypto/ed25519/ed25519_test.$O \
 	$(OBJDIR)/crypto/ed25519/fe.$O \

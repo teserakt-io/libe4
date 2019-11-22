@@ -1,9 +1,9 @@
-//  aes256enc_openssl.c
-//  2018-07-01  Markku-Juhani O. Saarinen <markku@teserakt.io>
+/*  aes256enc_openssl.c */
+/*  2018-07-01  Markku-Juhani O. Saarinen <markku@teserakt.io> */
 
-//  (c) 2018 Copyright Teserakt AG
+/*  (c) 2018 Copyright Teserakt AG */
 
-//  OpenSSL wrapper
+/*  OpenSSL wrapper */
 
 #include "e4/crypto/aes256enc.h"
 #include <openssl/aes.h>

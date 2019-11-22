@@ -11,13 +11,13 @@
 #include "e4c_store.h"
 #include "sha3.h"
 
-// number of topic keys
+/* number of topic keys */
 
 #define E4C_TOPICS_MAX 10
 
 static int topic_keys_no = 0;
 
-// This is the topic-key structure
+/* This is the topic-key structure */
 
 typedef struct {
     uint8_t used;
@@ -28,7 +28,7 @@ typedef struct {
 
 static topic_key_t eeprom_keys[E4C_TOPICS_MAX] EEMEM;
 
-// Utility function .. compare with eeprom
+/* Utility function .. compare with eeprom */
 
 static int memcmp_eeprom(const uint8_t *eeprom, const uint8_t *sram, size_t n)
 {
@@ -42,8 +42,8 @@ static int memcmp_eeprom(const uint8_t *eeprom, const uint8_t *sram, size_t n)
     return 0;
 }
 
-// This is the persistent storage format -- invoked with a physical button
-// or something
+/* This is the persistent storage format -- invoked with a physical button */
+/* or something */
 
 int e4c_reset_storage()
 {
@@ -57,8 +57,8 @@ int e4c_reset_storage()
     return 0;
 }
 
-// Initialize and check if persistent storage is valid. The path is 
-// optional -- default filename is used if set to NULL. Ignored with EEPROM.
+/* Initialize and check if persistent storage is valid. The path is  */
+/* optional -- default filename is used if set to NULL. Ignored with EEPROM. */
 
 int e4c_init(const char *path)
 {
@@ -74,33 +74,33 @@ int e4c_init(const char *path)
     return topic_keys_no;
 }
 
-// Synchronize the persistence
+/* Synchronize the persistence */
 
 int e4c_sync()
 {
     return 0;
 }
 
-// Free all resources
+/* Free all resources */
 
 int e4c_free()
 {   
     return 0;
 }
 
-// Fetch an index of a key of given hash. The command channel is 0.
-// Returns a negative on failure.
+/* Fetch an index of a key of given hash. The command channel is 0. */
+/* Returns a negative on failure. */
 
 int e4c_getindex(const char *topic)
 {
     int i;
     uint8_t hash[E4C_TOPIC_LEN];
 
-    // hash the topic
+    /* hash the topic */
     sha3(topic, strlen(topic), hash, E4C_TOPIC_LEN);
 
-    // look for it
-    for (i = 0; i < E4C_TOPICS_MAX; i++) {   // find the key
+    /* look for it */
+    for (i = 0; i < E4C_TOPICS_MAX; i++) {   /* find the key */
         if (eeprom_read_byte(&eeprom_keys[i].used) == 0)
             continue;
         if (memcmp_eeprom(eeprom_keys[i].topic, hash, E4C_TOPIC_LEN) == 0) {
@@ -113,7 +113,7 @@ int e4c_getindex(const char *topic)
     return i;
 }
 
-// get a key by index
+/* get a key by index */
 
 int e4c_getkey(uint8_t * key, int index)
 {
@@ -126,7 +126,7 @@ int e4c_getkey(uint8_t * key, int index)
     return 0;
 }
 
-// Remove topic (hash)
+/* Remove topic (hash) */
 
 int e4c_remove_topic(const uint8_t *topic_hash)
 {
@@ -137,7 +137,7 @@ int e4c_remove_topic(const uint8_t *topic_hash)
             continue;
         if (memcmp_eeprom(eeprom_keys[i].topic, topic_hash, 
             E4C_TOPIC_LEN) == 0) {
-            // remove this item by marking it free
+            /* remove this item by marking it free */
             eeprom_write_byte(&eeprom_keys[i].used, 0);
             topic_keys_no--;
         }
@@ -146,7 +146,7 @@ int e4c_remove_topic(const uint8_t *topic_hash)
     return E4ERR_TopicKeyMissing;
 }
 
-// Clear all topics except ID key
+/* Clear all topics except ID key */
 
 int e4c_reset_topics()
 {
@@ -162,7 +162,7 @@ int e4c_reset_topics()
     return 0;
 }
 
-// set id key for this instance index 0
+/* set id key for this instance index 0 */
 
 int e4c_set_id_key(const uint8_t *topic_hash, const uint8_t *key)
 {
@@ -180,7 +180,7 @@ int e4c_set_id_key(const uint8_t *topic_hash, const uint8_t *key)
     return 0;
 }
 
-// set key for given topic (hash)
+/* set key for given topic (hash) */
 
 int e4c_set_topic_key(const uint8_t *topic_hash, const uint8_t *key)
 {
@@ -191,17 +191,17 @@ int e4c_set_topic_key(const uint8_t *topic_hash, const uint8_t *key)
             continue;
         if (memcmp_eeprom(eeprom_keys[i].topic, topic_hash, 
             E4C_TOPIC_LEN) == 0) {
-            // update key only
+            /* update key only */
             eeprom_update_block(key, eeprom_keys[i].key, E4C_KEY_LEN);
             return 0;
         }
     }
 
-    // must be new, look for a free spot
+    /* must be new, look for a free spot */
     for (i = 0; i < E4C_TOPICS_MAX; i++) {
         if (eeprom_read_byte(&eeprom_keys[i].used) == 0) {
 
-            // mark used, update key and hash
+            /* mark used, update key and hash */
             eeprom_update_byte(&eeprom_keys[i].used, 0xFF);
             eeprom_update_block(topic_hash, eeprom_keys[i].topic, 
                 E4C_TOPIC_LEN);

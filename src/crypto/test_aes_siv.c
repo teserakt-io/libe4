@@ -1,14 +1,14 @@
-//  test_aes_siv.c
-//  2018-07-02  Markku-Juhani O. Saarinen <markku@teserakt.io>
+/*  test_aes_siv.c */
+/*  2018-07-02  Markku-Juhani O. Saarinen <markku@teserakt.io> */
 
-//  (c) 2018 Copyright Teserakt AG
+/*  (c) 2018 Copyright Teserakt AG */
 
 #include <string.h>
 
 #include "e4/crypto/aes256enc.h"
 #include "e4/crypto/aes_siv.h"
 
-// AES_Test triplet lifted from FIPS-197
+/* AES_Test triplet lifted from FIPS-197 */
 
 int test_aes256()
 {
@@ -29,15 +29,15 @@ int test_aes256()
     size_t i;
     uint8_t v[16], ek[AES256_EXPKEY_LEN];
 
-    aes256_enc_exp_key(ek, test_key); // expand key
+    aes256_enc_exp_key(ek, test_key); /* expand key */
 
     for (i = 0; i < 16; i++) v[i] = test_pt[i];
 
-    aes256_encrypt_ecb(v, ek); // encrypt
+    aes256_encrypt_ecb(v, ek); /* encrypt */
 
     for (i = 0; i < 16; i++)
     {
-        if (v[i] != test_ct[i]) return 1; // FAIL!
+        if (v[i] != test_ct[i]) return 1; /* FAIL! */
     }
 
     return 0;
@@ -45,11 +45,11 @@ int test_aes256()
 
 #include <stdio.h>
 
-// An AES256-SIV Test vector
+/* An AES256-SIV Test vector */
 
 int test_aes_siv()
 {
-    // self generated
+    /* self generated */
     const uint8_t test_key[64] = {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A,
         0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A,
@@ -70,7 +70,7 @@ int test_aes_siv()
                                    0x35, 0xb2, 0xd2, 0x8d, 0x10, 0xd1,
                                    0x9b, 0x08, 0x96, 0x38, 0x20, 0xba };
 
-    // from crypto_test.go
+    /* from crypto_test.go */
     const uint8_t test_jp[80] = {
         163, 170, 113, 22,  250, 77,  249, 210, 78,  28,  160, 45,  237, 93,
         164, 200, 69,  177, 144, 88,  25,  34,  203, 0,   222, 9,   31,  200,
@@ -92,14 +92,14 @@ int test_aes_siv()
 
     fails = 0;
 
-    // encrypt test
+    /* encrypt test */
     aes256_encrypt_siv(buf1, &len1, test_ad, 24, test_pt, 14, test_key);
     if (len1 != 30 || memcmp(buf1, test_ivc, len1) != 0)
     {
         fails++;
     }
 
-    // decrypt test
+    /* decrypt test */
     if (aes256_decrypt_siv(buf2, &len2, test_ad, 24, buf1, len1, test_key))
     {
         fails++;
@@ -110,14 +110,14 @@ int test_aes_siv()
         fails++;
     }
 
-    // corrupt test
+    /* corrupt test */
     buf1[25] ^= 1;
     if (aes256_decrypt_siv(buf2, &len2, test_ad, 24, buf1, len1, test_key) == 0)
     {
         fails++;
     }
 
-    // encrypt test with JP's test vector
+    /* encrypt test with JP's test vector */
     for (i = 0; i < sizeof(buf1); i++) buf1[i] = i;
 
     len2 = 0;

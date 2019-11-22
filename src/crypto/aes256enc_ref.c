@@ -1,7 +1,7 @@
-//  aes256enc_ref.c
-//  2018-07-09  Markku-Juhani O. Saarinen
+/*  aes256enc_ref.c */
+/*  2018-07-09  Markku-Juhani O. Saarinen */
 
-//  A baseline reference implementation of AES-256 Encrypt
+/*  A baseline reference implementation of AES-256 Encrypt */
 
 /**
  * Hacked from: rijndael-alg-fst.c
@@ -274,7 +274,7 @@ static const uint32_t rcon[] = {
     }
 #endif
 
-// Expand the cipher key into the encryption key schedule.
+/* Expand the cipher key into the encryption key schedule. */
 
 void aes256_enc_exp_key(void *ek_out, const void *key_in)
 {

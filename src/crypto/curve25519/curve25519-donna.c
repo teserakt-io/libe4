@@ -46,7 +46,7 @@
  * from the sample implementation. */
 
 #include <string.h>
-#include <stdint.h>
+#include "e4/stdint.h" /* if you are re-using this code you may want <stdint.h> */
 
 #ifdef _MSC_VER
 #define inline __inline
@@ -679,7 +679,7 @@ static void fmonty(limb *x2, limb *z2,  /* output 2Q */
   freduce_degree(x2);
   freduce_coefficients(x2);
   /* |x2[i]| < 2^26 */
-  fdifference(zz, xx);  // does zz = xx - zz
+  fdifference(zz, xx);  /* does zz = xx - zz */
   /* |zz[i]| < 2^27 */
   memset(zzz + 10, 0, sizeof(limb) * 9);
   fscalar_product(zzz, zz, 121665);
@@ -770,9 +770,9 @@ cmult(limb *resultx, limb *resultz, const u8 *n, const limb *q) {
   memcpy(resultz, nqz, sizeof(limb) * 10);
 }
 
-// -----------------------------------------------------------------------------
-// Shamelessly copied from djb's code
-// -----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------- */
+/* Shamelessly copied from djb's code */
+/* ----------------------------------------------------------------------------- */
 static void
 crecip(limb *out, const limb *z) {
   limb z2[10];

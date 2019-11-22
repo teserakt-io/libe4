@@ -108,7 +108,7 @@ int main(int argc, char** argv, char** envp) {
     memset(&store, 0, sizeof store);
     e4c_load(&store, "/tmp/unittests.e4c");
 
-    // TODO: test control messages have their intended effect.
+    /* TODO: test control messages have their intended effect. */
 
     /* Test E4 encryption using random topic keys */
     for ( iteration = 0; iteration<ITER_MAX; iteration++) {
