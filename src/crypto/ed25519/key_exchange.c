@@ -1,4 +1,6 @@
-#include "ed25519.h"
+
+#include "e4/stdint.h"
+#include "e4/crypto/ed25519.h"
 #include "fe.h"
 
 void ed25519_key_exchange(unsigned char *shared_secret, const unsigned char *public_key, const unsigned char *private_key) {

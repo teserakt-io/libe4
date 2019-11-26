@@ -1,4 +1,7 @@
-#include "ed25519.h"
+
+
+#include "e4/stdint.h"
+#include "e4/crypto/ed25519.h"
 
 #ifndef ED25519_NO_SEED
 

@@ -1,5 +1,6 @@
-#include "ed25519.h"
-#include "sha512.h"
+
+#include "e4/stdint.h"
+#include "e4/crypto/sha512.h"
 #include "ge.h"
 
 

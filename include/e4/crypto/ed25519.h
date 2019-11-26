@@ -1,6 +1,7 @@
 #ifndef ED25519_H
 #define ED25519_H
 
+#include "e4/stdint.h"
 
 #ifndef ED25519_NO_SEED
 int ed25519_create_seed(unsigned char *seed);

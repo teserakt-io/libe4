@@ -1,4 +1,6 @@
-#include "fixedint.h"
+
+#include "e4/stdint.h"
+
 #include "fe.h"
 
 

@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#include "fixedint.h"
+#include "e4/stdint.h"
 
 /* state */
 typedef struct sha512_context_ {

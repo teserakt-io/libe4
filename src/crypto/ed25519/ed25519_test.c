@@ -3,11 +3,10 @@
 #include <string.h>
 #include <time.h>
 
-/* #define ED25519_DLL */
-#include "src/ed25519.h"
+#include "e4/crypto/ed25519.h"
 
-#include "src/ge.h"
-#include "src/sc.h"
+#include "ge.h"
+#include "sc.h"
 
 
 int main() {

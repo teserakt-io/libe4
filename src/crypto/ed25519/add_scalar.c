@@ -1,10 +1,10 @@
-#include "ed25519.h"
+#include "e4/crypto/ed25519.h"
 #include "ge.h"
 #include "sc.h"
-#include "sha512.h"
+#include "e4/crypto/sha512.h"
 
 
-/* see http:/*crypto.stackexchange.com/a/6215/4697 */ */
+/* see http://crypto.stackexchange.com/a/6215/4697 */
 void ed25519_add_scalar(unsigned char *public_key, unsigned char *private_key, const unsigned char *scalar) {
     const unsigned char SC_1[32] = {1}; /* scalar with value 1 */
     
@@ -30,7 +30,7 @@ void ed25519_add_scalar(unsigned char *public_key, unsigned char *private_key, c
     if (private_key) {
         sc_muladd(private_key, SC_1, n, private_key);
 
-        /* https:/*github.com/orlp/ed25519/issues/3 */
+        /* https://github.com/orlp/ed25519/issues/3 */
         sha512_init(&hash);
         sha512_update(&hash, private_key + 32, 32);
         sha512_update(&hash, scalar, 32);
