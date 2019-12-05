@@ -1,3 +1,5 @@
+
+#include "e4/stdint.h"
 #include "ge.h"
 #include "precomp_data.h"
 

@@ -2,6 +2,7 @@
  * (c) 2018-2019 Copyright Teserakt AG
  */
 
+
 #include <string.h>
 #ifndef __AVR__
 #include <stdio.h>
@@ -120,7 +121,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         control = 1;
     }
 
-    /* check timestamp */
+    /* Retrieve timestamp encoded as little endian */
     tstamp = 0;
     for (j = 7; j >= 0; j--)
     {

@@ -1,6 +1,5 @@
 
-OBJS = $(OBJDIR)/e4symclient.$O           \
-       $(OBJDIR)/e4c_store_file.$O        \
+OBJS = $(OBJDIR)/e4c_store_file.$O        \
        $(OBJDIR)/e4util.$O                \
        $(OBJDIR)/crypto/aes_siv.$O        \
        $(OBJDIR)/crypto/aes256enc_ref.$O  \
@@ -9,6 +8,9 @@ OBJS = $(OBJDIR)/e4symclient.$O           \
        $(OBJDIR)/crypto/test_aes_siv.$O   \
        $(OBJDIR)/crypto/test_sha3.$O      \
        $(OBJDIR)/strlcpy.$O
+
+
+OBJS += $(OBJDIR)/e4pkcclient.$O
 
 
 OBJS += $(OBJDIR)/crypto/curve25519/curve25519-donna.$O \
