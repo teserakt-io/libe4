@@ -5,6 +5,10 @@
  * 2019-04-15  Antony Vennard <antony@teserakt.io>
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _E4CLIENT_H_
 #define _E4CLIENT_H_
 
@@ -125,4 +129,8 @@ void e4c_debug_print(e4storage *store);
 #include "e4/internal/e4c_store_file.h"
 #endif
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

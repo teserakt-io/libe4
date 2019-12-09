@@ -188,6 +188,10 @@
  *
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <limits.h>
 #include <signal.h>
@@ -916,4 +920,7 @@ int main () {
 	return EXIT_SUCCESS;
 }
 
+#endif
+#ifdef __cplusplus
+}
 #endif

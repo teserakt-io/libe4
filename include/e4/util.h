@@ -1,6 +1,9 @@
 
 #ifndef E4UTIL_H
 #define E4UTIL_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Derives a ClientID. Depends on the constant E4_ID_LEN */
 int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen);
@@ -14,4 +17,7 @@ int e4c_derive_topichash(uint8_t* topichash, const size_t topichash_len, const c
 int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *clientid);
 
 int e4c_hex_decode(char *bytes, const size_t byteslen, const char *hexstring, const size_t hexstringlen);
+#ifdef __cplusplus
+}
+#endif
 #endif

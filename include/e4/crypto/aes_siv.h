@@ -4,6 +4,9 @@
 
 #ifndef _AES_SIV_H_
 #define _AES_SIV_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stddef.h>
 #include <stdint.h>
@@ -24,4 +27,7 @@ int aes256_decrypt_siv(uint8_t *pt,
                        size_t ctlen,        /* in: ciphertext */
                        const uint8_t *key); /* in: secret key (32 bytes) */
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* _SIV_H_ */

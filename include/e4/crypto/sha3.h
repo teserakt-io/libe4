@@ -4,6 +4,9 @@
 
 #ifndef _SHA3_H_
 #define _SHA3_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stddef.h>
 #include "e4/stdint.h"
@@ -56,4 +59,7 @@ void sha3_256_trunc(char* output, const size_t outputlen, const char* input, con
 void shake_xof(sha3_ctx_t *c);
 void shake_out(sha3_ctx_t *c, void *out, size_t len);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
