@@ -10,6 +10,8 @@ setup:
 	mkdir -p $(OBJDIR)/crypto; \
 	mkdir -p $(OBJDIR)/crypto/curve25519; \
 	mkdir -p $(OBJDIR)/crypto/ed25519; \
+	mkdir -p $(OBJDIR)/crypto/ctaes; \
+	mkdir -p $(TESTDIR); \
 	mkdir -p $(LIBDIR); \
 	mkdir -p $(DISTDIR); \
 
@@ -43,7 +45,4 @@ format:
 $(TESTDIR)/%: test/%.c $(LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIB) 
 
-# Configuration mode tests
-build/test/e4symmetric: test/e4.c $(LIB)
-	$(CC) $(CFLAGS) $(INCLUDES) -DE4_STORE_FILE=1 -o $@ $< $(LIB)
 

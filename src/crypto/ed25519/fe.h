@@ -1,7 +1,7 @@
 #ifndef FE_H
 #define FE_H
 
-#include "fixedint.h"
+#include "e4/crypto/fixedint.h"
 
 
 /*
