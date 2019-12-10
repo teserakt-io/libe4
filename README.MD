@@ -3,13 +3,13 @@
 
 ## Documentation
 
-Documentation for this library [is available here](doc/rendered/index.html)
+Documentation for this library [is available here](about:blank)
 
 ## License
 
 This code is licensed to you according to your license agreement with Teserakt 
 AG and may be used according to this document only. Please see 
-[LICENSE](LICENSE.md).
+[LICENSE](LICENSE.MD).
 
 ## Copyright
 
