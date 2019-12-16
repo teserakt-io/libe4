@@ -3,7 +3,7 @@ CC       ?= clang
 AR       ?= ar
 LD       ?= clang
 ARFLAGS  = rcs
-CFLAGS	 = -Wall -Werror -g -DE4_STORE_FILE -std=c89 $(E4_CFLAGS)
+CFLAGS	 = -Wall -Werror -g -DE4_MODE_PUBKEY -DE4_STORE_FILE -std=c89 $(E4_CFLAGS)
 LDFLAGS	 = -L. $(E4_CFLAGS)
 INCLUDES = -Iinclude/
 

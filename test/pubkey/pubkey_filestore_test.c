@@ -63,7 +63,7 @@ int main(int argc, char** argv, char** envp) {
     
     e4c_set_storagelocation(&store, "/tmp/unittestspk.e4c");
 
-    e4retcode = e4c_set_id(&store, clientid);
+    e4retcode = e4c_set_id(&store, DEVICEID_1);
     e4retcode = e4c_set_idkey(&store, DEVEDWARDS_SECKEY_1);
 
     for ( iteration = 0; iteration<NUM_TOPICS; iteration++ ) {
@@ -103,7 +103,7 @@ int main(int argc, char** argv, char** envp) {
 
     memset(deviceid1, 0, sizeof deviceid1);
     bytes_read = fread(deviceid1, 1, sizeof deviceid1, urand_fd);
-    if ( bytes_read < sizeof topickey_current ) {
+    if ( bytes_read < sizeof deviceid1 ) {
         printf("Failed: generating deviceid bytes read %lu, expected %lu\n", bytes_read, sizeof deviceid1);
         returncode = 4;
         goto exit_close;
@@ -112,7 +112,7 @@ int main(int argc, char** argv, char** envp) {
     
     memset(deviceid2, 0, sizeof deviceid2);
     bytes_read = fread(deviceid2, 1, sizeof deviceid2, urand_fd);
-    if ( bytes_read < sizeof topickey_current ) {
+    if ( bytes_read < sizeof deviceid2 ) {
         printf("Failed: generating deviceid2 bytes read %lu, expected %lu\n", bytes_read, sizeof deviceid2);
         returncode = 4;
         goto exit_close;
@@ -123,7 +123,7 @@ int main(int argc, char** argv, char** envp) {
     /* test sync and reload from file-based storage */
     e4c_sync(&store);
     memset(&store, 0, sizeof store);
-    e4c_load(&store, "/tmp/unittests.e4c");
+    e4c_load(&store, "/tmp/unittestspk.e4c");
 
 exit_close:
     fclose(urand_fd);

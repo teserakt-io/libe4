@@ -20,8 +20,8 @@ OBJS = \
        $(OBJDIR)/crypto/ed25519/sign.$O \
        $(OBJDIR)/crypto/ed25519/verify.$O \
        $(OBJDIR)/crypto/sha512.$O \
-       $(OBJDIR)/e4c_pk_store_file.$O \
-       $(OBJDIR)/e4pkcclient.$O
+       $(OBJDIR)/e4c_pk_store_file.$O 
+       #$(OBJDIR)/e4pkcclient.$O
 
 
 TESTS = \

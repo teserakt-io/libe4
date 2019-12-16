@@ -40,7 +40,7 @@ const char E4V1_MAGIC[4] = "E41P";
 int e4c_init(e4storage *store)
 {
     ZERO(store->id);
-    ZERO(store->key);
+    ZERO(store->privkey);
     ZERO(store->ctrltopic);
     store->topiccount = 0;
     ZERO(store->topics);
@@ -111,8 +111,8 @@ int e4c_load(e4storage *store, const char *path)
     /* derive a topichash for the control topic. */
     e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
 
-    rlen = read(fd, store->key, sizeof store->key);
-    if (rlen != sizeof store->key)
+    rlen = read(fd, store->privkey, sizeof store->privkey);
+    if (rlen != sizeof store->privkey)
     {
         goto err;
     }
@@ -140,6 +140,30 @@ int e4c_load(e4storage *store, const char *path)
         lseek(fd, 4, SEEK_CUR);
         rlen = read(fd, store->topics[i].key, E4_KEY_LEN);
         if (rlen != E4_KEY_LEN)
+        {
+            goto err;
+        }
+        lseek(fd, 4, SEEK_CUR);
+    }
+    
+    rlen = read(fd, &store->devicecount, sizeof store->devicecount);
+    if (rlen != sizeof store->devicecount)
+    {
+        goto err;
+    }
+    lseek(fd, 4, SEEK_CUR);
+    
+    for (i = 0; i < store->devicecount; i++)
+    {
+        rlen = read(fd, store->devices[i].id, E4_ID_LEN);
+        if (rlen != E4_ID_LEN)
+        {
+            goto err;
+        }
+
+        lseek(fd, 4, SEEK_CUR);
+        rlen = read(fd, store->devices[i].pubkey, E4_PK_EDDSA_PUBKEY_LEN);
+        if (rlen != E4_PK_EDDSA_PUBKEY_LEN)
         {
             goto err;
         }
@@ -179,7 +203,7 @@ int e4c_sync(e4storage *store)
     write(fd, &zero, sizeof zero);
     write(fd, store->id, sizeof store->id);
     write(fd, &zero, sizeof zero);
-    write(fd, store->key, sizeof store->key);
+    write(fd, store->privkey, sizeof store->privkey);
     write(fd, &zero, sizeof zero);
     write(fd, &store->topiccount, sizeof store->topiccount);
     write(fd, &zero, sizeof zero);
@@ -191,6 +215,18 @@ int e4c_sync(e4storage *store)
         write(fd, t->topic, sizeof t->topic);
         write(fd, &zero, sizeof zero);
         write(fd, t->key, sizeof t->key);
+        write(fd, &zero, sizeof zero);
+    }
+    write(fd, &store->devicecount, sizeof store->devicecount);
+    write(fd, &zero, sizeof zero);
+
+    for (i = 0; i < store->devicecount; i++)
+    {
+        device_key *d = &(store->devices[0]) + i;
+
+        write(fd, d->id, sizeof d->id);
+        write(fd, &zero, sizeof zero);
+        write(fd, d->pubkey, sizeof d->pubkey);
         write(fd, &zero, sizeof zero);
     }
     close(fd);
@@ -220,7 +256,7 @@ exit:
 }
 int e4c_set_idkey(e4storage *store, const uint8_t *key)
 {
-    memmove(store->key, key, sizeof store->key);
+    memmove(store->privkey, key, sizeof store->privkey);
     return E4_RESULT_OK;
 }
 
@@ -320,6 +356,8 @@ int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash)
 
 int e4c_reset_topics(e4storage *store)
 {
+    int i = 0;
+
     if (store->topiccount > 0)
     {
         store->topiccount = 0;
@@ -354,7 +392,7 @@ int e4c_getdevicekey(uint8_t* pubkey, e4storage *store, const int index)
     if (index < 0 || index >= store->devicecount)
         return E4_ERROR_TOPICKEY_MISSING;
 
-    memcpy(key, store->devices[index].pubkey, E4_PK_EDDSA_PUBKEY_LEN);
+    memcpy(pubkey, store->devices[index].pubkey, E4_PK_EDDSA_PUBKEY_LEN);
 
     return 0;
 }
@@ -382,7 +420,6 @@ int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *pubke
 
     return e4c_sync(store);
 }
-}
 
 int e4c_remove_devices(e4storage* store, const uint8_t* id)
 {
@@ -392,14 +429,14 @@ int e4c_remove_devices(e4storage* store, const uint8_t* id)
     for (i = 0; i < store->devicecount; i++)
     {
 
-        if (memcmp(devicekeys[i], id, E4_ID_LEN) == 0)
+        if (memcmp(devicekeys[i].id, id, E4_ID_LEN) == 0)
         {
             /* remove this item and move list up */
             for (j = i + 1; j < store->topiccount; j++)
             {
-                memcpy(&devices[j - 1], &devices[j], sizeof(device_key));
+                memcpy(&devicekeys[j - 1], &devicekeys[j], sizeof(device_key));
             }
-            ZERO(devices[store->devicecount]);
+            ZERO(devicekeys[store->devicecount]);
             store->devicecount--;
 
             return e4c_sync(store);
@@ -409,7 +446,7 @@ int e4c_remove_devices(e4storage* store, const uint8_t* id)
     return E4_ERROR_DEVICEPK_MISSING;
 }
 
-int e4c_reset_topics(e4storage* store)
+int e4c_reset_devices(e4storage* store)
 {
     int i = 0;
     if (store->devicecount > 0)
@@ -418,7 +455,7 @@ int e4c_reset_topics(e4storage* store)
     }
     /* Attempt to zero memory. This may not work depending on the platform */
     for ( i=0 ; i < E4_DEVICES_MAX ; i++ ) {
-        ZERO(store->devicekeys[i]);
+        ZERO(store->devices[i]);
     }
 
     e4c_sync(store);
@@ -442,7 +479,7 @@ void e4c_debug_print(e4storage *store)
     printf("  Key=");
     for (j = 0; j < E4_KEY_LEN; j++)
     {
-        printf("%02x", store->key[j]);
+        printf("%02x", store->privkey[j]);
     }
     printf("\n");
     e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, store->id);

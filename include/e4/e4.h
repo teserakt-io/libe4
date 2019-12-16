@@ -137,7 +137,7 @@ int e4c_getdeviceindex(e4storage *store, const uint8_t* id);
 int e4c_getdevicekey(uint8_t* key, e4storage *store, const int index);
 int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *key);
 int e4c_remove_devices(e4storage* store, const uint8_t* id);
-int e4c_reset_topics(e4storage* store);
+int e4c_reset_devices(e4storage* store);
 #endif
 
 /*#ifdef DEBUG*/
