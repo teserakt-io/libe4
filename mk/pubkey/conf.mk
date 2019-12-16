@@ -13,14 +13,19 @@ NOW=$(shell date "+%Y%m%d%H%M")
 
 # OBJ paths match their src folder equivalents
 INCDIR  = include
-OBJDIR  = tmp/symkey
+OBJDIR  = tmp/pubkey/build
+TESTOBJDIR = tmp/pubkey/test
 SRCDIR  = src
 DOCDIR  = doc
-LIBDIR  = build/symkey/lib
-OUTINCDIR = build/symkey/include
+LIBDIR  = build/pubkey/lib
+OUTINCDIR = build/pubkey/include
 LIBNAME = libe4
 LIB	= $(LIBDIR)/$(LIBNAME).a
-DISTDIR	= dist/symkey/
-TESTDIR = build/symkey/test
+DISTDIR	= dist/pubkey/
+TESTDIR = build/pubkey/test
 
 O = o
+
+# test specific parts:
+TESTCFLAGS = -Wall -Werror -g -DE4_STORE_FILE -std=c11 -Wno-unused-variable $(E4_CFLAGS)
+TESTLDFLAGS = $(LDFLAGS) -L$(LIB)

@@ -12,13 +12,13 @@
 
 /* In memory structures that represent the file. */
 
-typedef struct
+typedef struct _e4_topic_key
 {
     uint8_t topic[E4_TOPICHASH_LEN];
     uint8_t key[E4_KEY_LEN];
 } topic_key;
 
-typedef struct
+typedef struct _e4_device_key
 {
     uint8_t id[E4_ID_LEN];
     uint8_t pubkey[E4_PK_EDDSA_PUBKEY_LEN];

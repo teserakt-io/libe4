@@ -1,5 +1,5 @@
 
-OBJS = $(OBJDIR)/e4pkcclient.$O           \
+OBJS = \
        $(OBJDIR)/e4util.$O                \
        $(OBJDIR)/crypto/aes_siv.$O        \
        $(OBJDIR)/crypto/aes256enc_ref.$O  \
@@ -19,12 +19,11 @@ OBJS = $(OBJDIR)/e4pkcclient.$O           \
        $(OBJDIR)/crypto/ed25519/seed.$O \
        $(OBJDIR)/crypto/ed25519/sign.$O \
        $(OBJDIR)/crypto/ed25519/verify.$O \
-       $(OBJDIR)/crypto/sha512.$O
-       
-
+       $(OBJDIR)/crypto/sha512.$O \
+       $(OBJDIR)/e4c_pk_store_file.$O \
+       $(OBJDIR)/e4pkcclient.$O
 
 
 TESTS = \
     $(TESTDIR)/util          \
-    $(TESTDIR)/crypto        \
-    $(TESTDIR)/e4file 
+    $(TESTDIR)/crypto

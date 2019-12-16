@@ -10,9 +10,12 @@
 #include "e4/strlcpy.h"
 #include "e4/crypto/sha3.h"
 
+#include "pubkey_kat.h"
+
 const size_t ITER_MAX = 100;
 const size_t PT_MAX = 100;
 const size_t NUM_TOPICS = 10;
+const size_t NUM_DEVICES = 10;
 const size_t SIZE_TOPICNAME = 8;
 
 int main(int argc, char** argv, char** envp) {
@@ -29,8 +32,17 @@ int main(int argc, char** argv, char** envp) {
     unsigned char topicname_tmp[SIZE_TOPICNAME/2];
     char topicname_current[SIZE_TOPICNAME+1];
     unsigned char topichash[E4_TOPICHASH_LEN];
-
     char topics[NUM_TOPICS][SIZE_TOPICNAME+1];
+    unsigned char deviceid1[E4_ID_LEN];
+    unsigned char deviceid2[E4_ID_LEN];
+    unsigned char deviceid3[E4_ID_LEN];
+    unsigned char deviceid4[E4_ID_LEN];
+    unsigned char deviceid5[E4_ID_LEN];
+    unsigned char deviceid6[E4_ID_LEN];
+    unsigned char deviceid7[E4_ID_LEN];
+    unsigned char deviceid8[E4_ID_LEN];
+    unsigned char deviceid9[E4_ID_LEN];
+    unsigned char deviceid10[E4_ID_LEN];
 
     memset(&store, 0, sizeof store);
 
@@ -51,22 +63,8 @@ int main(int argc, char** argv, char** envp) {
     
     e4c_set_storagelocation(&store, "/tmp/unittestspk.e4c");
 
-    /* set the identity key */
-    bytes_read = fread(&clientid, 1, sizeof clientid, urand_fd);
-    if ( bytes_read < sizeof clientid ) {
-        printf("Failed: generating clientid bytes read %lu, expected %lu\n", bytes_read, sizeof clientid);
-        returncode = 2;
-        goto exit_close;
-    }
-    bytes_read = fread(clientkey, 1, sizeof clientkey, urand_fd);
-    if ( bytes_read < sizeof clientkey ) {
-        printf("Failed: generating clientkey bytes read %lu, expected %lu\n", bytes_read, sizeof clientid);
-        returncode = 3;
-        goto exit_close;
-    }
-    
     e4retcode = e4c_set_id(&store, clientid);
-    e4retcode = e4c_set_idkey(&store, clientkey);
+    e4retcode = e4c_set_idkey(&store, DEVEDWARDS_SECKEY_1);
 
     for ( iteration = 0; iteration<NUM_TOPICS; iteration++ ) {
 
@@ -103,88 +101,29 @@ int main(int argc, char** argv, char** envp) {
         e4c_set_topic_key(&store, topichash, topickey_current); 
     }
 
+    memset(deviceid1, 0, sizeof deviceid1);
+    bytes_read = fread(deviceid1, 1, sizeof deviceid1, urand_fd);
+    if ( bytes_read < sizeof topickey_current ) {
+        printf("Failed: generating deviceid bytes read %lu, expected %lu\n", bytes_read, sizeof deviceid1);
+        returncode = 4;
+        goto exit_close;
+    }
+    e4c_set_device_key(&store, deviceid1, DEVEDWARDS_PUBKEY_1);
+    
+    memset(deviceid2, 0, sizeof deviceid2);
+    bytes_read = fread(deviceid2, 1, sizeof deviceid2, urand_fd);
+    if ( bytes_read < sizeof topickey_current ) {
+        printf("Failed: generating deviceid2 bytes read %lu, expected %lu\n", bytes_read, sizeof deviceid2);
+        returncode = 4;
+        goto exit_close;
+    }
+    e4c_set_device_key(&store, deviceid2, DEVEDWARDS_PUBKEY_2);
+
+
     /* test sync and reload from file-based storage */
     e4c_sync(&store);
     memset(&store, 0, sizeof store);
     e4c_load(&store, "/tmp/unittests.e4c");
-
-    /* TODO: test control messages have their intended effect. */
-
-    /* Test E4 encryption using random topic keys */
-    for ( iteration = 0; iteration<ITER_MAX; iteration++) {
-
-
-        size_t bytes_read = 0;
-        size_t ciphertext_len = 0;
-        size_t recovered_len = 0;
-        unsigned char plaintext_buffer[PT_MAX+1];
-        unsigned char ciphertext_buffer[PT_MAX + E4_MSGHDR_LEN + 1];
-        unsigned char recovered_buffer[PT_MAX+1];
-        uint8_t topicindex = 0;
-
-        char* topicname;
-
-        bytes_read = fread(&topicindex, 1, sizeof topicindex, urand_fd);
-        if ( bytes_read < sizeof topicindex ) {
-            printf("Failed: unable to read byte for topicindex");
-            returncode = 7;
-            goto exit_close;
-        }
-        topicindex = topicindex % NUM_TOPICS;
-        topicname = topics[topicindex];
-
-        memset(plaintext_buffer, 0, PT_MAX+1);
-        memset(ciphertext_buffer, 0, PT_MAX+E4_MSGHDR_LEN+1);
-        memset(recovered_buffer, 0, PT_MAX+1);
-
-        bytes_read = fread(plaintext_buffer, 1, PT_MAX, urand_fd);
-        if ( bytes_read < PT_MAX ) {
-            printf("Failed: unable to read random plaintext. Asked for %lu bytes, got %lu\n", PT_MAX, bytes_read);
-            returncode = 8;
-            goto exit_close;
-        }
-
-        e4retcode = e4c_protect_message(ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, &ciphertext_len,
-            plaintext_buffer, PT_MAX, topicname, &store);
-
-        if (e4retcode != E4_RESULT_OK) {
-            returncode = 12;
-            printf("Failed: E4 Error %d\n", e4retcode);
-            goto exit_close;
-        }
-
-        if ( ciphertext_len != PT_MAX + E4_MSGHDR_LEN ) {
-            printf("Failed: decrypted ciphertext has length %lu, should be %lu\n", ciphertext_len, PT_MAX+E4_MSGHDR_LEN);
-            returncode = 9;
-            goto exit_close;
-        }
-
-		/* e4c_unprotect_message zero-pads the output buffer. Perhaps we should 
-           get rid of this functionality and leave it to the user. For now, 
-           we fix it by passing the correct length of the recovered buffer. */
-        e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX+1, &recovered_len,
-            ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, topicname, &store);
-
-        if (e4retcode != E4_RESULT_OK) {
-            returncode = 13;
-            printf("Failed: E4 Error %d\n", e4retcode);
-            goto exit_close;
-        }
-
-        if ( recovered_len != PT_MAX ) {
-            printf("Failed: decrypted plaintext has length %lu, should be %lu\n", recovered_len, PT_MAX);
-            returncode = 10;
-            goto exit_close;
-        }
-
-
-        if ( memcmp(recovered_buffer, plaintext_buffer, sizeof plaintext_buffer) != 0 ) {
-            printf("Failed: recovered buffer not equal to plaintext buffer.\n");
-            returncode = 11;
-            goto exit_close;
-        }
-
-    }
 
 exit_close:
     fclose(urand_fd);

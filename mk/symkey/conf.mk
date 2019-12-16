@@ -12,7 +12,8 @@ NOW=$(shell date "+%Y%m%d%H%M")
 
 # OBJ paths match their src folder equivalents
 INCDIR  = include
-OBJDIR  = tmp/symkey
+OBJDIR  = tmp/symkey/build
+TESTOBJDIR = tmp/symkey/test
 SRCDIR  = src
 DOCDIR  = doc
 LIBDIR  = build/symkey/lib
@@ -23,3 +24,7 @@ DISTDIR	= dist/symkey/
 TESTDIR = build/symkey/test
 
 O = o
+
+# test specific parts:
+TESTCFLAGS = -Wall -Werror -g -DE4_STORE_FILE -std=c11 $(E4_CFLAGS)
+TESTLDFLAGS =
