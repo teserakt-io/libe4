@@ -80,40 +80,68 @@ struct _e4storage;
 typedef struct _e4storage e4storage;
 
 /* e4c_protect_message produces a protected message for onwards
-   transmission 
-   (out) cptr Pointer to a ciphertext buffer 
-   (in) cmax  Maximum length of ciphertext buffer to be written. \param[out] clen Actual
-   length of ciphertext buffer written. \param[in] mptr Pointer to a message
-   (plaintext) buffer. \param[in] mlen Length of message to be encrypted.
-   \param[in] topic Pointer to a topic hash for topic associated with this
-   message. \param[inout] storage Pointer to the structure representing storage.
-   \return 0 on success. Non-zero return values indicate errors. 
+   transmission. 
+
+Parameters:
+
+ * ciphertext: (inout) a pointer to a buffer to receive the output ciphertext.
+ * ciphertext_max_len: the maximum length of the ciphertext buffer to write. 
+   If this value is insufficient, an error will be returned.
+ * ciphertext_len: (out) the number of bytes written to the ciphertext buffer.
+ * message: (in) the plaintext (to be encrypted data).
+ * message_len: (in) the length of the message buffer, in bytes.
+ * topic_name: (in) the C-style zero-terminated string identifying the "topic" 
+   name to be used. In MQTT implementations this corresponds to the topic name 
+   used in the protocol; more generally this is any valid identifier for the 
+   group channel.
+ * storage: (inout) pointer to a context structure for the backend key storage 
+   in use.
+
+Returns:
+
+   E4_RESULT_OK (and out parameters) on success. An appropriate E4_ERROR 
+   variable on failure. These correspond to 0 on success and other values on 
+   failure.
+
  */
-int e4c_protect_message(uint8_t *cptr,
-                        size_t cmax,
-                        size_t *clen,
-                        const uint8_t *mptr,
-                        size_t mlen,
-                        const char *topic,
+int e4c_protect_message(uint8_t *ciphertext,
+                        size_t ciphertext_max_len,
+                        size_t *ciphertext_len,
+                        const uint8_t *message,
+                        size_t message_len,
+                        const char *topic_name,
                         e4storage *storage);
 
-/** \brief e4c_unprotect_message retrieves and authenticates a message that
-was encrypted by E4.
-   \param[out] mptr Pointer to ciphertext to be read
-   \param[in] mmax Maximum length of plaintext buffer to which we can write.
-   \param[out] mlen Actual length of plaintext buffer written by decryption.
-   \param[in] cptr Pointer to ciphertext buffer
-   \param[in] clen Length of ciphertext buffer
-   \param[in] topic Pointer to a topic hash for topic associated with this
-message. \param[inout] storage Pointer to the structure representing storage.
-\return 0 on success. Non-zero return values indicate errors. 
- */
-int e4c_unprotect_message(uint8_t *mptr,
-                          size_t mmax,
-                          size_t *mlen,
-                          const uint8_t *cptr,
-                          size_t clen,
-                          const char *topic,
+/* e4c_unprotect_message retrieves and authenticates a message that was 
+encrypted by E4.
+
+Parameters:
+
+ * message: (out) Pointer to ciphertext to be read
+ * message_max_len: (in) Maximum length of plaintext buffer to which we can write.
+ * message_len: (in) Actual length of plaintext buffer written by decryption.
+ * ciphertext: (in) Pointer to ciphertext buffer
+ * ciphertext_len: (in) clen Length of ciphertext buffer
+ * topic_name: (in) Pointer to a topic hash for topic associated with this
+message.
+ * storage: (inout) Pointer to the structure representing storage.
+ 
+Returns:
+
+   E4_RESULT_OK if the message was successfully decrypted.
+   E4_RESULT_OK_CONTROL if the message was a control message. Such messages are 
+   commands for the E4 protocol and do not need to be processed by the 
+   application. Applications should not rely on the plaintext buffer in this 
+   case.
+   E4_ERROR_... on error.
+
+*/
+int e4c_unprotect_message(uint8_t *message,
+                          size_t message_max_len,
+                          size_t *message_len,
+                          const uint8_t *ciphertext,
+                          size_t ciphertext_len,
+                          const char *topic_name,
                           e4storage *storage);
 
 
