@@ -4,8 +4,8 @@
 extern "C" {
 #endif
 
-void curve25519(unsigned char *output, const unsigned char *a,
-                             const unsigned char *b);
+void curve25519(unsigned char *output, const unsigned char *secret,
+                             const unsigned char *base);
 
 #ifdef __cplusplus
 }
