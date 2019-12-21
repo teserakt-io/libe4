@@ -50,7 +50,12 @@ extern "C" {
 
 /* Unable to find public key for device;e4 */
 #define E4_ERROR_DEVICEPK_MISSING -109
+/* Signature verification failed */
+#define E4_ERROR_PK_SIGVERIF_FAILED -110
 
+
+/* Size of the timestamp field */
+#define E4_TS_LEN 8
 /* Size of the ID, truncated sha3(alias) */
 #define E4_ID_LEN 16
 
@@ -71,6 +76,10 @@ extern "C" {
 #define E4_PK_EDDSA_PRIVKEY_LEN 64
 #define E4_PK_EDDSA_PUBKEY_LEN 32
 #define E4_PK_EDDSA_SIG_LEN 32
+#define E4_PK_X25519_PUBKEY_LEN 32
+#define E4_PK_X25519_PRIVKEY_LEN 32
+
+#define E4_PK_TOPICMSGHDR_LEN (E4_TAG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN)
 
 struct _e4storage;
 /* This structure represents storage-specific data to be passed to the e4c
@@ -151,7 +160,6 @@ int e4c_set_storagelocation(e4storage *store, const char *path);
 int e4c_load(e4storage *store, const char *path);
 int e4c_sync(e4storage *store);
 int e4c_set_id(e4storage *store, const uint8_t *id);
-int e4c_set_idkey(e4storage *store, const uint8_t *key);
 int e4c_is_device_ctrltopic(e4storage *store, const char *topic);
 int e4c_getindex(e4storage *store, const char *topic);
 int e4c_gettopickey(uint8_t *key, e4storage *store, const int index);
@@ -159,13 +167,17 @@ int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t
 int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash);
 int e4c_reset_topics(e4storage *store);
 
+int e4c_set_idkey(e4storage *store, const uint8_t *key);
 #ifdef E4_MODE_PUBKEY 
 /* pubkey storage apis */
+int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey);
 int e4c_getdeviceindex(e4storage *store, const uint8_t* id);
 int e4c_getdevicekey(uint8_t* key, e4storage *store, const int index);
 int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *key);
-int e4c_remove_devices(e4storage* store, const uint8_t* id);
+int e4c_remove_device(e4storage* store, const uint8_t* id);
 int e4c_reset_devices(e4storage* store);
+int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key);
+int e4c_get_c2_pubkey(e4storage* store, uint8_t* key);
 #endif
 
 /*#ifdef DEBUG*/

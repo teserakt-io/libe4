@@ -27,7 +27,9 @@ clean:
 	rm -rf $(LIBDIR)
 
 
-test: clean setup lib $(E4TESTS)
+testbuild: clean setup lib $(E4TESTS)
+
+test: testbuild $(E4TESTEXEC)
 
 format:
 	clang-format -i src/*.c src/crypto/*.c include/e4/*.h include/e4/crypto/*.h include/e4/internal/*.h

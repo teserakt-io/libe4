@@ -27,3 +27,11 @@ SYMKEY_TESTS = \
     $(TESTDIR)/symkey_file 
 
 E4TESTS += $(SYMKEY_TESTS)
+
+testexec_sk:
+	./$(TESTDIR)/util
+	./$(TESTDIR)/crypto
+	./$(TESTDIR)/symkey_file
+
+E4TESTEXEC += testexec_sk
+

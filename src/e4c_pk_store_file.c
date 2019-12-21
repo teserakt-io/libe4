@@ -111,12 +111,19 @@ int e4c_load(e4storage *store, const char *path)
     /* derive a topichash for the control topic. */
     e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
 
+    /* read in key material */
     rlen = read(fd, store->privkey, sizeof store->privkey);
     if (rlen != sizeof store->privkey)
     {
         goto err;
     }
-
+    lseek(fd, 4, SEEK_CUR);
+    
+    rlen = read(fd, store->pubkey, sizeof store->pubkey);
+    if (rlen != sizeof store->pubkey)
+    {
+        goto err;
+    }
     lseek(fd, 4, SEEK_CUR);
 
     rlen = read(fd, &store->topiccount, sizeof store->topiccount);
@@ -204,6 +211,8 @@ int e4c_sync(e4storage *store)
     write(fd, store->id, sizeof store->id);
     write(fd, &zero, sizeof zero);
     write(fd, store->privkey, sizeof store->privkey);
+    write(fd, &zero, sizeof zero);
+    write(fd, store->pubkey, sizeof store->pubkey);
     write(fd, &zero, sizeof zero);
     write(fd, &store->topiccount, sizeof store->topiccount);
     write(fd, &zero, sizeof zero);
@@ -370,6 +379,11 @@ int e4c_reset_topics(e4storage *store)
     return 0;
 }
 
+int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey) {
+    memmove(store->pubkey, pubkey, sizeof store->pubkey);
+    return E4_RESULT_OK;
+}
+
 int e4c_getdeviceindex(e4storage *store, const uint8_t* id) 
 {
     int i;
@@ -421,7 +435,7 @@ int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *pubke
     return e4c_sync(store);
 }
 
-int e4c_remove_devices(e4storage* store, const uint8_t* id)
+int e4c_remove_device(e4storage* store, const uint8_t* id)
 {
     int i, j;
     device_key *devicekeys = store->devices;
@@ -462,6 +476,17 @@ int e4c_reset_devices(e4storage* store)
     return 0;
 }
 
+int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key) {
+    memcpy(store->c2key, key, E4_PK_X25519_PUBKEY_LEN);
+    e4c_sync(store);
+    return 0;
+}
+
+int e4c_get_c2_pubkey(e4storage* store, uint8_t* key) {
+    memcpy(key, store->c2key, E4_PK_X25519_PUBKEY_LEN);
+    return 0;
+}
+
 /*#ifdef DEBUG */
 
 void e4c_debug_print(e4storage *store)
@@ -476,10 +501,22 @@ void e4c_debug_print(e4storage *store)
         printf("%02x", store->id[j]);
     }
     printf("\n");
-    printf("  Key=");
-    for (j = 0; j < E4_KEY_LEN; j++)
+    printf("  PrivKey=");
+    for (j = 0; j < E4_PK_EDDSA_PRIVKEY_LEN; j++)
     {
         printf("%02x", store->privkey[j]);
+    }
+    printf("\n");
+    printf("  PubKey=");
+    for (j = 0; j < E4_PK_EDDSA_PUBKEY_LEN; j++)
+    {
+        printf("%02x", store->privkey[j]);
+    }
+    printf("\n");
+    printf("  C2PubKey=");
+    for (j = 0; j < E4_PK_X25519_PUBKEY_LEN; j++)
+    {
+        printf("%02x", store->c2key[j]);
     }
     printf("\n");
     e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, store->id);

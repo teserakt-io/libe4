@@ -49,8 +49,12 @@ int e4c_protect_message(uint8_t *cptr,
     size_t clen2 = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
+    uint8_t* signaturep = NULL;
+    size_t signeddatalen=0;
 
-    if (mlen + E4_MSGHDR_LEN > cmax) /* actually: not enough space */
+    /* pubkey messages are: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
+
+    if (mlen + E4_PK_TOPICMSGHDR_LEN + E4_PK_EDDSA_SIG_LEN > cmax) /* actually: not enough space */
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
     *clen = mlen + E4_MSGHDR_LEN;
 
@@ -62,12 +66,8 @@ int e4c_protect_message(uint8_t *cptr,
     }
     else
     {
-        if (e4c_is_device_ctrltopic(storage, topic) != 0)
-        {
-            return E4_ERROR_TOPICKEY_MISSING;
-        }
-        /* control topic being used: */
-        memcpy(key, storage->key, E4_KEY_LEN);
+        /* TODO: we do not implement sending back to the C2 at present */
+        return E4_ERROR_TOPICKEY_MISSING;
     }
 
 #ifdef __AVR__
@@ -82,16 +82,36 @@ int e4c_protect_message(uint8_t *cptr,
         time_now >>= 8;
     }
 
+    /* set our ID in the output buffer
+     * if Avi is reading this code, hope you are enjoying this memcpy.
+     */
+    memcpy(cptr + E4_TS_LEN, storage->id, E4_ID_LEN);
+
     /* encrypt */
     clen2 = 0;
-    aes256_encrypt_siv(cptr + 8, &clen2, cptr, 8, mptr, mlen, key);
+    aes256_encrypt_siv(cptr + E4_TS_LEN + E4_ID_LEN, &clen2, cptr, 8, mptr, mlen, key);
+
+    /* sign the result */
+    signeddatalen = E4_TS_LEN + E4_ID_LEN + E4_TAG_LEN + mlen;
+    signaturep = &cptr[0] + signeddatalen;
+
+    /*
+    ed25519_sign(unsigned char *signature,
+                 const unsigned char *message,
+                 size_t message_len,
+                 const unsigned char *public_key,
+                 const unsigned char *private_key);
+     */
+    ed25519_sign(signaturep,
+                 cptr,
+                 signeddatalen,
+                 storage->pubkey,
+                 storage->privkey);
 
     return E4_RESULT_OK;
 }
 
-
 /* Unprotect message */
-
 int e4c_unprotect_message(uint8_t *mptr,
                           size_t mmax,
                           size_t *mlen,
@@ -104,34 +124,111 @@ int e4c_unprotect_message(uint8_t *mptr,
     int i = 0, j = 0, r = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
+
+    uint8_t* assocdata;
+    size_t assocdatalen = 0;
+    size_t sivpayloadlen = 0;
+
 #ifndef __AVR__
     uint64_t secs1970;
 
     secs1970 = (uint64_t)time(NULL); /* this system has a RTC */
 #endif
 
-    /* bounds checking */
+    /* There are two possible message formats:
 
-    if (clen < E4_MSGHDR_LEN || mmax < clen - E4_MSGHDR_LEN)
-    {
-        return E4_ERROR_CIPHERTEXT_TOO_SHORT;
-    }
+       From other clients: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64)
+       From the C2:        Timestamp (8) | IV (16) | Ciphertext (n)
+    */
 
-    /* get the key */
-    i = e4c_getindex(storage, topic);
-    if (i >= 0)
+    assocdata = cptr;
+
+    if (e4c_is_device_ctrltopic(storage, topic) == 0)
     {
-        e4c_gettopickey(key, storage, i);
+        uint8_t c2pk[E4_PK_X25519_PUBKEY_LEN];
+        uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
+        uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
+        /* control topic being used: */
+        control = 1;
+
+        /* bounds checking */
+        if (clen < E4_MSGHDR_LEN || mmax < clen - E4_MSGHDR_LEN)
+        {
+            return E4_ERROR_CIPHERTEXT_TOO_SHORT;
+        }
+
+        e4c_get_c2_pubkey(store, c2pk);
+
+        /* convert our key to X25519 */
+        xed25519_convert_ed2c_private(devicesk, store->privkey);
+
+        /* key=sha3(X25519(c2, device)) */
+
+        curve25519(sharedpoint, devicesk, c2pk);
+        sha3(sharedpoint, sizeof sharedpoint, key, sizeof key);
+
+        /* set things up for symmetric decryption: */
+        /* From the C2:        Timestamp (8) | IV (16) | Ciphertext (n) */
+        assocdatalen = E4_TS_LEN;
+        sivpayloadlen = clen - E4_TS_LEN;
     }
     else
     {
-        if (e4c_is_device_ctrltopic(storage, topic) != 0)
+        int i;
+        uint8_t sender_pk[E4_PK_EDDSA_PUBKEY_LEN];
+        uint8_t* idptr = cptr[8];
+
+        control = 0;
+
+        /* bounds checking */
+        if (clen < E4_PKTOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN ||
+            mmax < clen - (E4_PKTOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN))
+        {
+            return E4_ERROR_CIPHERTEXT_TOO_SHORT;
+        }
+
+        i = e4c_getdeviceindex(store, idptr);
+        if (i >= 0)
+        {
+            e4c_getdevicekey(sender_pk, store, i);
+        }
+        else
+        {
+            /* TODO: policies to not validate sigs if key not found
+               due to storage constraints.
+
+               NOTE: this MUST NOT be conflated with signature verif
+               failure. If signatures fail to verify we will _always_
+               reject the message.
+             */
+
+            return E4_ERROR_DEVICEPK_MISSING;
+        }
+
+        /* check signature attached to end */
+        signverifresult = ed25519_verify(cptr[clen-E4_PK_EDDSA_SIG_LEN],
+                cptr, clen-E4_PK_EDDSA_SIG_LEN, sender_pk);
+
+        if (signverifresult != 1)
+        {
+            return E4_ERROR_PK_SIGVERIF_FAILED;
+        }
+
+        /* find the topic key and set it */
+        i = e4c_getindex(storage, topic);
+        if (i >= 0)
+        {
+            e4c_gettopickey(key, storage, i);
+        }
+        else
         {
             return E4_ERROR_TOPICKEY_MISSING;
         }
-        /* control topic being used: */
-        memcpy(key, storage->key, E4_KEY_LEN);
-        control = 1;
+
+        /* set things up for symmetric decryption: */
+        /* From other clients: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
+        assocdatalen = E4_ID_LEN + E4_TS_LEN;
+        sivpayloadlen = clen - (E4_TS_LEN + E4_ID_LEN + E4_PK_EDDSA_SIG_LEN);
     }
 
     /* Retrieve timestamp encoded as little endian */
@@ -142,13 +239,23 @@ int e4c_unprotect_message(uint8_t *mptr,
         tstamp += (uint64_t)cptr[j];
     }
 
-    /* decrypt */
-    if (aes256_decrypt_siv(mptr, mlen, cptr, 8, cptr + 8, clen - 8, key) != 0)
+    /* decrypt
+       int aes256_decrypt_siv(uint8_t *pt,
+                       size_t *ptlen, /-* out: plaintext *-/
+                       const uint8_t *ad,
+                       size_t adlen, /-* in: associated data / nonce *-/
+                       const uint8_t *ct,
+                       size_t ctlen,        /-* in: ciphertext *-/
+                       const uint8_t *key); /-* in: secret key (32 bytes) *-/
+     */
+
+    if (aes256_decrypt_siv(mptr, mlen, assocdata, assocdatalen,
+                cptr + assocdatalen, sivpayloadlen, key) != 0)
     {
         return E4_ERROR_INVALID_TAG;
     }
 
-    /* TODO: this is only valuable for string-type data 
+    /* TODO: this is only valuable for string-type data
      * we should consider removing it, as it requires that
      * the plaintext buffer be 1 byte bigger than that which was
      * encrypted, which is very unnecessary. */
@@ -161,8 +268,8 @@ int e4c_unprotect_message(uint8_t *mptr,
     if (secs1970 < 946684800)
     {
         /* calibrate message if this is a control message */
-        if (control) {         
-            secs1970 = tstamp; 
+        if (control) {
+            secs1970 = tstamp;
         }
     }
     else
@@ -211,6 +318,19 @@ int e4c_unprotect_message(uint8_t *mptr,
         if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN))
             return E4_ERROR_INVALID_COMMAND;
         r = e4c_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
+        return r == 0 ? E4_RESULT_OK_CONTROL : r;
+    case 0x04: /* RemovePubKey(id) */
+        if (*mlen != (1 + E4_ID_LEN))
+        r = e4c_remove_devices(storage, mptr+1);
+        return r == 0 ? E4_RESULT_OK_CONTROL : r;
+    case 0x05: /* RemovePubKeys() */
+        if (*mlen != 1) return E4_ERROR_INVALID_COMMAND;
+        r = e4c_reset_devices(storage);
+        return r == 0 ? E4_RESULT_OK_CONTROL : r;
+    case 0x06: /* SetPubKey(pubkey, id) */
+        if (*mlen != (1 + E4_ID_LEN + E4_PK_EDDSA_PUBKEY_LEN))
+            return E4_ERROR_INVALID_COMMAND;
+        r = e4c_set_device_key(storage, mptr+1+E4_PK_EDDSA_PUBKEY_LEN, mptr+1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     }
 

@@ -29,6 +29,8 @@ struct _e4storage
     /* These fields are persisted by the sync command */
     uint8_t id[E4_ID_LEN];
     uint8_t privkey[E4_PK_EDDSA_PRIVKEY_LEN];
+    uint8_t pubkey[E4_PK_EDDSA_PUBKEY_LEN];
+    uint8_t c2key[E4_PK_X25519_PUBKEY_LEN];
 
     uint16_t devicecount;
     uint16_t topiccount;

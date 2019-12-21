@@ -22,31 +22,6 @@ void printhex(const uint8_t* buffer, size_t len)
 
 int main(int argc, char** argv) {
 
-    /*uint8_t shared_point[32] = {0};
-    uint8_t shared_secret[32] = {0};
-
-    ed25519_key_exchange((unsigned char*) shared_point, DEVEDWARDS_PUBKEY_1, C2EDWARDS_SECKEY_1);
-
-    sha3(shared_point, sizeof shared_point, shared_secret, sizeof shared_secret);
-    if (sizeof shared_secret != sizeof DEVSHAREDKEY_1) {
-        printf("ed25519_kex shared secret size mismatch");
-        return 1;
-    }
-
-    if (memcmp(shared_secret, DEVSHAREDKEY_1, 32) != 0) {
-        printf("ed25519_kex failed.\n");
-        printhex(shared_secret, sizeof shared_secret);
-        printf("\n");
-        printhex(DEVSHAREDKEY_1, sizeof DEVSHAREDKEY_1);
-        printf("\n");
-        printhex(C2SHAREDKEY_1, sizeof DEVSHAREDKEY_1);
-        printf("\n");
-
-        //return 1;
-    } else {
-        printf("ed25519_kex: OK.\n");
-    }*/
-
     // point conversion tests:
     
     uint8_t c2_c255_private[32] = {0};
