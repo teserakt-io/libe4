@@ -29,7 +29,7 @@
 #include "e4/strlcpy.h"
 #include "e4/util.h"
 
-const char E4V1_MAGIC[4] = "E41P";
+const char E4V2_MAGIC[4] = "E42P";
 
 #define ZERO(X)                                                                \
     do                                                                         \
@@ -82,12 +82,12 @@ int e4c_load(e4storage *store, const char *path)
     lseek(fd, 0, SEEK_SET);
 
     memset(mbuf, 0, sizeof mbuf);
-    rlen = read(fd, mbuf, sizeof E4V1_MAGIC);
-    if (rlen != sizeof E4V1_MAGIC)
+    rlen = read(fd, mbuf, sizeof E4V2_MAGIC);
+    if (rlen != sizeof E4V2_MAGIC)
     {
         goto err;
     }
-    if (memcmp(mbuf, E4V1_MAGIC, sizeof E4V1_MAGIC) != 0)
+    if (memcmp(mbuf, E4V2_MAGIC, sizeof E4V2_MAGIC) != 0)
     {
         goto err;
     }
@@ -121,6 +121,13 @@ int e4c_load(e4storage *store, const char *path)
     
     rlen = read(fd, store->pubkey, sizeof store->pubkey);
     if (rlen != sizeof store->pubkey)
+    {
+        goto err;
+    }
+    lseek(fd, 4, SEEK_CUR);
+    
+    rlen = read(fd, store->c2key, sizeof store->c2key);
+    if (rlen != sizeof store->c2key)
     {
         goto err;
     }
@@ -206,13 +213,15 @@ int e4c_sync(e4storage *store)
 
     uint32_t zero = 0;
 
-    write(fd, E4V1_MAGIC, sizeof E4V1_MAGIC);
+    write(fd, E4V2_MAGIC, sizeof E4V2_MAGIC);
     write(fd, &zero, sizeof zero);
     write(fd, store->id, sizeof store->id);
     write(fd, &zero, sizeof zero);
     write(fd, store->privkey, sizeof store->privkey);
     write(fd, &zero, sizeof zero);
     write(fd, store->pubkey, sizeof store->pubkey);
+    write(fd, &zero, sizeof zero);
+    write(fd, store->c2key, sizeof store->c2key);
     write(fd, &zero, sizeof zero);
     write(fd, &store->topiccount, sizeof store->topiccount);
     write(fd, &zero, sizeof zero);
@@ -266,6 +275,7 @@ exit:
 int e4c_set_idkey(e4storage *store, const uint8_t *key)
 {
     memmove(store->privkey, key, sizeof store->privkey);
+    e4c_sync(store);
     return E4_RESULT_OK;
 }
 
@@ -381,6 +391,7 @@ int e4c_reset_topics(e4storage *store)
 
 int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey) {
     memmove(store->pubkey, pubkey, sizeof store->pubkey);
+    e4c_sync(store);
     return E4_RESULT_OK;
 }
 
@@ -510,7 +521,7 @@ void e4c_debug_print(e4storage *store)
     printf("  PubKey=");
     for (j = 0; j < E4_PK_EDDSA_PUBKEY_LEN; j++)
     {
-        printf("%02x", store->privkey[j]);
+        printf("%02x", store->pubkey[j]);
     }
     printf("\n");
     printf("  C2PubKey=");

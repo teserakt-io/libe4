@@ -33,16 +33,6 @@ int main(int argc, char** argv, char** envp) {
     char topicname_current[SIZE_TOPICNAME+1];
     unsigned char topichash[E4_TOPICHASH_LEN];
     char topics[NUM_TOPICS][SIZE_TOPICNAME+1];
-    unsigned char deviceid1[E4_ID_LEN];
-    unsigned char deviceid2[E4_ID_LEN];
-    unsigned char deviceid3[E4_ID_LEN];
-    unsigned char deviceid4[E4_ID_LEN];
-    unsigned char deviceid5[E4_ID_LEN];
-    unsigned char deviceid6[E4_ID_LEN];
-    unsigned char deviceid7[E4_ID_LEN];
-    unsigned char deviceid8[E4_ID_LEN];
-    unsigned char deviceid9[E4_ID_LEN];
-    unsigned char deviceid10[E4_ID_LEN];
 
     memset(&store, 0, sizeof store);
 
@@ -63,8 +53,31 @@ int main(int argc, char** argv, char** envp) {
     
     e4c_set_storagelocation(&store, "/tmp/unittestspk.e4c");
 
-    e4retcode = e4c_set_id(&store, DEVICEID_1);
-    e4retcode = e4c_set_idkey(&store, DEVEDWARDS_SECKEY_1);
+    e4retcode = e4c_set_id(&store, pkkat[0].deviceid);
+    if ( e4retcode != 0 ) {
+        printf("Failed: unable to set id\n");
+        returncode = 1;
+        goto exit_close;
+    }
+    
+    e4retcode = e4c_set_idkey(&store, pkkat[0].dev_edwards_seckey);
+    if ( e4retcode != 0 ) {
+        printf("Failed: unable to set idkey\n");
+        returncode = 1;
+        goto exit_close;
+    }
+    e4retcode = e4c_set_idpubkey(&store, pkkat[0].dev_edwards_pubkey);
+    if ( e4retcode != 0 ) {
+        printf("Failed: unable to set idpubkey\n");
+        returncode = 1;
+        goto exit_close;
+    }
+    e4retcode = e4c_set_c2_pubkey(&store, pkkat[0].c2_edwards_pubkey);
+    if ( e4retcode != 0 ) {
+        printf("Failed: unable to set c2 pubkey\n");
+        returncode = 1;
+        goto exit_close;
+    }
 
     for ( iteration = 0; iteration<NUM_TOPICS; iteration++ ) {
 
@@ -101,29 +114,42 @@ int main(int argc, char** argv, char** envp) {
         e4c_set_topic_key(&store, topichash, topickey_current); 
     }
 
+    /*
     memset(deviceid1, 0, sizeof deviceid1);
     bytes_read = fread(deviceid1, 1, sizeof deviceid1, urand_fd);
     if ( bytes_read < sizeof deviceid1 ) {
         printf("Failed: generating deviceid bytes read %lu, expected %lu\n", bytes_read, sizeof deviceid1);
         returncode = 4;
         goto exit_close;
-    }
-    e4c_set_device_key(&store, deviceid1, DEVEDWARDS_PUBKEY_1);
-    
-    memset(deviceid2, 0, sizeof deviceid2);
-    bytes_read = fread(deviceid2, 1, sizeof deviceid2, urand_fd);
-    if ( bytes_read < sizeof deviceid2 ) {
-        printf("Failed: generating deviceid2 bytes read %lu, expected %lu\n", bytes_read, sizeof deviceid2);
-        returncode = 4;
-        goto exit_close;
-    }
-    e4c_set_device_key(&store, deviceid2, DEVEDWARDS_PUBKEY_2);
+    }*/
 
+    /* set some device keys */
+    for ( iteration=0; iteration < NUM_PKCATS; iteration++ ) { 
+        e4c_set_device_key(&store, pkkat[iteration].otherdeviceid, pkkat[iteration].otherdevicepk);
+    }
 
     /* test sync and reload from file-based storage */
     e4c_sync(&store);
     memset(&store, 0, sizeof store);
     e4c_load(&store, "/tmp/unittestspk.e4c");
+
+    /* let's make use of the read API to check things are working: */
+
+    uint8_t c2_pubkey_reread[32];
+
+    e4retcode = e4c_get_c2_pubkey(&store, c2_pubkey_reread);
+    if ( e4retcode != 0 ) {
+        printf("Failed: unable to get c2 pubkey\n");
+        returncode = 1;
+        goto exit_close;
+    }
+
+    if ( memcmp(c2_pubkey_reread, pkkat[0].c2_edwards_pubkey, sizeof pkkat[0].c2_edwards_pubkey) != 0 ) {
+        printf("Failed: we reread the c2 pubkey and it was invalid\n");
+        returncode = 1;
+        goto exit_close;
+
+    }
 
 exit_close:
     fclose(urand_fd);
