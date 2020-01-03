@@ -208,7 +208,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x03: /* SetTopicKey(topic, key) */
-        if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN))
+        if (*mlen != (1 + E4_KEY_LEN + E4_TOPICHASH_LEN))
             return E4_ERROR_INVALID_COMMAND;
         r = e4c_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;

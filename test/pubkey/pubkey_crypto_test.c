@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
         printf("c25519_pubkey_convert: OK.\n");
     }
 
-    // curve25519 variant:
+    // curve25519 variant c2->device:
     
     uint8_t c255_shared_point[32] = {0};
     uint8_t c255_shared_secret[32] = {0};
@@ -77,7 +77,29 @@ int main(int argc, char** argv) {
 
         //return 1;
     } else {
-        printf("c25519_kex: OK.\n");
+        printf("c25519_kex_c2d: OK.\n");
+    }
+    
+    // curve25519 variant c2->device:
+    
+    memset(c255_shared_secret, 0, sizeof c255_shared_secret);
+    memset(c255_shared_point, 0, sizeof c255_shared_point);
+
+    curve25519(c255_shared_point, pkkat[0].dev_montgom_seckey, pkkat[0].c2_montgom_pubkey);
+    sha3(c255_shared_point, sizeof c255_shared_point, c255_shared_secret, sizeof c255_shared_secret);
+    
+    if (memcmp(c255_shared_secret, pkkat[0].dev_sharedkey, 32) != 0) {
+        printf("c25519_kex failed.\n");
+        printhex(c255_shared_secret, sizeof c255_shared_secret);
+        printf("\n");
+        printhex(pkkat[0].c2_sharedkey, sizeof pkkat[0].c2_sharedkey);
+        printf("\n");
+        printhex(pkkat[0].dev_sharedkey, sizeof pkkat[0].dev_sharedkey);
+        printf("\n");
+
+        //return 1;
+    } else {
+        printf("c25519_kex_d2c: OK.\n");
     }
     }
 

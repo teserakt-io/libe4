@@ -34,4 +34,7 @@ test: testbuild $(E4TESTEXEC)
 format:
 	clang-format -i src/*.c src/crypto/*.c include/e4/*.h include/e4/crypto/*.h include/e4/internal/*.h
 
+tidy:
+	clang-tidy src/*.c src/crypto/*.c src/crypto/curve25519/*.c src/crypto/ed25519/*.c include/e4/*.h include/e4/internal/*.h include/e4/crypto/*.h
+
 

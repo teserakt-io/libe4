@@ -1,5 +1,6 @@
 
 include mk/first.mk
+include mk/conf.mk
 
 CONF ?= symkey
 include mk/$(CONF)/conf.mk

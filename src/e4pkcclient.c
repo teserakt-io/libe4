@@ -26,6 +26,9 @@
 
 #include "e4/crypto/aes_siv.h"
 #include "e4/crypto/sha3.h"
+#include "e4/crypto/curve25519.h"
+#include "e4/crypto/ed25519.h"
+#include "e4/crypto/xed25519.h"
 
 #ifdef __AVR__
 /* Wall-clock time, incremented exernally, calibrated from control message */
@@ -121,18 +124,18 @@ int e4c_unprotect_message(uint8_t *mptr,
                           e4storage *storage)
 {
     uint8_t control = 0;
-    int i = 0, j = 0, r = 0;
+    int j = 0, r = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
 
-    uint8_t* assocdata;
+    const uint8_t* assocdata = cptr;
     size_t assocdatalen = 0;
     size_t sivpayloadlen = 0;
 
 #ifndef __AVR__
-    uint64_t secs1970;
+    /*uint64_t secs1970;
 
-    secs1970 = (uint64_t)time(NULL); /* this system has a RTC */
+    secs1970 = (uint64_t)time(NULL); / this system has a RTC */
 #endif
 
     /* There are two possible message formats:
@@ -141,13 +144,15 @@ int e4c_unprotect_message(uint8_t *mptr,
        From the C2:        Timestamp (8) | IV (16) | Ciphertext (n)
     */
 
-    assocdata = cptr;
-
     if (e4c_is_device_ctrltopic(storage, topic) == 0)
     {
         uint8_t c2pk[E4_PK_X25519_PUBKEY_LEN];
         uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
         uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
+
+        memset(c2pk, 0, sizeof c2pk);
+        memset(devicesk, 0, sizeof devicesk);
+        memset(sharedpoint, 0, sizeof sharedpoint);
         /* control topic being used: */
         control = 1;
 
@@ -157,15 +162,15 @@ int e4c_unprotect_message(uint8_t *mptr,
             return E4_ERROR_CIPHERTEXT_TOO_SHORT;
         }
 
-        e4c_get_c2_pubkey(store, c2pk);
+        e4c_get_c2_pubkey(storage, c2pk);
 
         /* convert our key to X25519 */
-        xed25519_convert_ed2c_private(devicesk, store->privkey);
+        xed25519_convert_ed2c_private(devicesk, storage->privkey);
 
-        /* key=sha3(X25519(c2, device)) */
+        /* key=sha3(X25519(devicesk, c2pk)) */
 
         curve25519(sharedpoint, devicesk, c2pk);
-        sha3(sharedpoint, sizeof sharedpoint, key, sizeof key);
+        sha3(sharedpoint, E4_PK_X25519_PUBKEY_LEN, key, E4_KEY_LEN);
 
         /* set things up for symmetric decryption: */
         /* From the C2:        Timestamp (8) | IV (16) | Ciphertext (n) */
@@ -174,23 +179,24 @@ int e4c_unprotect_message(uint8_t *mptr,
     }
     else
     {
+        int signverifresult = 0;
         int i;
         uint8_t sender_pk[E4_PK_EDDSA_PUBKEY_LEN];
-        uint8_t* idptr = cptr[8];
+        const uint8_t* idptr = &cptr[8];
 
         control = 0;
 
         /* bounds checking */
-        if (clen < E4_PKTOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN ||
-            mmax < clen - (E4_PKTOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN))
+        if (clen < E4_PK_TOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN ||
+            mmax < clen - (E4_PK_TOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN))
         {
             return E4_ERROR_CIPHERTEXT_TOO_SHORT;
         }
 
-        i = e4c_getdeviceindex(store, idptr);
+        i = e4c_getdeviceindex(storage, idptr);
         if (i >= 0)
         {
-            e4c_getdevicekey(sender_pk, store, i);
+            e4c_getdevicekey(sender_pk, storage, i);
         }
         else
         {
@@ -206,7 +212,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         }
 
         /* check signature attached to end */
-        signverifresult = ed25519_verify(cptr[clen-E4_PK_EDDSA_SIG_LEN],
+        signverifresult = ed25519_verify(&cptr[clen-E4_PK_EDDSA_SIG_LEN],
                 cptr, clen-E4_PK_EDDSA_SIG_LEN, sender_pk);
 
         if (signverifresult != 1)
@@ -265,9 +271,9 @@ int e4c_unprotect_message(uint8_t *mptr,
 
 
     /* Since AVR has no real time clock, time is initially unknown. */
-    if (secs1970 < 946684800)
+    /*if (secs1970 < 946684800)
     {
-        /* calibrate message if this is a control message */
+        /.* calibrate message if this is a control message 
         if (control) {
             secs1970 = tstamp;
         }
@@ -289,14 +295,17 @@ int e4c_unprotect_message(uint8_t *mptr,
                 return E4_ERROR_TIMESTAMP_TOO_OLD;
             }
         }
-    }
+    }*/
 
     /* if not control channel, we can exit now; no command to process. */
     if (!(control)) return E4_RESULT_OK;
 
     /* execute commands */
 
-    if (*mlen == 0) return E4_ERROR_INVALID_COMMAND;
+    if (*mlen == 0) 
+    {
+        return E4_ERROR_INVALID_COMMAND;
+    }
 
     switch (mptr[0])
     {
@@ -315,21 +324,25 @@ int e4c_unprotect_message(uint8_t *mptr,
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x03: /* SetTopicKey(topic, key) */
-        if (*mlen != (1 + E4_KEY_LEN + E4_ID_LEN))
+        if (*mlen != (1 + E4_KEY_LEN + E4_TOPICHASH_LEN))
+        {
             return E4_ERROR_INVALID_COMMAND;
+        }
         r = e4c_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     case 0x04: /* RemovePubKey(id) */
         if (*mlen != (1 + E4_ID_LEN))
-        r = e4c_remove_devices(storage, mptr+1);
+        r = e4c_remove_device(storage, mptr+1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     case 0x05: /* RemovePubKeys() */
         if (*mlen != 1) return E4_ERROR_INVALID_COMMAND;
         r = e4c_reset_devices(storage);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     case 0x06: /* SetPubKey(pubkey, id) */
-        if (*mlen != (1 + E4_ID_LEN + E4_PK_EDDSA_PUBKEY_LEN))
+        if (*mlen != (1 + E4_ID_LEN + E4_PK_EDDSA_PUBKEY_LEN)) 
+        {
             return E4_ERROR_INVALID_COMMAND;
+        }
         r = e4c_set_device_key(storage, mptr+1+E4_PK_EDDSA_PUBKEY_LEN, mptr+1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     }

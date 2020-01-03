@@ -2,8 +2,9 @@
 CC       ?= clang
 AR       ?= ar
 ARFLAGS  = rcs
-CFLAGS	 = -Wall -Werror -g -DE4_STORE_FILE -std=c89 $(E4_CFLAGS)
+CFLAGS	 = -Wall -fPIC -Werror -g -DE4_STORE_FILE -std=c89 $(E4_CFLAGS)
 LDFLAGS	 = -L. $(E4_CFLAGS)
+LDSOFLAGS = -shared -fPIC -Wl,-soname,libe4s.so.1
 INCLUDES = -Iinclude/
 
 # BUILD environment
@@ -20,6 +21,7 @@ LIBDIR  = build/symkey/lib
 OUTINCDIR = build/symkey/include
 LIBNAME = libe4
 LIB	= $(LIBDIR)/$(LIBNAME).a
+LIBSO	= $(LIBDIR)/$(LIBNAME).so.$(VERSION)
 DISTDIR	= dist/symkey/
 TESTDIR = build/symkey/test
 
