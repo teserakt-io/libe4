@@ -12,9 +12,7 @@ OBJS = \
        $(OBJDIR)/crypto/ed25519/add_scalar.$O \
        $(OBJDIR)/crypto/ed25519/fe.$O \
        $(OBJDIR)/crypto/ed25519/ge.$O \
-       $(OBJDIR)/crypto/ed25519/keypair.$O \
        $(OBJDIR)/crypto/ed25519/sc.$O \
-       $(OBJDIR)/crypto/ed25519/seed.$O \
        $(OBJDIR)/crypto/ed25519/sign.$O \
        $(OBJDIR)/crypto/ed25519/verify.$O \
        $(OBJDIR)/crypto/sha512.$O \

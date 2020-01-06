@@ -44,8 +44,7 @@ PUBKEY_TESTS = \
     $(TESTDIR)/crypto             \
     $(TESTDIR)/pubkey_file        \
     $(TESTDIR)/pubkey_e4cmd       \
-    $(TESTDIR)/pubkey_crypto_test \
-    $(TESTDIR)/ed25519_test
+    $(TESTDIR)/pubkey_crypto_test
 
 E4TESTS += $(PUBKEY_TESTS)
 
@@ -55,7 +54,6 @@ testexec_pk:
 	./$(TESTDIR)/pubkey_file
 	./$(TESTDIR)/pubkey_e4cmd
 	./$(TESTDIR)/pubkey_crypto_test
-	./$(TESTDIR)/ed25519_test
 
 E4TESTEXEC += testexec_pk
 
