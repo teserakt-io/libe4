@@ -60,7 +60,7 @@ keys, manually managed.
 
 This code implements the same protocol as [`e4go`](https://github.com/teserakt-io/e4go/). 
 If you are using a system that can support projects written in Golang, you 
-may prefer to benefit from the security and reliabiltiy of the language 
+may prefer to benefit from the security and reliability of the language 
 instead of using C code.
 
 This project is aimed at cases that have very small memory footprints, 
