@@ -31,7 +31,8 @@ key management framework for MQTT and other publish-subscribe protocols.
                         const uint8_t *message,
                         size_t message_len,
                         const char *topic_name,
-                        e4storage *storage);` - this function takes a message 
+                        e4storage *storage,
+                        const uint32_t proto_opts);` - this function takes a message 
    to be protected and a "topic" for which it should be protected and returns 
    ciphertext that can be sent using your messaging layer.
  * `int e4c_unprotect_message(uint8_t *message,
@@ -40,7 +41,8 @@ key management framework for MQTT and other publish-subscribe protocols.
                           const uint8_t *ciphertext,
                           size_t ciphertext_len,
                           const char *topic_name,
-                          e4storage *storage);`
+                          e4storage *storage,
+                          const uint32_t proto_opts);`
     This function performs the reverse of the protect function. 
 
 We talk of message *protection* instead of just *encryption* because the 

@@ -95,6 +95,19 @@ struct _e4storage;
  defines. */
 typedef struct _e4storage e4storage;
 
+/* Options bits for e4c crypto functions: */
+
+/* Disable checks on message timestamp within acceptable window 
+ * Packet timestamps are still covered by authenticated encryption, 
+ * but older messages are allowed */
+#define E4_OPTION_IGNORE_TIMESTAMP         0x01
+/* Disable failure if we do not have a client public key to validate 
+ * signatures. Corrupt signatures will ALWAYS fail, this is only 
+ * for the case where too many clients exist for us to store all of 
+ * their keys. */
+#define E4_OPTION_IGNORE_MISSING_PUBKEY    0x02
+
+
 /* e4c_protect_message produces a protected message for onwards
    transmission. 
 
@@ -126,7 +139,8 @@ int e4c_protect_message(uint8_t *ciphertext,
                         const uint8_t *message,
                         size_t message_len,
                         const char *topic_name,
-                        e4storage *storage);
+                        e4storage *storage,
+                        const uint32_t proto_opts);
 
 /* e4c_unprotect_message retrieves and authenticates a message that was 
 encrypted by E4.
@@ -158,8 +172,8 @@ int e4c_unprotect_message(uint8_t *message,
                           const uint8_t *ciphertext,
                           size_t ciphertext_len,
                           const char *topic_name,
-                          e4storage *storage
-                          );
+                          e4storage *storage,
+                          const uint32_t proto_opts);
 
 
 /* the e4storage type pre-defined above implements these API calls */

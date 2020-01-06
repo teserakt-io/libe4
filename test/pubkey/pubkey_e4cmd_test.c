@@ -102,7 +102,8 @@ int main(int argc, char** argv, char** envp) {
                           pkkat[i].cmd_resettopics,
                           pkkat[i].cmd_resettopics_len,
                           ctrltopic,
-                          &store);
+                          &store,
+                          E4_OPTION_IGNORE_TIMESTAMP);
 
         if ( e4retcode != E4_RESULT_OK_CONTROL ) {
             printf("Failed: e4c_unprotect_message returned error code other than 'this is a command'\n");
@@ -120,7 +121,8 @@ int main(int argc, char** argv, char** envp) {
                           pkkat[i].cmd_settopickey,
                           pkkat[i].cmd_settopickey_len,
                           ctrltopic,
-                          &store);
+                          &store,
+                          E4_OPTION_IGNORE_TIMESTAMP);
 
         if ( e4retcode != E4_RESULT_OK_CONTROL ) {
             printf("Failed: e4c_unprotect_message returned error code other than 'this is a command'\n");
@@ -138,7 +140,8 @@ int main(int argc, char** argv, char** envp) {
                           pkkat[i].cmd_removetopic,
                           pkkat[i].cmd_removetopic_len,
                           ctrltopic,
-                          &store);
+                          &store,
+                          E4_OPTION_IGNORE_TIMESTAMP);
 
         if ( e4retcode != E4_RESULT_OK_CONTROL ) {
             printf("Failed: e4c_unprotect_message returned error code other than 'this is a command'\n");
@@ -156,7 +159,8 @@ int main(int argc, char** argv, char** envp) {
                           pkkat[i].cmd_resetpubkeys,
                           pkkat[i].cmd_resetpubkeys_len,
                           ctrltopic,
-                          &store);
+                          &store,
+                          E4_OPTION_IGNORE_TIMESTAMP);
 
         if ( e4retcode != E4_RESULT_OK_CONTROL ) {
             printf("Failed: e4c_unprotect_message returned error code other than 'this is a command'\n");
@@ -174,7 +178,8 @@ int main(int argc, char** argv, char** envp) {
                           pkkat[i].cmd_setpubkey,
                           pkkat[i].cmd_setpubkey_len,
                           ctrltopic,
-                          &store);
+                          &store, 
+                          E4_OPTION_IGNORE_TIMESTAMP);
 
         if ( e4retcode != E4_RESULT_OK_CONTROL ) {
             printf("Failed: e4c_unprotect_message returned error code other than 'this is a command'\n");
@@ -192,7 +197,8 @@ int main(int argc, char** argv, char** envp) {
                           pkkat[i].cmd_removepubkey,
                           pkkat[i].cmd_removepubkey_len,
                           ctrltopic,
-                          &store);
+                          &store, 
+                          E4_OPTION_IGNORE_TIMESTAMP);
 
         if ( e4retcode != E4_RESULT_OK_CONTROL ) {
             printf("Failed: e4c_unprotect_message returned error code other than 'this is a command'\n");

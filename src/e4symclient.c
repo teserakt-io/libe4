@@ -43,7 +43,8 @@ int e4c_protect_message(uint8_t *cptr,
                         const uint8_t *mptr,
                         size_t mlen,
                         const char *topic,
-                        e4storage *storage)
+                        e4storage *storage,
+                        const uint32_t proto_opts)
 {
     int i = 0;
     uint8_t key[E4_KEY_LEN];
@@ -112,7 +113,8 @@ int e4c_unprotect_message(uint8_t *mptr,
                           const uint8_t *cptr,
                           size_t clen,
                           const char *topic,
-                          e4storage *storage)
+                          e4storage *storage,
+                          const uint32_t proto_opts)
 {
     uint8_t control = 0;
     int i = 0, j = 0, r = 0;
@@ -190,19 +192,20 @@ int e4c_unprotect_message(uint8_t *mptr,
     }
     else
     {
-
-        if (tstamp >= secs1970)
-        {
-            if (tstamp - secs1970 > E4C_TIME_FUTURE)
+        if (!(proto_opts & E4_OPTION_IGNORE_TIMESTAMP )) {   
+            if (tstamp >= secs1970)
             {
-                return E4_ERROR_TIMESTAMP_IN_FUTURE;
+                if (tstamp - secs1970 > E4C_TIME_FUTURE)
+                {
+                    return E4_ERROR_TIMESTAMP_IN_FUTURE;
+                }
             }
-        }
-        else
-        {
-            if (secs1970 - tstamp > E4C_TIME_TOO_OLD)
+            else
             {
-                return E4_ERROR_TIMESTAMP_TOO_OLD;
+                if (secs1970 - tstamp > E4C_TIME_TOO_OLD)
+                {
+                    return E4_ERROR_TIMESTAMP_TOO_OLD;
+                }
             }
         }
     }

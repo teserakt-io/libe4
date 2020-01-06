@@ -47,7 +47,8 @@ int e4c_protect_message(uint8_t *cptr,
                         const uint8_t *mptr,
                         size_t mlen,
                         const char *topic,
-                        e4storage *storage)
+                        e4storage *storage,
+                        const uint32_t proto_opts)
 {
     int i = 0;
     size_t clen_siv = 0;
@@ -140,7 +141,8 @@ int e4c_unprotect_message(uint8_t *mptr,
                           const uint8_t *cptr,
                           size_t clen,
                           const char *topic,
-                          e4storage *storage)
+                          e4storage *storage,
+                          const uint32_t proto_opts)
 {
     uint8_t control = 0;
     int j = 0, r = 0;
@@ -152,9 +154,9 @@ int e4c_unprotect_message(uint8_t *mptr,
     size_t sivpayloadlen = 0;
 
 #ifndef __AVR__
-    /*uint64_t secs1970;
+    uint64_t secs1970;
 
-    secs1970 = (uint64_t)time(NULL); / this system has a RTC */
+    secs1970 = (uint64_t)time(NULL); /* this system has a RTC */
 #endif
     
     if (cptr == NULL ||
@@ -225,27 +227,31 @@ int e4c_unprotect_message(uint8_t *mptr,
         if (i >= 0)
         {
             e4c_getdevicekey(sender_pk, storage, i);
+        
+            /* check signature attached to end */
+            signverifresult = ed25519_verify(&cptr[clen-E4_PK_EDDSA_SIG_LEN],
+                cptr, clen-E4_PK_EDDSA_SIG_LEN, sender_pk);
+
+            if (signverifresult != 1)
+            {
+                return E4_ERROR_PK_SIGVERIF_FAILED;
+            }
         }
         else
         {
-            /* TODO: policies to not validate sigs if key not found
-               due to storage constraints.
-
-               NOTE: this MUST NOT be conflated with signature verif
-               failure. If signatures fail to verify we will _always_
-               reject the message.
-             */
-
-            return E4_ERROR_DEVICEPK_MISSING;
-        }
-
-        /* check signature attached to end */
-        signverifresult = ed25519_verify(&cptr[clen-E4_PK_EDDSA_SIG_LEN],
-                cptr, clen-E4_PK_EDDSA_SIG_LEN, sender_pk);
-
-        if (signverifresult != 1)
-        {
-            return E4_ERROR_PK_SIGVERIF_FAILED;
+            /* NOTE: given the limited storage capacity of 
+             * client devices, it might be acceptable to decrypt topic messages 
+             * even when we do not have the public key of the sending client.
+             * If E4_OPTION_IGNORE_MISSING_PUBKEY is set, the client has 
+             * asked for this behaviour. If not, we should return an error.
+             *
+             * THIS IS NOT THE SAME as disabling signature validation. IF we 
+             * have a key at all for a client, signature verification 
+             * must succeed. This option is a get-out for when we cannot 
+             * store keys due to storage constraints */
+            if ( !(proto_opts & E4_OPTION_IGNORE_MISSING_PUBKEY) ) {
+                return E4_ERROR_DEVICEPK_MISSING;
+            }
         }
 
         /* find the topic key and set it */
@@ -299,9 +305,9 @@ int e4c_unprotect_message(uint8_t *mptr,
 
 
     /* Since AVR has no real time clock, time is initially unknown. */
-    /*if (secs1970 < 946684800)
+    if (secs1970 < 946684800)
     {
-        /.* calibrate message if this is a control message 
+        /* calibrate message if this is a control message */ 
         if (control) {
             secs1970 = tstamp;
         }
@@ -309,21 +315,23 @@ int e4c_unprotect_message(uint8_t *mptr,
     else
     {
 
-        if (tstamp >= secs1970)
-        {
-            if (tstamp - secs1970 > E4C_TIME_FUTURE)
+        if (!(proto_opts & E4_OPTION_IGNORE_TIMESTAMP )) {   
+            if (tstamp >= secs1970)
             {
-                return E4_ERROR_TIMESTAMP_IN_FUTURE;
+                if (tstamp - secs1970 > E4C_TIME_FUTURE)
+                {
+                    return E4_ERROR_TIMESTAMP_IN_FUTURE;
+                }
+            }
+            else
+            {
+                if (secs1970 - tstamp > E4C_TIME_TOO_OLD)
+                {
+                    return E4_ERROR_TIMESTAMP_TOO_OLD;
+                }
             }
         }
-        else
-        {
-            if (secs1970 - tstamp > E4C_TIME_TOO_OLD)
-            {
-                return E4_ERROR_TIMESTAMP_TOO_OLD;
-            }
-        }
-    }*/
+    }
 
     /* if not control channel, we can exit now; no command to process. */
     if (!(control)) return E4_RESULT_OK;

@@ -146,7 +146,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         e4retcode = e4c_protect_message(ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, &ciphertext_len,
-            plaintext_buffer, PT_MAX, topicname, &store);
+            plaintext_buffer, PT_MAX, topicname, &store, 0);
 
         if (e4retcode != E4_RESULT_OK) {
             returncode = 12;
@@ -164,7 +164,7 @@ int main(int argc, char** argv, char** envp) {
            get rid of this functionality and leave it to the user. For now, 
            we fix it by passing the correct length of the recovered buffer. */
         e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX+1, &recovered_len,
-            ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, topicname, &store);
+            ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, topicname, &store, 0);
 
         if (e4retcode != E4_RESULT_OK) {
             returncode = 13;
