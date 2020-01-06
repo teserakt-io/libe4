@@ -1,7 +1,7 @@
 
-# libe4
-
 ![Teserakt AG](logo.png)
+
+# libe4
 
   * [Introduction](#introduction)
   * [When to use](#when-to-use)
