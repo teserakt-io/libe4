@@ -189,9 +189,6 @@ private discussion is preferred) see [SECURITY](SECURITY.md).
 
 ## Intellectual Property
 
-libe4 is &copy; Teserakt AG 2018-2020 and is released under the Apache 
-License 2.0. `libe4` also uses open source components from various projects and 
-these may be available to you under different licenses. Please see: 
-[LICENSE](LICENSE) for the license text and licenses of third party 
-components.
+libe4 is copyright (c) Teserakt AG 2018-2020, and released under Apache 2.0 
+License, (see [LICENSE](LICENSE).
 
