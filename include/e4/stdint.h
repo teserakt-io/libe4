@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 #if __STDC_VERSION__ >= 199901L
+   #include <stddef.h>
    #include <stdint.h>
 #else
    #include "e4/pstdint.h"

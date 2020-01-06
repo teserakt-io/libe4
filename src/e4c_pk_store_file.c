@@ -266,7 +266,7 @@ int e4c_set_id(e4storage *store, const uint8_t *id)
 exit:
     return r;
 }
-int e4c_set_idkey(e4storage *store, const uint8_t *key)
+int e4c_set_idseckey(e4storage *store, const uint8_t *key)
 {
     memmove(store->privkey, key, sizeof store->privkey);
     e4c_sync(store);

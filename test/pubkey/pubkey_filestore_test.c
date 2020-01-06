@@ -24,8 +24,6 @@ int main(int argc, char** argv, char** envp) {
     FILE* urand_fd = NULL;
     e4storage store;
 
-    unsigned char clientid[E4_ID_LEN];
-    unsigned char clientkey[E4_KEY_LEN];
     unsigned char topickey_current[E4_KEY_LEN]; 
     unsigned char topicname_tmp[SIZE_TOPICNAME/2];
     char topicname_current[SIZE_TOPICNAME+1];
@@ -58,9 +56,9 @@ int main(int argc, char** argv, char** envp) {
         goto exit_close;
     }
     
-    e4retcode = e4c_set_idkey(&store, pkkat[0].dev_edwards_seckey);
+    e4retcode = e4c_set_idseckey(&store, pkkat[0].dev_edwards_seckey);
     if ( e4retcode != 0 ) {
-        printf("Failed: unable to set idkey\n");
+        printf("Failed: unable to set idseckey\n");
         returncode = 1;
         goto exit_close;
     }

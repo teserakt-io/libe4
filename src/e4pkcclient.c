@@ -50,17 +50,30 @@ int e4c_protect_message(uint8_t *cptr,
                         e4storage *storage)
 {
     int i = 0;
-    size_t clen2 = 0;
+    size_t clen_siv = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
     uint8_t* signaturep = NULL;
     size_t signeddatalen=0;
 
     /* pubkey messages are: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
-
     if (mlen + E4_PK_TOPICMSGHDR_LEN + E4_PK_EDDSA_SIG_LEN > cmax) /* actually: not enough space */
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
-    *clen = mlen + E4_MSGHDR_LEN;
+    
+    if (mlen + E4_PK_TOPICMSGHDR_LEN + E4_PK_EDDSA_SIG_LEN < mlen) /* overflow */
+        return E4_ERROR_PARAMETER_OVERFLOW;
+    
+    if (cptr == NULL    ||
+        mptr == NULL    ||
+        topic == NULL   ||
+        clen == NULL    ||
+        storage == NULL)
+    {
+        return E4_ERROR_PARAMETER_INVALID;
+    }
+    
+    *clen = mlen + E4_PK_TOPICMSGHDR_LEN;
+
 
     /* get the key */
     i = e4c_getindex(storage, topic);
@@ -86,17 +99,15 @@ int e4c_protect_message(uint8_t *cptr,
         time_now >>= 8;
     }
 
-    /* set our ID in the output buffer
-     * if Avi is reading this code, hope you are enjoying this memcpy.
-     */
-    memcpy(cptr + E4_TS_LEN, storage->id, E4_ID_LEN);
+    /* set our ID in the output buffer */
+    memcpy(cptr + E4_TIMESTAMP_LEN, storage->id, E4_ID_LEN);
 
     /* encrypt */
-    clen2 = 0;
-    aes256_encrypt_siv(cptr + E4_TS_LEN + E4_ID_LEN, &clen2, cptr, 8, mptr, mlen, key);
+    clen_siv = 0;
+    aes256_encrypt_siv(cptr + E4_TIMESTAMP_LEN + E4_ID_LEN, &clen_siv, cptr, 8, mptr, mlen, key);
 
     /* sign the result */
-    signeddatalen = E4_TS_LEN + E4_ID_LEN + E4_TAG_LEN + mlen;
+    signeddatalen = E4_TIMESTAMP_LEN + E4_ID_LEN + E4_TAG_LEN + mlen;
     signaturep = &cptr[0] + signeddatalen;
 
     /*
@@ -111,6 +122,13 @@ int e4c_protect_message(uint8_t *cptr,
                  signeddatalen,
                  storage->pubkey,
                  storage->privkey);
+
+    /* pubkey messages are: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
+    /* safety check. clen_siv = msglen+E4_TAG_LEN. Therefore adding E4_PK_EDDSA_SIG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN should 
+     * equal clen */
+    if ( *clen != clen_siv + E4_PK_EDDSA_SIG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN ) {
+        return E4_ERROR_INTERNAL;
+    }
 
     return E4_RESULT_OK;
 }
@@ -138,6 +156,15 @@ int e4c_unprotect_message(uint8_t *mptr,
 
     secs1970 = (uint64_t)time(NULL); / this system has a RTC */
 #endif
+    
+    if (cptr == NULL ||
+        mptr == NULL ||
+        topic == NULL ||
+        storage == NULL)
+    {
+        return E4_ERROR_PARAMETER_INVALID;
+    }
+
 
     /* There are two possible message formats:
 
@@ -175,8 +202,8 @@ int e4c_unprotect_message(uint8_t *mptr,
 
         /* set things up for symmetric decryption: */
         /* From the C2:        Timestamp (8) | IV (16) | Ciphertext (n) */
-        assocdatalen = E4_TS_LEN;
-        sivpayloadlen = clen - E4_TS_LEN;
+        assocdatalen = E4_TIMESTAMP_LEN;
+        sivpayloadlen = clen - E4_TIMESTAMP_LEN;
     }
     else
     {
@@ -234,8 +261,8 @@ int e4c_unprotect_message(uint8_t *mptr,
 
         /* set things up for symmetric decryption: */
         /* From other clients: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
-        assocdatalen = E4_ID_LEN + E4_TS_LEN;
-        sivpayloadlen = clen - (E4_TS_LEN + E4_ID_LEN + E4_PK_EDDSA_SIG_LEN);
+        assocdatalen = E4_ID_LEN + E4_TIMESTAMP_LEN;
+        sivpayloadlen = clen - (E4_TIMESTAMP_LEN + E4_ID_LEN + E4_PK_EDDSA_SIG_LEN);
     }
 
     /* Retrieve timestamp encoded as little endian */
@@ -320,8 +347,8 @@ int e4c_unprotect_message(uint8_t *mptr,
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x02: /* SetIdKey(key) */
-        if (*mlen != (1 + E4_KEY_LEN)) return E4_ERROR_INVALID_COMMAND;
-        r = e4c_set_idkey(storage, mptr + 1);
+        if (*mlen != (1 + E4_PK_EDDSA_PRIVKEY_LEN)) return E4_ERROR_INVALID_COMMAND;
+        r = e4c_set_idseckey(storage, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x03: /* SetTopicKey(topic, key) */

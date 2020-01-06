@@ -1,33 +1,20 @@
 
-CC       ?= clang
-AR       ?= ar
-ARFLAGS  = rcs
-CFLAGS	 = -Wall -fPIC -Werror -std=c89 $(E4_CFLAGS) 
-LDFLAGS	 = -L. $(E4_CFLAGS)
-LDSOFLAGS = -shared -fPIC -Wl,-soname,libe4s.so.1
-INCLUDES = -Iinclude/ -Ibuild/symkey/include/
+E4_OUTPUT_DIR ?= build/symkey
 
-# BUILD environment
-GITCOMMIT=$(shell git rev-list -1 HEAD)
-NOW=$(shell date "+%Y%m%d%H%M")
+LDSOFLAGS = -shared -fPIC -Wl,-soname,libe4s.so.1
+INCLUDES = -Iinclude/ -I$(E4_OUTPUT_DIR)/include/
 
 # OBJ paths match their src folder equivalents
-INCDIR  = include
 OBJDIR  = tmp/symkey/build
 TESTOBJDIR = tmp/symkey/test
-SRCDIR  = src
-DOCDIR  = doc
-BUILDDIR = build/symkey
-LIBDIR  = build/symkey/lib
-OUTINCDIR = build/symkey/include
-LIBNAME = libe4
-LIB	= $(LIBDIR)/$(LIBNAME).a
-LIBSO	= $(LIBDIR)/$(LIBNAME).so.$(VERSION)
+
+BUILDDIR = $(E4_OUTPUT_DIR)
+LIBDIR  = $(BUILDDIR)/lib
+OUTINCDIR = $(BUILDDIR)/include
 DISTDIR	= dist/symkey/
-TESTDIR = build/symkey/test
+TESTDIR = $(BUILDDIR)/test
 
-O = o
+LIB	= $(LIBDIR)/$(LIBNAME).a
+LIBSO	= $(LIBDIR)/$(LIBNAME)s.so.$(VERSION)
 
-# test specific parts:
-TESTCFLAGS = -Wall -Werror -g -std=c11 $(E4_CFLAGS)
-TESTLDFLAGS =
+

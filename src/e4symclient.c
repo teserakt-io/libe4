@@ -46,13 +46,21 @@ int e4c_protect_message(uint8_t *cptr,
                         e4storage *storage)
 {
     int i = 0;
-    size_t clen2 = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
 
     if (mlen + E4_MSGHDR_LEN > cmax) /* actually: not enough space */
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
-    *clen = mlen + E4_MSGHDR_LEN;
+    if (mlen + E4_MSGHDR_LEN < mlen) /* overflow */
+        return E4_ERROR_PARAMETER_OVERFLOW;
+    
+    if (cptr == NULL ||
+        mptr == NULL ||
+        topic == NULL ||
+        storage == NULL)
+    {
+        return E4_ERROR_PARAMETER_INVALID;
+    }
 
     /* get the key */
     i = e4c_getindex(storage, topic);
@@ -76,15 +84,21 @@ int e4c_protect_message(uint8_t *cptr,
     time_now = time(NULL); /* timestamp */
 #endif
 
-    for (i = 0; i < 8; i++)
+    for (i = 0; i < E4_TIMESTAMP_LEN; i++)
     {
         cptr[i] = time_now & 0xFF;
         time_now >>= 8;
     }
 
     /* encrypt */
-    clen2 = 0;
-    aes256_encrypt_siv(cptr + 8, &clen2, cptr, 8, mptr, mlen, key);
+    aes256_encrypt_siv(cptr + E4_TIMESTAMP_LEN, clen, cptr, E4_TIMESTAMP_LEN, mptr, mlen, key);
+    /* add associated data */
+    *clen += E4_TIMESTAMP_LEN;
+
+    /* safety check */
+    if ( *clen != mlen + E4_MSGHDR_LEN ) {
+        return E4_ERROR_INTERNAL;
+    }
 
     return E4_RESULT_OK;
 }
@@ -116,6 +130,15 @@ int e4c_unprotect_message(uint8_t *mptr,
     {
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
     }
+    
+    if (cptr == NULL ||
+        mptr == NULL ||
+        topic == NULL ||
+        storage == NULL)
+    {
+        return E4_ERROR_PARAMETER_INVALID;
+    }
+
 
     /* get the key */
     i = e4c_getindex(storage, topic);
@@ -143,7 +166,7 @@ int e4c_unprotect_message(uint8_t *mptr,
     }
 
     /* decrypt */
-    if (aes256_decrypt_siv(mptr, mlen, cptr, 8, cptr + 8, clen - 8, key) != 0)
+    if (aes256_decrypt_siv(mptr, mlen, cptr, E4_TIMESTAMP_LEN, cptr + E4_TIMESTAMP_LEN, clen - E4_TIMESTAMP_LEN, key) != 0)
     {
         return E4_ERROR_INVALID_TAG;
     }

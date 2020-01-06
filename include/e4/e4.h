@@ -32,6 +32,9 @@ extern "C" {
 #define E4_RESULT_OK 0
 /* A control message was handled. Applications may discard the resulting buffer */
 #define E4_RESULT_OK_CONTROL -1
+
+/* Internal error: for exception conditions that indicate the code has a bug */
+#define E4_ERROR_INTERNAL -100
 /* Invalid authentication tag indicates corrupted ciphertext  */
 #define E4_ERROR_INVALID_TAG -101
 /* Message received outside of error window for clock.  */
@@ -48,15 +51,18 @@ extern "C" {
 #define E4_ERROR_INVALID_COMMAND -107
 /* E4 Persistence layer reported an error.  */
 #define E4_ERROR_PERSISTENCE_ERROR -108
-
 /* Unable to find public key for device;e4 */
 #define E4_ERROR_DEVICEPK_MISSING -109
 /* Signature verification failed */
 #define E4_ERROR_PK_SIGVERIF_FAILED -110
-
+/* Overflow detected */
+#define E4_ERROR_PARAMETER_OVERFLOW -111
+/* Invalid parameters, e.g. NULL pointers */
+#define E4_ERROR_PARAMETER_INVALID -112
 
 /* Size of the timestamp field */
 #define E4_TS_LEN 8
+#define E4_TIMESTAMP_LEN 8
 /* Size of the ID, truncated sha3(alias) */
 #define E4_ID_LEN 16
 
@@ -70,7 +76,7 @@ extern "C" {
 #define E4_CTRLTOPIC_LEN (2 * E4_ID_LEN) + 3
 
 #define E4_TAG_LEN 16
-#define E4_TIMESTAMP_LEN 8
+
 #define E4_MSGHDR_LEN (E4_TAG_LEN + E4_TIMESTAMP_LEN)
 
 /* Public key support */
@@ -152,7 +158,8 @@ int e4c_unprotect_message(uint8_t *message,
                           const uint8_t *ciphertext,
                           size_t ciphertext_len,
                           const char *topic_name,
-                          e4storage *storage);
+                          e4storage *storage
+                          );
 
 
 /* the e4storage type pre-defined above implements these API calls */
@@ -168,10 +175,13 @@ int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t
 int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash);
 int e4c_reset_topics(e4storage *store);
 
+#ifdef E4_MODE_SYMKEY
 int e4c_set_idkey(e4storage *store, const uint8_t *key);
+#endif
 #ifdef E4_MODE_PUBKEY 
 /* pubkey storage apis */
 int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey);
+int e4c_set_idseckey(e4storage *store, const uint8_t *key);
 int e4c_getdeviceindex(e4storage *store, const uint8_t* id);
 int e4c_getdevicekey(uint8_t* key, e4storage *store, const int index);
 int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *key);

@@ -19,8 +19,7 @@ const size_t SIZE_TOPICNAME = 8;
 int main(int argc, char** argv, char** envp) {
     int returncode = 0;
     int e4retcode = 0;
-    int iteration = 0;
-    size_t bytes_read = 0;
+    //size_t bytes_read = 0;
     FILE* urand_fd = NULL;
     e4storage store;
 
@@ -56,9 +55,9 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
-        e4retcode = e4c_set_idkey(&store, pkkat[i].dev_edwards_seckey);
+        e4retcode = e4c_set_idseckey(&store, pkkat[i].dev_edwards_seckey);
         if ( e4retcode != 0 ) {
-            printf("Failed: unable to set idkey\n");
+            printf("Failed: unable to set idseckey\n");
             returncode = 1;
             goto exit_close;
         }
