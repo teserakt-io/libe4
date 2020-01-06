@@ -8,14 +8,16 @@ $(OBJDIR)/%.$O: src/%.c
 
 setup: 
 	mkdir -p $(OBJDIR); \
+	rm -rf $(OUTINCDIR); \
+	mkdir -p $(OUTINCDIR); \
+	mkdir -p $(OUTINCDIR)/e4config; \
 	mkdir -p $(TESTOBJDIR); \
 	mkdir -p $(OBJDIR)/crypto; \
 	mkdir -p $(OBJDIR)/crypto/curve25519; \
 	mkdir -p $(OBJDIR)/crypto/ed25519; \
 	mkdir -p $(OBJDIR)/crypto/ctaes; \
 	mkdir -p $(TESTDIR); \
-	mkdir -p $(LIBDIR); \
-	mkdir -p $(DISTDIR); \
+	mkdir -p $(LIBDIR);
 
 lib: setup $(E4LIBS)
 
@@ -25,7 +27,7 @@ clean:
 	rm -rf $(OBJDIR) 
 	rm -rf $(LIB)
 	rm -rf $(LIBDIR)
-
+	rm -rf build
 
 testbuild: clean setup lib $(E4TESTS)
 

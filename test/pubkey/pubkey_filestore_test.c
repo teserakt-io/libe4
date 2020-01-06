@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define E4_MODE_PUBKEY
-
 #include "e4/e4.h"
 #include "e4/util.h"
 #include "e4/strlcpy.h"
@@ -130,7 +128,9 @@ int main(int argc, char** argv, char** envp) {
 
     /* test sync and reload from file-based storage */
     e4c_sync(&store);
+#ifdef E4_STORE_FILE
     memset(&store, 0, sizeof store);
+#endif
     e4c_load(&store, "/tmp/unittestspk.e4c");
 
     /* let's make use of the read API to check things are working: */

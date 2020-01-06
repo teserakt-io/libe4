@@ -2,7 +2,9 @@
 
 libe4 is maintained by [Teserakt AG](https://teserakt.io) and its team:
 
+* [@daeMOn63 ](https://github.com/daeMOn63) (Flavien Binet)
 * [@diagprov](https://github.com/diagprov) (Antony Vennard)
+* [@odeke-em](https://github.com/odeke-em) (Emmanuel Odeke)
 * [@veorq](https://github.com/veorq) (JP Aumasson)
 
 We welcome and encourage third-party contributions to libe4, be it reports of 
@@ -33,17 +35,22 @@ If you contribute code and submit a patch, please note the following design
 philosophy of the code, which must be adhered to. Unfortunately, we cannot 
 accept patches that deviate from these rules:
 
-* The code must run freestanding. Certain parts of libc may not be available.
-* C89 is targeted for maximum portability. 
+* The code must run freestanding. Certain parts of libc may not be available 
+  or may not be appropriate for certain functionality. If in doubt, we will be 
+  happy to discuss and clarify.
+* C89 is targeted for maximum portability. Testing code may be 
+  compiled with later versions of C for convenience.
 * Any kind of dynamic allocation is prohibited. This includes the use of 
   `malloc`, `calloc`, and some more surprising functions such as `strdup`. 
   Some security and safety testing profiles in (for example) the automotive 
-  industry require this. In addition, an allocator may not be available.
-* Host unit tests may deviate from the above rules.
+  industry require this. In addition, an allocator may not be available in 
+  target environment.
+* Host unit tests may deviate from the above rules (see C89) but should 
+  generally avoid using the library in ways that it would not be used 
+  in production (i.e. `malloc` is still prohibited).
 * Device tests (tests designed to be deployed on devices) may vary.
 * Pull requests should target the `develop` branch.
-* Please follow the C coding conventions that exist. If in doubt, run 
-  `make format` before sending your patch.
+* Please follow the C coding conventions that exist.
 
 Also please make sure to create new unit tests covering your code additions. 
 You can execute the tests by running:

@@ -104,7 +104,9 @@ int main(int argc, char** argv, char** envp) {
 
     /* test sync and reload from file-based storage */
     e4c_sync(&store);
+#ifdef E4_STORE_FILE
     memset(&store, 0, sizeof store);
+#endif
     e4c_load(&store, "/tmp/unittests.e4c");
 
     /* TODO: test control messages have their intended effect. */

@@ -1,6 +1,5 @@
 
-OBJS = $(OBJDIR)/e4c_store_file.$O        \
-       $(OBJDIR)/e4util.$O                \
+OBJS = $(OBJDIR)/e4util.$O                \
        $(OBJDIR)/crypto/aes_siv.$O        \
        $(OBJDIR)/crypto/aes256enc_ref.$O  \
        $(OBJDIR)/crypto/sha3.$O           \
@@ -10,3 +9,10 @@ OBJS = $(OBJDIR)/e4c_store_file.$O        \
        $(OBJDIR)/strlcpy.$O               \
        $(OBJDIR)/e4symclient.$O 
 
+ifeq ("$(STORE)", "file")
+OBJS := $(OBJS) $(OBJDIR)/e4c_store_file.$O 
+endif
+
+ifeq ("$(STORE)", "mem")
+OBJS := $(OBJS) $(OBJDIR)/e4c_store_mem.$O
+endif

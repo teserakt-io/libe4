@@ -19,10 +19,13 @@ OBJS = \
        $(OBJDIR)/crypto/ed25519/verify.$O \
        $(OBJDIR)/crypto/sha512.$O \
        $(OBJDIR)/crypto/xed25519.$O \
-       $(OBJDIR)/e4c_pk_store_file.$O \
        $(OBJDIR)/e4pkcclient.$O
 
+ifeq ("$(STORE)", "file")
+OBJS := $(OBJS) $(OBJDIR)/e4c_pk_store_file.$O 
+endif
 
-TESTS = \
-    $(TESTDIR)/util          \
-    $(TESTDIR)/crypto
+ifeq ("$(STORE)", "mem")
+OBJS := $(OBJS) $(OBJDIR)/e4c_pk_store_mem.$O
+endif
+

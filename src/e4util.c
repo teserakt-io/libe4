@@ -27,6 +27,12 @@
 
 /* #endif */
 
+void zeroize( void *v, size_t n )
+{
+    volatile unsigned char *p = ( volatile unsigned char * )v;
+    while( n-- ) *p++ = 0;
+}
+
 int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen)
 {
     if (clientidlen != E4_ID_LEN ) {

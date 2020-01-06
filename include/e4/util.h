@@ -22,6 +22,17 @@
 extern "C" {
 #endif
 
+#ifndef ZERO
+#define ZERO(X)                   \
+    do                            \
+    {                             \
+        zeroize(&X, sizeof X);    \
+    } while (0)
+#endif
+
+/* void zeroize */
+void zeroize(void *v, size_t n);
+
 /* Derives a ClientID. Depends on the constant E4_ID_LEN */
 int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen);
 

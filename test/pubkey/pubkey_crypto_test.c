@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define E4_MODE_PUBKEY
 #include "e4/crypto/ed25519.h"
 #include "e4/crypto/curve25519.h"
 #include "e4/crypto/sha3.h"

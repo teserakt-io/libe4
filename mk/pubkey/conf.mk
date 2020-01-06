@@ -3,10 +3,10 @@ CC       ?= clang
 AR       ?= ar
 LD       ?= clang
 ARFLAGS  = rcs
-CFLAGS	 = -Wall -Werror -fPIC -DE4_MODE_PUBKEY -DE4_STORE_FILE -std=c89 $(E4_CFLAGS)
+CFLAGS	 = -Wall -Werror -fPIC -std=c89 $(E4_CFLAGS)
 LDFLAGS	 = -L. $(E4_CFLAGS)
 LDSOFLAGS = -shared -fPIC -Wl,-soname,libe4p.so.1
-INCLUDES = -Iinclude/
+INCLUDES = -Iinclude/ -Ibuild/pubkey/include/
 
 # BUILD environment
 GITCOMMIT=$(shell git rev-list -1 HEAD)
@@ -18,6 +18,7 @@ OBJDIR  = tmp/pubkey/build
 TESTOBJDIR = tmp/pubkey/test
 SRCDIR  = src
 DOCDIR  = doc
+BUILDDIR = build/pubkey
 LIBDIR  = build/pubkey/lib
 OUTINCDIR = build/pubkey/include
 LIBNAME = libe4
@@ -29,5 +30,5 @@ TESTDIR = build/pubkey/test
 O = o
 
 # test specific parts:
-TESTCFLAGS = -Wall -Werror -g -DE4_STORE_FILE -std=c11 -Wno-unused-variable $(E4_CFLAGS)
+TESTCFLAGS = -Wall -Werror -g -std=c11 -Wno-unused-variable $(E4_CFLAGS)
 TESTLDFLAGS = $(LDFLAGS)

@@ -17,9 +17,8 @@
  */
 
 #include <fcntl.h>
-
-#ifndef _E4C_STORE_FILE_H_
-#define _E4C_STORE_FILE_H_
+#ifndef _E4C_STORE_MEM_H_
+#define _E4C_STORE_MEM_H_
 
 #include <stddef.h>
 #include <stdint.h>

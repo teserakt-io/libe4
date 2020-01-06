@@ -25,6 +25,7 @@ extern "C" {
 
 #include <stddef.h>
 #include <stdint.h>
+#include "e4config/e4_config.h"
 
 /* E4 Library Error codes */
 /* Operation succeeded without error  */
@@ -185,17 +186,24 @@ void e4c_debug_print(e4storage *store);
 /*#endif*/
 
 #ifdef E4_STORE_FILE
-
   #ifdef E4_MODE_PUBKEY
     #include "e4/internal/e4c_pk_store_file.h"
   #else
     #include "e4/internal/e4c_store_file.h"
   #endif
-
 #endif
+
+#ifdef E4_STORE_MEM
+  #ifdef E4_MODE_PUBKEY
+    #include "e4/internal/e4c_pk_store_mem.h"
+  #else
+    #include "e4/internal/e4c_store_mem.h"
+  #endif
 
 #endif
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

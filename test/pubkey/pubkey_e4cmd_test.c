@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define E4_MODE_PUBKEY
-
 #include "e4/e4.h"
 #include "e4/util.h"
 #include "e4/strlcpy.h"
