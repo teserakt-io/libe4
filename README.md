@@ -183,13 +183,13 @@ Before contributing, please read our [CONTRIBUTING](CONTRIBUTING.md) guide.
 ## Security
 
 To report a security vulnerability (or potential vulnerability where 
-private discussion is preferred) see [SECURITY](SECURITY.MD).
+private discussion is preferred) see [SECURITY](SECURITY.md).
 
 ## Intellectual Property
 
 libe4 is &copy; Teserakt AG 2018-2020 and is released under the Apache 
 License 2.0. `libe4` also uses open source components from various projects and 
 these may be available to you under different licenses. Please see: 
-[LICENSE](LICENSE.MD) for the license text and licenses of third party 
+[LICENSE](LICENSE.md) for the license text and licenses of third party 
 components.
 
