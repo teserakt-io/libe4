@@ -72,9 +72,6 @@ int e4c_load(e4storage *store, const char *path)
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    /*size_t filesize = */ lseek(fd, 0, SEEK_END);
-    lseek(fd, 0, SEEK_SET);
-
     memset(mbuf, 0, sizeof mbuf);
     rlen = read(fd, mbuf, sizeof E4V2_MAGIC);
     if (rlen != sizeof E4V2_MAGIC)
@@ -86,15 +83,12 @@ int e4c_load(e4storage *store, const char *path)
         goto err;
     }
 
-    lseek(fd, 4, SEEK_CUR);
-
     rlen = read(fd, store->id, sizeof store->id);
     if (rlen != sizeof store->id)
     {
         goto err;
     }
 
-    lseek(fd, 4, SEEK_CUR);
 
     r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, store->id);
     if (r != 0)
@@ -111,21 +105,17 @@ int e4c_load(e4storage *store, const char *path)
     {
         goto err;
     }
-    lseek(fd, 4, SEEK_CUR);
-    
     rlen = read(fd, store->pubkey, sizeof store->pubkey);
     if (rlen != sizeof store->pubkey)
     {
         goto err;
     }
-    lseek(fd, 4, SEEK_CUR);
     
     rlen = read(fd, store->c2key, sizeof store->c2key);
     if (rlen != sizeof store->c2key)
     {
         goto err;
     }
-    lseek(fd, 4, SEEK_CUR);
 
     rlen = read(fd, &store->topiccount, sizeof store->topiccount);
     if (rlen != sizeof store->topiccount)
@@ -133,7 +123,6 @@ int e4c_load(e4storage *store, const char *path)
         goto err;
     }
 
-    lseek(fd, 4, SEEK_CUR);
     /* TODO: detect if we cannot read everything based on the topiccount */
 
 
@@ -145,13 +134,11 @@ int e4c_load(e4storage *store, const char *path)
             goto err;
         }
 
-        lseek(fd, 4, SEEK_CUR);
         rlen = read(fd, store->topics[i].key, E4_KEY_LEN);
         if (rlen != E4_KEY_LEN)
         {
             goto err;
         }
-        lseek(fd, 4, SEEK_CUR);
     }
     
     rlen = read(fd, &store->devicecount, sizeof store->devicecount);
@@ -159,7 +146,6 @@ int e4c_load(e4storage *store, const char *path)
     {
         goto err;
     }
-    lseek(fd, 4, SEEK_CUR);
     
     for (i = 0; i < store->devicecount; i++)
     {
@@ -169,13 +155,11 @@ int e4c_load(e4storage *store, const char *path)
             goto err;
         }
 
-        lseek(fd, 4, SEEK_CUR);
         rlen = read(fd, store->devices[i].pubkey, E4_PK_EDDSA_PUBKEY_LEN);
         if (rlen != E4_PK_EDDSA_PUBKEY_LEN)
         {
             goto err;
         }
-        lseek(fd, 4, SEEK_CUR);
     }
 
     e4c_debug_print(store);
@@ -205,41 +189,28 @@ int e4c_sync(e4storage *store)
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    uint32_t zero = 0;
-
     write(fd, E4V2_MAGIC, sizeof E4V2_MAGIC);
-    write(fd, &zero, sizeof zero);
     write(fd, store->id, sizeof store->id);
-    write(fd, &zero, sizeof zero);
     write(fd, store->privkey, sizeof store->privkey);
-    write(fd, &zero, sizeof zero);
     write(fd, store->pubkey, sizeof store->pubkey);
-    write(fd, &zero, sizeof zero);
     write(fd, store->c2key, sizeof store->c2key);
-    write(fd, &zero, sizeof zero);
     write(fd, &store->topiccount, sizeof store->topiccount);
-    write(fd, &zero, sizeof zero);
 
     for (i = 0; i < store->topiccount; i++)
     {
         topic_key *t = &(store->topics[0]) + i;
 
         write(fd, t->topic, sizeof t->topic);
-        write(fd, &zero, sizeof zero);
         write(fd, t->key, sizeof t->key);
-        write(fd, &zero, sizeof zero);
     }
     write(fd, &store->devicecount, sizeof store->devicecount);
-    write(fd, &zero, sizeof zero);
 
     for (i = 0; i < store->devicecount; i++)
     {
         device_key *d = &(store->devices[0]) + i;
 
         write(fd, d->id, sizeof d->id);
-        write(fd, &zero, sizeof zero);
         write(fd, d->pubkey, sizeof d->pubkey);
-        write(fd, &zero, sizeof zero);
     }
     close(fd);
 
