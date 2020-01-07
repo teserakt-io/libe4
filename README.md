@@ -190,5 +190,5 @@ private discussion is preferred) see [SECURITY](SECURITY.md).
 ## Intellectual Property
 
 libe4 is copyright (c) Teserakt AG 2018-2020, and released under Apache 2.0 
-License, (see [LICENSE](LICENSE).
+License, (see [LICENSE](LICENSE)).
 
