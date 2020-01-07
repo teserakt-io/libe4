@@ -51,11 +51,13 @@ typedef struct _e4_aessiv_kat {
                     siv_kats[i].plaintext, sizeof siv_kats[i].plaintext, 
                     siv_kats[i].key) != 0 )
         {
+            printf("encrypt-siv func failure ");
             failures += 1;
             continue;
         }
                     
         if ( memcmp(generated_ct, siv_kats[i].ciphertext, sizeof generated_ct) != 0 ) {
+            printf("encrypt-siv output failure ");
             failures += 1;
             continue;
         }
@@ -65,15 +67,18 @@ typedef struct _e4_aessiv_kat {
                     siv_kats[i].ciphertext, sizeof siv_kats[i].ciphertext,
                     siv_kats[i].key) != 0 )
         {
+            printf("decrypt-siv func failure ");
             failures += 1;
             continue;
         }
 
         if ( memcmp(recovered_pt, siv_kats[i].plaintext, sizeof recovered_pt) != 0 ) {
+            printf("decrypt-siv output failure ");
             failures += 1;
             continue;
         }
     }
+    printf("\n");
     printf("SIV test executed %d KATs, with %ld failures\n", SIV_KAT_NUM, failures);
 
     return failures > 0 ? 1 : 0;
