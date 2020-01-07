@@ -80,6 +80,16 @@ int e4c_set_idseckey(e4storage *store, const uint8_t *key)
     return E4_RESULT_OK;
 }
 
+int e4c_get_idseckey(e4storage* store, uint8_t *key) {
+    memcpy(key, store->privkey, sizeof store->privkey);
+    return 0;
+}
+
+int e4c_get_idpubkey(e4storage* store, uint8_t *key) {
+    memcpy(key, store->pubkey, sizeof store->pubkey);
+    return 0;
+}
+
 int e4c_getindex(e4storage *store, const char *topic)
 {
     int i;

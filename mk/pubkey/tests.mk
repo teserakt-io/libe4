@@ -9,6 +9,9 @@ $(TESTOBJDIR)/util.$O: test/util.c
 $(TESTOBJDIR)/crypto.$O: test/crypto.c
 	$(CC) $(TESTCFLAGS) $(INCLUDES) -c $< -o $@
 
+$(TESTOBJDIR)/siv.$O: test/siv.c
+	$(CC) $(TESTCFLAGS) $(INCLUDES) -c $< -o $@
+
 $(TESTOBJDIR)/pubkey_file.$O: test/pubkey/pubkey_filestore_test.c
 	$(CC) $(TESTCFLAGS) $(INCLUDES) -c $< -o $@
 
@@ -30,6 +33,9 @@ $(TESTDIR)/util: $(TESTOBJDIR)/util.$O
 $(TESTDIR)/crypto: $(TESTOBJDIR)/crypto.$O
 	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
 
+$(TESTDIR)/siv_kats_the_musical: $(TESTOBJDIR)/siv.$O
+	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
+
 $(TESTDIR)/pubkey_file: $(TESTOBJDIR)/pubkey_file.$O
 	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
 
@@ -46,11 +52,12 @@ $(TESTDIR)/ed25519_test: $(TESTOBJDIR)/ed25519_test.$O
 	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
 
 PUBKEY_TESTS = \
-    $(TESTDIR)/util               \
-    $(TESTDIR)/crypto             \
-    $(TESTDIR)/pubkey_file        \
-    $(TESTDIR)/pubkey_e4cmd       \
-    $(TESTDIR)/pubkey_e4topicmsg  \
+    $(TESTDIR)/util                  \
+    $(TESTDIR)/crypto                \
+    $(TESTDIR)/siv_kats_the_musical  \
+    $(TESTDIR)/pubkey_file           \
+    $(TESTDIR)/pubkey_e4cmd          \
+    $(TESTDIR)/pubkey_e4topicmsg     \
     $(TESTDIR)/pubkey_crypto_test
 
 E4TESTS += $(PUBKEY_TESTS)
@@ -58,6 +65,7 @@ E4TESTS += $(PUBKEY_TESTS)
 testexec_pk:
 	./$(TESTDIR)/util
 	./$(TESTDIR)/crypto
+	./$(TESTDIR)/siv_kats_the_musical
 	./$(TESTDIR)/pubkey_file
 	./$(TESTDIR)/pubkey_e4cmd
 	./$(TESTDIR)/pubkey_e4topicmsg

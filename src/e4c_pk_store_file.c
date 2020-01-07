@@ -33,10 +33,14 @@ const char E4V2_MAGIC[4] = "E42P";
 
 int e4c_init(e4storage *store)
 {
+    zeroize((void*)store, sizeof(struct _e4storage));
     ZERO(store->id);
     ZERO(store->privkey);
+    ZERO(store->pubkey);
+    ZERO(store->c2key);
     ZERO(store->ctrltopic);
-    store->topiccount = 0;
+    ZERO(store->topiccount);
+    ZERO(store->devicecount);
     ZERO(store->topics);
     ZERO(store->filepath);
     return 0;
@@ -242,6 +246,16 @@ int e4c_set_idseckey(e4storage *store, const uint8_t *key)
     memmove(store->privkey, key, sizeof store->privkey);
     e4c_sync(store);
     return E4_RESULT_OK;
+}
+
+int e4c_get_idseckey(e4storage* store, uint8_t *key) {
+    memcpy(key, store->privkey, sizeof store->privkey);
+    return 0;
+}
+
+int e4c_get_idpubkey(e4storage* store, uint8_t *key) {
+    memcpy(key, store->pubkey, sizeof store->pubkey);
+    return 0;
 }
 
 int e4c_getindex(e4storage *store, const char *topic)

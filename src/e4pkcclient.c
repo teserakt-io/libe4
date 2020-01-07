@@ -176,6 +176,7 @@ int e4c_unprotect_message(uint8_t *mptr,
 
     if (e4c_is_device_ctrltopic(storage, topic) == 0)
     {
+        uint8_t deviceedsk[E4_PK_EDDSA_PRIVKEY_LEN];
         uint8_t c2pk[E4_PK_X25519_PUBKEY_LEN];
         uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
         uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
@@ -192,10 +193,13 @@ int e4c_unprotect_message(uint8_t *mptr,
             return E4_ERROR_CIPHERTEXT_TOO_SHORT;
         }
 
-        e4c_get_c2_pubkey(storage, c2pk);
-
+        r = e4c_get_c2_pubkey(storage, c2pk);
+        if ( r != E4_RESULT_OK ) {
+            return r;
+        }
+        e4c_get_idseckey(storage, deviceedsk);
         /* convert our key to X25519 */
-        xed25519_convert_ed2c_private(devicesk, storage->privkey);
+        xed25519_convert_ed2c_private(devicesk, deviceedsk);
 
         /* key=sha3(X25519(devicesk, c2pk)) */
 
@@ -204,7 +208,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         /* set things up for symmetric decryption: */
         /* From the C2:        Timestamp (8) | IV (16) | Ciphertext (n) */
         assocdatalen = E4_TIMESTAMP_LEN;
-        sivctoffset = E4_ID_LEN + E4_TIMESTAMP_LEN;
+        sivctoffset = E4_TIMESTAMP_LEN;
         sivpayloadlen = clen - assocdatalen;
         printf("CONTROL_TOPIC_MODE\n");
     }
