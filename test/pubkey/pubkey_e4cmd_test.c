@@ -68,6 +68,20 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
+        /* let's check this also works */
+        if ( memcmp(store.pubkey, pkkat[i].dev_edwards_pubkey, sizeof pkkat[i].dev_edwards_pubkey) != 0 )
+        {
+            printf("Failed: did not correctly store device pubkey.\n");
+            returncode = 1;
+            goto exit_close;
+        }
+        if ( memcmp(store.privkey, pkkat[i].dev_edwards_seckey, sizeof pkkat[i].dev_edwards_seckey) != 0 )
+        {
+            printf("Failed: did not correctly store device pubkey.\n");
+            returncode = 1;
+            goto exit_close;
+        }
+
         e4retcode = e4c_set_c2_pubkey(&store, pkkat[i].c2_montgom_pubkey);
         if ( e4retcode != 0 ) {
             printf("Failed: unable to set c2 pubkey\n");

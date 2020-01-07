@@ -97,6 +97,10 @@ int main(int argc, char** argv, char** envp) {
 
         unsigned char topichash[E4_TOPICHASH_LEN] = {0};
 
+        if (i >= 10) {
+            e4c_remove_device(&store, topickat[i-10].otherdevice_id);
+        }
+
         if ( e4c_set_device_key(&store, topickat[i].otherdevice_id, topickat[i].otherdevice_pubkey) != E4_RESULT_OK ) {
             printf("Unable to set device key");
             returncode = 1;

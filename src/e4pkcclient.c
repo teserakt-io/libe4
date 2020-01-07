@@ -151,6 +151,7 @@ int e4c_unprotect_message(uint8_t *mptr,
 
     size_t assocdatalen = 0;
     size_t sivpayloadlen = 0;
+    size_t sivctoffset = 0;
 
 #ifndef __AVR__
     uint64_t secs1970;
@@ -199,12 +200,13 @@ int e4c_unprotect_message(uint8_t *mptr,
         /* key=sha3(X25519(devicesk, c2pk)) */
 
         curve25519(sharedpoint, devicesk, c2pk);
-        sha3(sharedpoint, E4_PK_X25519_PUBKEY_LEN, key, E4_KEY_LEN);
-
+        sha3(sharedpoint, E4_PK_X25519_PUBKEY_LEN, key, E4_KEY_LEN); 
         /* set things up for symmetric decryption: */
         /* From the C2:        Timestamp (8) | IV (16) | Ciphertext (n) */
         assocdatalen = E4_TIMESTAMP_LEN;
+        sivctoffset = E4_ID_LEN + E4_TIMESTAMP_LEN;
         sivpayloadlen = clen - assocdatalen;
+        printf("CONTROL_TOPIC_MODE\n");
     }
     else
     {
@@ -271,8 +273,9 @@ int e4c_unprotect_message(uint8_t *mptr,
 
         /* set things up for symmetric decryption: */
         /* From other clients: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
-        assocdatalen = E4_ID_LEN + E4_TIMESTAMP_LEN;
-        sivpayloadlen = clen - assocdatalen - E4_PK_EDDSA_SIG_LEN;
+        assocdatalen = E4_TIMESTAMP_LEN;
+        sivctoffset = E4_ID_LEN + E4_TIMESTAMP_LEN;
+        sivpayloadlen = clen - sivctoffset - E4_PK_EDDSA_SIG_LEN;
     }
 
     /* Retrieve timestamp encoded as little endian */
@@ -297,12 +300,13 @@ int e4c_unprotect_message(uint8_t *mptr,
     printf("assocdataptr=%p\n", cptr);
     printf("ciphertext_len=%lu\n", clen);
     printf("siv_len=%lu\n", sivpayloadlen);
-    printf("ciphertext=%p  (distance=%lu)\n", cptr+assocdatalen, assocdatalen);
+    printf("ciphertext=%p  (distance=%lu)\n", cptr+sivctoffset, sivctoffset);
     printf("\n");
 
     if (aes256_decrypt_siv(mptr, mlen, cptr, assocdatalen,
-                cptr + assocdatalen, sivpayloadlen, key) != 0)
+                cptr + sivctoffset, sivpayloadlen, key) != 0)
     {
+        printf("KEY IN USE:\n");
         for (j=0; j < E4_KEY_LEN; j++) {
             printf("0x%02x ", key[j]);
         }
