@@ -293,9 +293,21 @@ int e4c_unprotect_message(uint8_t *mptr,
                        const uint8_t *key); /-* in: secret key (32 bytes) *-/
      */
 
+    printf("DECRYPT REQUEST\n");
+    printf("assocdataptr=%p\n", cptr);
+    printf("ciphertext_len=%lu\n", clen);
+    printf("siv_len=%lu\n", sivpayloadlen);
+    printf("ciphertext=%p  (distance=%lu)\n", cptr+assocdatalen, assocdatalen);
+    printf("\n");
+
     if (aes256_decrypt_siv(mptr, mlen, cptr, assocdatalen,
                 cptr + assocdatalen, sivpayloadlen, key) != 0)
     {
+        for (j=0; j < E4_KEY_LEN; j++) {
+            printf("0x%02x ", key[j]);
+        }
+        printf("\n");
+        printf("\n");
         return E4_ERROR_INVALID_TAG;
     }
 

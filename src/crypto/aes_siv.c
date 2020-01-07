@@ -166,6 +166,7 @@ int aes256_encrypt_siv(uint8_t *ct,
 }
 
 /* AES256-SIV Decrypt */
+#include <stdio.h>
 
 int aes256_decrypt_siv(uint8_t *pt,
                        size_t *ptlen, /* out: plaintext */
@@ -179,6 +180,17 @@ int aes256_decrypt_siv(uint8_t *pt,
     uint8_t d[16], x[16];
 
     uint8_t eky[AES256_EXPKEY_LEN];
+       
+        printf("ciphetext:\n");
+        for (i=0; i < ctlen; i++) {
+            printf("0x%02x ", ct[i]);
+        }
+        printf("\n");
+        printf("ad:\n");
+        for (i=0; i < adlen; i++) {
+            printf("0x%02x ", ad[i]);
+        }
+        printf("\n");
 
     aes256_enc_exp_key(eky, key);
 
