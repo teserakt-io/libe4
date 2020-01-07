@@ -97,10 +97,6 @@ int main(int argc, char** argv, char** envp) {
 
         unsigned char topichash[E4_TOPICHASH_LEN] = {0};
 
-        if (i >= 10) {
-            e4c_remove_device(&store, topickat[i-10].otherdevice_id);
-        }
-
         if ( e4c_set_device_key(&store, topickat[i].otherdevice_id, topickat[i].otherdevice_pubkey) != E4_RESULT_OK ) {
             printf("Unable to set device key");
             returncode = 1;
@@ -130,6 +126,19 @@ int main(int argc, char** argv, char** envp) {
         
         if ( memcmp(messagebuffer, topickat[i].plaintext, sizeof topickat[i].plaintext) != 0 ) {
             printf("Failed: decrypted plaintext not equal to KAT.\n");
+            returncode = 1;
+            goto exit_close;
+        }
+        
+        e4retcode = e4c_remove_device(&store, topickat[i].otherdevice_id);
+        if ( e4retcode != E4_RESULT_OK ) {
+            e4c_debug_print(&store);
+            printf("ID: ");
+            for ( int j = 0; j < E4_ID_LEN; j++ ) {
+                printf("%02x ", topickat[i].otherdevice_id[j]);
+            }
+            printf("\n");
+            printf("Failed: e4c_remove_device could not remove a devicekey\n");
             returncode = 1;
             goto exit_close;
         }

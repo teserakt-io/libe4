@@ -108,7 +108,7 @@ siv_ctr(uint8_t *dst, const uint8_t *src, size_t len, const uint8_t iv[16], void
             for (j = 15; j >= 0; j--)
             { /* will actually terminate early */
                 cnt[j]++;
-                if (cnt[j] != 0xFF) break;
+                if (cnt[j] != 0) break;
             }
             j = 0;
         }
@@ -181,17 +181,6 @@ int aes256_decrypt_siv(uint8_t *pt,
 
     uint8_t eky[AES256_EXPKEY_LEN];
        
-        printf("ciphetext:\n");
-        for (i=0; i < ctlen; i++) {
-            printf("0x%02x ", ct[i]);
-        }
-        printf("\n");
-        printf("ad:\n");
-        for (i=0; i < adlen; i++) {
-            printf("0x%02x ", ad[i]);
-        }
-        printf("\n");
-
     aes256_enc_exp_key(eky, key);
 
     ctlen -= 16; /* ctlen is ptlen now */
