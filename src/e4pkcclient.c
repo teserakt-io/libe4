@@ -149,7 +149,6 @@ int e4c_unprotect_message(uint8_t *mptr,
     uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
 
-    const uint8_t* assocdata = cptr;
     size_t assocdatalen = 0;
     size_t sivpayloadlen = 0;
 
@@ -205,7 +204,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         /* set things up for symmetric decryption: */
         /* From the C2:        Timestamp (8) | IV (16) | Ciphertext (n) */
         assocdatalen = E4_TIMESTAMP_LEN;
-        sivpayloadlen = clen - E4_TIMESTAMP_LEN;
+        sivpayloadlen = clen - assocdatalen;
     }
     else
     {
@@ -220,6 +219,11 @@ int e4c_unprotect_message(uint8_t *mptr,
         if (clen < E4_PK_TOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN ||
             mmax < clen - (E4_PK_TOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN))
         {
+            /*printf("CLEN=%ld OVERHEAD=%d DIFF=%ld MMAX=%ld\n", 
+                    clen, 
+                    E4_PK_TOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN,
+                    clen - (size_t)(E4_PK_TOPICMSGHDR_LEN+E4_PK_EDDSA_SIG_LEN),
+                    mmax);*/
             return E4_ERROR_CIPHERTEXT_TOO_SHORT;
         }
 
@@ -268,7 +272,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         /* set things up for symmetric decryption: */
         /* From other clients: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
         assocdatalen = E4_ID_LEN + E4_TIMESTAMP_LEN;
-        sivpayloadlen = clen - (E4_TIMESTAMP_LEN + E4_ID_LEN + E4_PK_EDDSA_SIG_LEN);
+        sivpayloadlen = clen - (assocdatalen + E4_PK_EDDSA_SIG_LEN);
     }
 
     /* Retrieve timestamp encoded as little endian */
@@ -289,20 +293,14 @@ int e4c_unprotect_message(uint8_t *mptr,
                        const uint8_t *key); /-* in: secret key (32 bytes) *-/
      */
 
-    if (aes256_decrypt_siv(mptr, mlen, assocdata, assocdatalen,
+    if (aes256_decrypt_siv(mptr, mlen, cptr, assocdatalen,
                 cptr + assocdatalen, sivpayloadlen, key) != 0)
     {
         return E4_ERROR_INVALID_TAG;
     }
 
-    /* TODO: this is only valuable for string-type data
-     * we should consider removing it, as it requires that
-     * the plaintext buffer be 1 byte bigger than that which was
-     * encrypted, which is very unnecessary. */
-    if (*mlen + 1 > mmax) /* zero-pad it in place. */
+    if (*mlen > mmax) 
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
-    mptr[*mlen] = 0;
-
 
     /* Since AVR has no real time clock, time is initially unknown. */
     if (secs1970 < 946684800)

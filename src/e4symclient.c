@@ -173,14 +173,8 @@ int e4c_unprotect_message(uint8_t *mptr,
         return E4_ERROR_INVALID_TAG;
     }
 
-    /* TODO: this is only valuable for string-type data 
-     * we should consider removing it, as it requires that
-     * the plaintext buffer be 1 byte bigger than that which was
-     * encrypted, which is very unnecessary. */
-    if (*mlen + 1 > mmax) /* zero-pad it in place. */
+    if (*mlen > mmax) 
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
-    mptr[*mlen] = 0;
-
 
     /* Since AVR has no real time clock, time is initially unknown. */
     if (secs1970 < 946684800)

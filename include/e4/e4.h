@@ -82,7 +82,7 @@ extern "C" {
 /* Public key support */
 #define E4_PK_EDDSA_PRIVKEY_LEN 64
 #define E4_PK_EDDSA_PUBKEY_LEN 32
-#define E4_PK_EDDSA_SIG_LEN 32
+#define E4_PK_EDDSA_SIG_LEN 64
 #define E4_PK_X25519_PUBKEY_LEN 32
 #define E4_PK_X25519_PRIVKEY_LEN 32
 
