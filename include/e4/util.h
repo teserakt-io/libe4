@@ -30,6 +30,12 @@ extern "C" {
     } while (0)
 #endif
 
+#if __STDC_VERSION__ >= 199901L
+#define INLINE static inline
+#else
+#define INLINE static
+#endif
+
 /* void zeroize */
 void zeroize(void *v, size_t n);
 

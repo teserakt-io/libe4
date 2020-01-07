@@ -19,6 +19,7 @@
 #include "e4/crypto/sha3.h"
 #include "e4/e4.h"
 #include <e4/stdint.h>
+#include <e4/util.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,8 +87,19 @@ int e4c_derive_topichash(uint8_t* topichash, const size_t topichash_len, const c
     return 0;
 }
 
-char hex_lower[] = "0123456789abcdef";
-char hex_upper[] = "0123456789ABCDEF";
+INLINE int8_t from_hex(const char c) {
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+        return (c - 'a') + 10;
+    } else if (c >= 'A' && c <= 'F') {
+        return (c - 'A') + 10;
+    } else {
+        return -1;
+    }
+}
+
+
 
 int e4c_hex_decode(char *bytes, const size_t byteslen, const char *hexstring, const size_t hexstringlen)
 {
@@ -115,46 +127,24 @@ int e4c_hex_decode(char *bytes, const size_t byteslen, const char *hexstring, co
         unsigned char byte = 0;
         char hbits = hexstring[2 * i];
         char lbits = hexstring[2 * i + 1];
-        char *pos = NULL;
-        int val = -1;
-
-        pos = strchr(hex_upper, hbits);
-        if (pos != NULL)
-        {
-            val = (int)(pos - hex_upper);
-        }
-        pos = strchr(hex_lower, hbits);
-        if (pos != NULL)
-        {
-            val = (int)(pos - hex_lower);
-        }
+        int8_t val = -1;
+    
+        val = from_hex(hbits);
         if (val < 0)
         {
-            printf("val is %d\n", val);
             return 0;
         }
 
-        byte |= val << 4;
-        pos = NULL;
+        byte |= (uint8_t)(val) << 4;
         val = -1;
 
-        pos = strchr(hex_upper, lbits);
-        if (pos != NULL)
-        {
-            val = (int)(pos - hex_upper);
-        }
-        pos = strchr(hex_lower, lbits);
-        if (pos != NULL)
-        {
-            val = (int)(pos - hex_lower);
-        }
+        val = from_hex(lbits);
         if (val < 0)
         {
-            printf("val is %d\n", val);
             return 0;
         }
 
-        byte |= val;
+        byte |= (uint8_t)(val);
 
         memcpy(bytes + i, &byte, 1);
     }
