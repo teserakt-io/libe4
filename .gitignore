@@ -12,3 +12,5 @@ qa/*
 util/sivkat/sivkat
 util/sivkat/siv_kat.h
 
+util/e4pktool/e4pktool
+util/e4pktool/*.h
