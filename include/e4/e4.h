@@ -61,7 +61,6 @@ extern "C" {
 #define E4_ERROR_PARAMETER_INVALID -112
 
 /* Size of the timestamp field */
-#define E4_TS_LEN 8
 #define E4_TIMESTAMP_LEN 8
 /* Size of the ID, truncated sha3(alias) */
 #define E4_ID_LEN 16

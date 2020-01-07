@@ -272,7 +272,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         /* set things up for symmetric decryption: */
         /* From other clients: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
         assocdatalen = E4_ID_LEN + E4_TIMESTAMP_LEN;
-        sivpayloadlen = clen - (assocdatalen + E4_PK_EDDSA_SIG_LEN);
+        sivpayloadlen = clen - assocdatalen - E4_PK_EDDSA_SIG_LEN;
     }
 
     /* Retrieve timestamp encoded as little endian */

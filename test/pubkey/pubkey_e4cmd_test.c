@@ -96,6 +96,7 @@ int main(int argc, char** argv, char** envp) {
         /* now we are set up, let's try processing those command messages */
 
         memset(messagebuffer, 0, sizeof messagebuffer);
+        messagelen = 0;
         e4retcode = e4c_unprotect_message(messagebuffer,
                           sizeof messagebuffer,
                           &messagelen,
@@ -115,6 +116,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         memset(messagebuffer, 0, sizeof messagebuffer);
+        messagelen = 0;
         e4retcode = e4c_unprotect_message(messagebuffer,
                           sizeof messagebuffer,
                           &messagelen,
@@ -134,6 +136,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         memset(messagebuffer, 0, sizeof messagebuffer);
+        messagelen = 0;
         e4retcode = e4c_unprotect_message(messagebuffer,
                           sizeof messagebuffer,
                           &messagelen,
@@ -153,6 +156,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         memset(messagebuffer, 0, sizeof messagebuffer);
+        messagelen = 0;
         e4retcode = e4c_unprotect_message(messagebuffer,
                           sizeof messagebuffer,
                           &messagelen,
@@ -172,6 +176,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         memset(messagebuffer, 0, sizeof messagebuffer);
+        messagelen = 0;
         e4retcode = e4c_unprotect_message(messagebuffer,
                           sizeof messagebuffer,
                           &messagelen,
@@ -191,6 +196,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         memset(messagebuffer, 0, sizeof messagebuffer);
+        messagelen = 0;
         e4retcode = e4c_unprotect_message(messagebuffer,
                           sizeof messagebuffer,
                           &messagelen,

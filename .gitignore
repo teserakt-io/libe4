@@ -7,5 +7,6 @@ build/*
 .*.swo
 .vscode/
 .archive/
+qa/*
 
 util/sivkat/sivkat
