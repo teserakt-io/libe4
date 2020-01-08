@@ -132,7 +132,9 @@ int main(int argc, char** argv, char** envp) {
         
         e4retcode = e4c_remove_device(&store, topickat[i].otherdevice_id);
         if ( e4retcode != E4_RESULT_OK ) {
+#ifdef DEBUG
             e4c_debug_print(&store);
+#endif
             printf("ID: ");
             for ( int j = 0; j < E4_ID_LEN; j++ ) {
                 printf("%02x ", topickat[i].otherdevice_id[j]);
