@@ -100,54 +100,37 @@ INLINE int8_t from_hex(const char c) {
 }
 
 
-
-int e4c_hex_decode(char *bytes, const size_t byteslen, const char *hexstring, const size_t hexstringlen)
+int e4c_hex_decode(char *dst, const size_t dst_len, const char *encoded, const size_t encoded_len)
 {
-
-    size_t reqbytes = 0;
-    int i = 0;
+    char *walk;
+    int i;
+    size_t decoded_len;
+    int8_t h1, h2;
 
     /* can't decode empty string; can't decode odd bytes, */
-    if (hexstringlen == 0 || hexstringlen % 2 == 1)
+    if (encoded_len == 0 || encoded_len % 2 != 0)
     {
-        printf("length condition failed.\n");
-        return 0;
-    }
-    reqbytes = hexstringlen >> 1;
-
-    if (reqbytes > byteslen)
-    {
-        printf("reqbytes is wrong. r=%ld, hl=%ld, bl=%ld\n", reqbytes, hexstringlen, byteslen);
+        printf("e4c_hex_decode: encoded_len=%ld but must be non-zero and even.\n", encoded_len);
         return 0;
     }
 
-    for (i = 0; i < reqbytes; i++)
+    decoded_len = encoded_len >> 1;
+    if (decoded_len > dst_len)
     {
-
-        unsigned char byte = 0;
-        char hbits = hexstring[2 * i];
-        char lbits = hexstring[2 * i + 1];
-        int8_t val = -1;
-    
-        val = from_hex(hbits);
-        if (val < 0)
-        {
-            return 0;
-        }
-
-        byte |= (uint8_t)(val) << 4;
-        val = -1;
-
-        val = from_hex(lbits);
-        if (val < 0)
-        {
-            return 0;
-        }
-
-        byte |= (uint8_t)(val);
-
-        memcpy(bytes + i, &byte, 1);
+        printf("e4c_hex_decode: decoded_len is wrong. r=%ld, hl=%ld, bl=%ld\n",
+                                                decoded_len, encoded_len, dst_len);
+        return 0;
     }
 
-    return (int)reqbytes;
+    walk = dst;
+    for (i = 0; i < encoded_len; i += 2)
+    {
+        if ((h1 = from_hex(encoded[i])) < 0)
+            return 0;
+        if ((h2 = from_hex(encoded[i+1])) < 0)
+            return 0;
+        *walk++ = (char)(h1<<4 | h2);
+    }
+
+    return i;
 }
