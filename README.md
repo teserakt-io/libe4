@@ -176,7 +176,18 @@ architecture.
 `libe4` respects environment variables such as `CC`. You may therefore, 
 for example, cross compile for arm using something like:
 
-    CC=arm-none-eabi-gcc CONF=symkey STORE=mem make
+```
+CC=clang LD=clang \
+E4_CFLAGS="--target=armv7m-linux-eabi" \
+E4_LDFLAGS="--target=armv7m-linux-eabi" CSTD=c89 \
+CC=clang LD=clang CONF=pubkey make
+```
+
+Or an appropriate way to target your cross compiler.
+
+For the moment, Arduino and Android cross compile makefiles are in beta, but 
+will be published publicly as soon as they are ready (they require a 
+more complicated and specific use of make).
 
 ## Contributing
 

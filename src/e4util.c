@@ -24,10 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* #ifdef DEBUG */
-
-/* #endif */
-
 void zeroize( void *v, size_t n )
 {
     volatile unsigned char *p = ( volatile unsigned char * )v;
@@ -110,15 +106,19 @@ int e4c_hex_decode(char *dst, const size_t dst_len, const char *encoded, const s
     /* can't decode empty string; can't decode odd bytes, */
     if (encoded_len == 0 || encoded_len % 2 != 0)
     {
-        printf("e4c_hex_decode: encoded_len=%ld but must be non-zero and even.\n", encoded_len);
+#ifdef DEBUG
+        printf("e4c_hex_decode: encoded_len=%u but must be non-zero and even.\n", encoded_len);
+#endif
         return 0;
     }
 
     decoded_len = encoded_len >> 1;
     if (decoded_len > dst_len)
     {
-        printf("e4c_hex_decode: decoded_len is wrong. r=%ld, hl=%ld, bl=%ld\n",
+#ifdef DEBUG
+        printf("e4c_hex_decode: decoded_len is wrong. r=%u, hl=%u, bl=%u\n",
                                                 decoded_len, encoded_len, dst_len);
+#endif
         return 0;
     }
 

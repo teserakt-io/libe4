@@ -131,7 +131,9 @@ int e4c_load(e4storage *store, const char *path)
         }
     }
 
+#ifdef DEBUG
     e4c_debug_print(store);
+#endif
 
     close(fd);
     return 0;
@@ -309,8 +311,7 @@ int e4c_reset_topics(e4storage *store)
     return 0;
 }
 
-/*#ifdef DEBUG */
-
+#ifdef DEBUG
 void e4c_debug_print(e4storage *store)
 {
     int i, j;
@@ -347,5 +348,4 @@ void e4c_debug_print(e4storage *store)
         printf("\n");
     }
 }
-
-/*#endif*/
+#endif

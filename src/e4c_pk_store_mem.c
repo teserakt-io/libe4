@@ -309,11 +309,9 @@ int e4c_get_c2_pubkey(e4storage* store, uint8_t* key) {
     return 0;
 }
 
-/*#ifdef DEBUG */
-
+#ifdef DEBUG 
 void e4c_debug_print(e4storage *store)
 {
     return;
 }
-
-/*#endif*/
+#endif

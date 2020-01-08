@@ -206,9 +206,9 @@ int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key);
 int e4c_get_c2_pubkey(e4storage* store, uint8_t* key);
 #endif
 
-/*#ifdef DEBUG*/
+#ifdef DEBUG
 void e4c_debug_print(e4storage *store);
-/*#endif*/
+#endif
 
 #ifdef E4_STORE_FILE
   #ifdef E4_MODE_PUBKEY

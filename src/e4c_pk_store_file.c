@@ -166,7 +166,9 @@ int e4c_load(e4storage *store, const char *path)
         }
     }
 
+#ifdef DEBUG
     e4c_debug_print(store);
+#endif
 
     close(fd);
     return 0;
@@ -477,8 +479,7 @@ int e4c_get_c2_pubkey(e4storage* store, uint8_t* key) {
     return 0;
 }
 
-/*#ifdef DEBUG */
-
+#ifdef DEBUG
 void e4c_debug_print(e4storage *store)
 {
     int i, j;
@@ -542,5 +543,4 @@ void e4c_debug_print(e4storage *store)
         printf("\n");
     }
 }
-
-/*#endif*/
+#endif
