@@ -127,7 +127,7 @@ int e4c_protect_message(uint8_t *cptr,
     /* pubkey messages are: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
     /* safety check. clen_siv = msglen+E4_TAG_LEN. Therefore adding E4_PK_EDDSA_SIG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN should 
      * equal clen */
-    if ( *clen != clen_siv + E4_PK_EDDSA_SIG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN ) {
+    if (*clen != clen_siv + E4_PK_EDDSA_SIG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN) {
         return E4_ERROR_INTERNAL;
     }
 
@@ -181,9 +181,9 @@ int e4c_unprotect_message(uint8_t *mptr,
         uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
         uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
 
-        memset(c2pk, 0, sizeof c2pk);
-        memset(devicesk, 0, sizeof devicesk);
-        memset(sharedpoint, 0, sizeof sharedpoint);
+        memset(c2pk, 0, sizeof(c2pk));
+        memset(devicesk, 0, sizeof(devicesk));
+        memset(sharedpoint, 0, sizeof(sharedpoint));
         /* control topic being used: */
         control = 1;
 
@@ -194,7 +194,7 @@ int e4c_unprotect_message(uint8_t *mptr,
         }
 
         r = e4c_get_c2_pubkey(storage, c2pk);
-        if ( r != E4_RESULT_OK ) {
+        if (r != E4_RESULT_OK) {
             return r;
         }
         e4c_get_idseckey(storage, deviceedsk);
@@ -258,7 +258,7 @@ int e4c_unprotect_message(uint8_t *mptr,
              * have a key at all for a client, signature verification 
              * must succeed. This option is a get-out for when we cannot 
              * store keys due to storage constraints */
-            if ( !(proto_opts & E4_OPTION_IGNORE_MISSING_PUBKEY) ) {
+            if (!(proto_opts & E4_OPTION_IGNORE_MISSING_PUBKEY)) {
                 return E4_ERROR_DEVICEPK_MISSING;
             }
         }
@@ -319,7 +319,7 @@ int e4c_unprotect_message(uint8_t *mptr,
     else
     {
 
-        if (!(proto_opts & E4_OPTION_IGNORE_TIMESTAMP )) {   
+        if (!(proto_opts & E4_OPTION_IGNORE_TIMESTAMP)) {   
             if (tstamp >= secs1970)
             {
                 if (tstamp - secs1970 > E4C_TIME_FUTURE)

@@ -13,12 +13,12 @@ int main(int argc, char** argv, char** envp) {
     int r = 0;
 
     r = e4c_hex_decode((char*)test1_bytes_output, sizeof(test1_bytes_output), test1_input, strlen(test1_input));
-    if ( r == 0 ) {
+    if (r == 0) {
         returncode = 1;
         goto exit;
     }
 
-    if ( memcmp(test1_bytes_output, test1_bytes_kat, sizeof test1_bytes_kat) != 0 ) {
+    if (memcmp(test1_bytes_output, test1_bytes_kat, sizeof(test1_bytes_kat)) != 0) {
         printf("Test %s failed.", "Test1");
 
 

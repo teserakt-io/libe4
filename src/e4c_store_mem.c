@@ -60,15 +60,15 @@ int e4c_set_id(e4storage *store, const uint8_t *id)
     ZERO(controltopic);
 
     r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, id);
-    if ( r != E4_RESULT_OK ) goto exit;
+    if (r != E4_RESULT_OK) goto exit;
 
     r = e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
-    if ( r != E4_RESULT_OK ) {
+    if (r != E4_RESULT_OK) {
         ZERO(store->ctrltopic);
         goto exit;
     }
 
-    memmove(store->id, id, sizeof store->id);
+    memmove(store->id, id, sizeof(store->id));
     r = E4_RESULT_OK;
 exit:
     return r;
@@ -77,7 +77,7 @@ exit:
 
 int e4c_set_idkey(e4storage *store, const uint8_t *key)
 {
-    memmove(store->key, key, sizeof store->key);
+    memmove(store->key, key, sizeof(store->key));
     return E4_RESULT_OK;
 }
 
