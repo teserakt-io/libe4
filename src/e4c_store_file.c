@@ -72,20 +72,20 @@ int e4c_load(e4storage *store, const char *path)
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    memset(mbuf, 0, sizeof mbuf);
-    rlen = read(fd, mbuf, sizeof E4V1_MAGIC);
-    if (rlen != sizeof E4V1_MAGIC)
+    memset(mbuf, 0, sizeof(mbuf));
+    rlen = read(fd, mbuf, sizeof(E4V1_MAGIC));
+    if (rlen != sizeof(E4V1_MAGIC))
     {
         goto err;
     }
-    if (memcmp(mbuf, E4V1_MAGIC, sizeof E4V1_MAGIC) != 0)
+    if (memcmp(mbuf, E4V1_MAGIC, sizeof(E4V1_MAGIC)) != 0)
     {
         goto err;
     }
 
 
-    rlen = read(fd, store->id, sizeof store->id);
-    if (rlen != sizeof store->id)
+    rlen = read(fd, store->id, sizeof(store->id));
+    if (rlen != sizeof(store->id))
     {
         goto err;
     }
@@ -100,15 +100,15 @@ int e4c_load(e4storage *store, const char *path)
     /* derive a topichash for the control topic. */
     e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
 
-    rlen = read(fd, store->key, sizeof store->key);
-    if (rlen != sizeof store->key)
+    rlen = read(fd, store->key, sizeof(store->key));
+    if (rlen != sizeof(store->key))
     {
         goto err;
     }
 
 
-    rlen = read(fd, &store->topiccount, sizeof store->topiccount);
-    if (rlen != sizeof store->topiccount)
+    rlen = read(fd, &store->topiccount, sizeof(store->topiccount));
+    if (rlen != sizeof(store->topiccount))
     {
         goto err;
     }
@@ -160,17 +160,17 @@ int e4c_sync(e4storage *store)
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    write(fd, E4V1_MAGIC, sizeof E4V1_MAGIC);
-    write(fd, store->id, sizeof store->id);
-    write(fd, store->key, sizeof store->key);
-    write(fd, &store->topiccount, sizeof store->topiccount);
+    write(fd, E4V1_MAGIC, sizeof(E4V1_MAGIC));
+    write(fd, store->id, sizeof(store->id));
+    write(fd, store->key, sizeof(store->key));
+    write(fd, &store->topiccount, sizeof(store->topiccount));
 
     for (i = 0; i < store->topiccount; i++)
     {
         topic_key *t = &(store->topics[0]) + i;
 
-        write(fd, t->topic, sizeof t->topic);
-        write(fd, t->key, sizeof t->key);
+        write(fd, t->topic, sizeof(t->topic));
+        write(fd, t->key, sizeof(t->key));
     }
     close(fd);
 
@@ -184,15 +184,15 @@ int e4c_set_id(e4storage *store, const uint8_t *id)
     ZERO(controltopic);
 
     r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, id);
-    if ( r != E4_RESULT_OK ) goto exit;
+    if (r != E4_RESULT_OK) goto exit;
 
     r = e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
-    if ( r != E4_RESULT_OK ) {
+    if (r != E4_RESULT_OK) {
         ZERO(store->ctrltopic);
         goto exit;
     }
 
-    memmove(store->id, id, sizeof store->id);
+    memmove(store->id, id, sizeof(store->id));
     r = E4_RESULT_OK;
 exit:
     return r;
@@ -200,7 +200,7 @@ exit:
 
 int e4c_set_idkey(e4storage *store, const uint8_t *key)
 {
-    memmove(store->key, key, sizeof store->key);
+    memmove(store->key, key, sizeof(store->key));
     return E4_RESULT_OK;
 }
 

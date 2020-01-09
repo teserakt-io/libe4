@@ -59,15 +59,15 @@ int e4c_set_id(e4storage *store, const uint8_t *id)
     ZERO(controltopic);
 
     r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, id);
-    if ( r != E4_RESULT_OK ) goto exit;
+    if (r != E4_RESULT_OK) goto exit;
 
     r = e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
-    if ( r != E4_RESULT_OK ) {
+    if (r != E4_RESULT_OK) {
         ZERO(store->ctrltopic);
         goto exit;
     }
 
-    memmove(store->id, id, sizeof store->id);
+    memmove(store->id, id, sizeof(store->id));
     r = E4_RESULT_OK;
 exit:
     return r;
@@ -75,18 +75,18 @@ exit:
 
 int e4c_set_idseckey(e4storage *store, const uint8_t *key)
 {
-    memmove(store->privkey, key, sizeof store->privkey);
+    memmove(store->privkey, key, sizeof(store->privkey));
     e4c_sync(store);
     return E4_RESULT_OK;
 }
 
 int e4c_get_idseckey(e4storage* store, uint8_t *key) {
-    memcpy(key, store->privkey, sizeof store->privkey);
+    memcpy(key, store->privkey, sizeof(store->privkey));
     return 0;
 }
 
 int e4c_get_idpubkey(e4storage* store, uint8_t *key) {
-    memcpy(key, store->pubkey, sizeof store->pubkey);
+    memcpy(key, store->pubkey, sizeof(store->pubkey));
     return 0;
 }
 
@@ -192,7 +192,7 @@ int e4c_reset_topics(e4storage *store)
     {
         store->topiccount = 0;
     }
-    for ( i=0 ; i < E4_TOPICS_MAX ; i++ ) {
+    for (i=0 ; i < E4_TOPICS_MAX ; i++) {
         ZERO(store->topics[i]);
     }
 
@@ -201,7 +201,7 @@ int e4c_reset_topics(e4storage *store)
 }
 
 int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey) {
-    memmove(store->pubkey, pubkey, sizeof store->pubkey);
+    memmove(store->pubkey, pubkey, sizeof(store->pubkey));
     e4c_sync(store);
     return E4_RESULT_OK;
 }
@@ -290,7 +290,7 @@ int e4c_reset_devices(e4storage* store)
         store->devicecount = 0;
     }
     /* Attempt to zero memory. This may not work depending on the platform */
-    for ( i=0 ; i < E4_DEVICES_MAX ; i++ ) {
+    for (i=0 ; i < E4_DEVICES_MAX ; i++) {
         ZERO(store->devices[i]);
     }
 

@@ -31,10 +31,10 @@ int main(int argc, char** argv, char** envp) {
 
     char topics[NUM_TOPICS][SIZE_TOPICNAME+1];
 
-    memset(&store, 0, sizeof store);
+    memset(&store, 0, sizeof(store));
 
     urand_fd = fopen("/dev/urandom", "r");
-    if ( urand_fd == NULL  ) {
+    if (urand_fd == NULL) {
         /* can't generate random plaintexts in this case */
         printf("Failed: unable to open /dev/urandom\n");
         returncode = 1;
@@ -42,7 +42,7 @@ int main(int argc, char** argv, char** envp) {
     }
 
     e4retcode = e4c_init(&store);
-    if ( e4retcode != 0 ) {
+    if (e4retcode != 0) {
         printf("Failed: unable to init e4store\n");
         returncode = 1;
         goto exit_close;
@@ -51,15 +51,15 @@ int main(int argc, char** argv, char** envp) {
     e4c_set_storagelocation(&store, "/tmp/unittests.e4c");
 
     /* set the identity key */
-    bytes_read = fread(&clientid, 1, sizeof clientid, urand_fd);
-    if ( bytes_read < sizeof clientid ) {
-        printf("Failed: generating clientid bytes read %lu, expected %lu\n", bytes_read, sizeof clientid);
+    bytes_read = fread(&clientid, 1, sizeof(clientid), urand_fd);
+    if (bytes_read < sizeof(clientid)) {
+        printf("Failed: generating clientid bytes read %lu, expected %lu\n", bytes_read, sizeof(clientid));
         returncode = 2;
         goto exit_close;
     }
-    bytes_read = fread(clientkey, 1, sizeof clientkey, urand_fd);
-    if ( bytes_read < sizeof clientkey ) {
-        printf("Failed: generating clientkey bytes read %lu, expected %lu\n", bytes_read, sizeof clientid);
+    bytes_read = fread(clientkey, 1, sizeof(clientkey), urand_fd);
+    if (bytes_read < sizeof(clientkey)) {
+        printf("Failed: generating clientkey bytes read %lu, expected %lu\n", bytes_read, sizeof(clientid));
         returncode = 3;
         goto exit_close;
     }
@@ -67,32 +67,32 @@ int main(int argc, char** argv, char** envp) {
     e4retcode = e4c_set_id(&store, clientid);
     e4retcode = e4c_set_idkey(&store, clientkey);
 
-    for ( iteration = 0; iteration<NUM_TOPICS; iteration++ ) {
+    for (iteration = 0; iteration<NUM_TOPICS; iteration++) {
 
         int j=0;
 
         memset(topics[iteration], 0, SIZE_TOPICNAME);
-        memset(topicname_current, 0, sizeof topicname_current);
-        memset(topickey_current, 0, sizeof topickey_current);
+        memset(topicname_current, 0, sizeof(topicname_current));
+        memset(topickey_current, 0, sizeof(topickey_current));
 
-        bytes_read = fread(topickey_current, 1, sizeof topickey_current, urand_fd);
-        if ( bytes_read < sizeof topickey_current ) {
-            printf("Failed: generating topickey_current bytes read %lu, expected %lu\n", bytes_read, sizeof topickey_current);
+        bytes_read = fread(topickey_current, 1, sizeof(topickey_current), urand_fd);
+        if (bytes_read < sizeof(topickey_current)) {
+            printf("Failed: generating topickey_current bytes read %lu, expected %lu\n", bytes_read, sizeof(topickey_current));
             returncode = 4;
             goto exit_close;
         }
         bytes_read = fread(topicname_tmp, 1, SIZE_TOPICNAME/2, urand_fd);
-        if ( bytes_read < sizeof topicname_tmp ) {
+        if (bytes_read < sizeof(topicname_tmp)) {
             printf("Failed: generating topicname bytes read %lu, expected %lu\n", bytes_read, SIZE_TOPICNAME/2);
             returncode = 5;
             goto exit_close;
         }
 
-        for ( j = 0; j < SIZE_TOPICNAME/2; j++ ) {
-            snprintf(&topicname_current[2*j], (sizeof topicname_current)-(2*j), "%02x", topicname_tmp[j]);
+        for (j = 0; j < SIZE_TOPICNAME/2; j++) {
+            snprintf(&topicname_current[2*j], (sizeof(topicname_current))-(2*j), "%02x", topicname_tmp[j]);
         }
         bytes_read = strlcpy(&topics[iteration][0], topicname_current, SIZE_TOPICNAME+1);
-        if ( bytes_read < SIZE_TOPICNAME ) {
+        if (bytes_read < SIZE_TOPICNAME) {
             printf("Failed: strlcpy topicname->iteration, read %lu, expected %lu\n", bytes_read, SIZE_TOPICNAME);
             returncode = 6;
             goto exit_close;
@@ -105,14 +105,14 @@ int main(int argc, char** argv, char** envp) {
     /* test sync and reload from file-based storage */
     e4c_sync(&store);
 #ifdef E4_STORE_FILE
-    memset(&store, 0, sizeof store);
+    memset(&store, 0, sizeof(store));
 #endif
     e4c_load(&store, "/tmp/unittests.e4c");
 
     /* TODO: test control messages have their intended effect. */
 
     /* Test E4 encryption using random topic keys */
-    for ( iteration = 0; iteration<ITER_MAX; iteration++) {
+    for (iteration = 0; iteration<ITER_MAX; iteration++) {
 
 
         size_t bytes_read = 0;
@@ -125,8 +125,8 @@ int main(int argc, char** argv, char** envp) {
 
         char* topicname;
 
-        bytes_read = fread(&topicindex, 1, sizeof topicindex, urand_fd);
-        if ( bytes_read < sizeof topicindex ) {
+        bytes_read = fread(&topicindex, 1, sizeof(topicindex), urand_fd);
+        if (bytes_read < sizeof(topicindex)) {
             printf("Failed: unable to read byte for topicindex");
             returncode = 7;
             goto exit_close;
@@ -139,7 +139,7 @@ int main(int argc, char** argv, char** envp) {
         memset(recovered_buffer, 0, PT_MAX+1);
 
         bytes_read = fread(plaintext_buffer, 1, PT_MAX, urand_fd);
-        if ( bytes_read < PT_MAX ) {
+        if (bytes_read < PT_MAX) {
             printf("Failed: unable to read random plaintext. Asked for %lu bytes, got %lu\n", PT_MAX, bytes_read);
             returncode = 8;
             goto exit_close;
@@ -154,7 +154,7 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
-        if ( ciphertext_len != PT_MAX + E4_MSGHDR_LEN ) {
+        if (ciphertext_len != PT_MAX + E4_MSGHDR_LEN) {
             printf("Failed: decrypted ciphertext has length %lu, should be %lu\n", ciphertext_len, PT_MAX+E4_MSGHDR_LEN);
             returncode = 9;
             goto exit_close;
@@ -172,14 +172,14 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
-        if ( recovered_len != PT_MAX ) {
+        if (recovered_len != PT_MAX) {
             printf("Failed: decrypted plaintext has length %lu, should be %lu\n", recovered_len, PT_MAX);
             returncode = 10;
             goto exit_close;
         }
 
 
-        if ( memcmp(recovered_buffer, plaintext_buffer, sizeof plaintext_buffer) != 0 ) {
+        if (memcmp(recovered_buffer, plaintext_buffer, sizeof(plaintext_buffer)) != 0) {
             printf("Failed: recovered buffer not equal to plaintext buffer.\n");
             returncode = 11;
             goto exit_close;

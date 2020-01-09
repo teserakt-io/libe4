@@ -24,15 +24,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-void zeroize( void *v, size_t n )
+void zeroize(void *v, size_t n)
 {
-    volatile unsigned char *p = ( volatile unsigned char * )v;
-    while( n-- ) *p++ = 0;
+    volatile unsigned char *p = (volatile unsigned char *)v;
+    while(n--) *p++ = 0;
 }
 
 int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char *clientname, const size_t clientnamelen)
 {
-    if (clientidlen != E4_ID_LEN ) {
+    if (clientidlen != E4_ID_LEN) {
         return E4_ID_LEN;
     }
     sha3_256_trunc((char*)clientid, clientidlen, clientname, clientnamelen);
@@ -41,7 +41,6 @@ int e4c_derive_clientid(uint8_t *clientid, const size_t clientidlen, const char 
 
 int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *clientid)
 {
-
     int i = 0;
 
     if (topiclen < E4_CTRLTOPIC_LEN + 1)
@@ -52,7 +51,7 @@ int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *
 #if __STDC_VERSION__ >= 199901L
     snprintf(topic, topiclen, "e4/");
 #else
-    if ( topiclen < 3 ) {
+    if (topiclen < 3) {
         return -1;
     }
     sprintf(topic, "e4/");
@@ -63,7 +62,7 @@ int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *
     #if __STDC_VERSION__ >= 199901L
         snprintf((char *)(topic + adjust), topiclen - adjust, "%02x", clientid[i]);
     #else
-        if ( adjust >= topiclen ) {
+        if (adjust >= topiclen) {
             return -1;
         }
         sprintf((char *)(topic + adjust), "%02x", clientid[i]);
@@ -76,7 +75,7 @@ int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *
 /* Computes the topichash, which is currently SHA3-256/128. */
 int e4c_derive_topichash(uint8_t* topichash, const size_t topichash_len, const char* topic) {
     size_t topiclen = strlen(topic);
-    if (topichash_len != E4_ID_LEN ) {
+    if (topichash_len != E4_ID_LEN) {
         return E4_ID_LEN;
     }
     sha3_256_trunc((char*)topichash, topichash_len, topic, topiclen);

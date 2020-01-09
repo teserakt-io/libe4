@@ -76,19 +76,19 @@ int e4c_load(e4storage *store, const char *path)
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    memset(mbuf, 0, sizeof mbuf);
-    rlen = read(fd, mbuf, sizeof E4V2_MAGIC);
-    if (rlen != sizeof E4V2_MAGIC)
+    memset(mbuf, 0, sizeof(mbuf));
+    rlen = read(fd, mbuf, sizeof(E4V2_MAGIC));
+    if (rlen != sizeof(E4V2_MAGIC))
     {
         goto err;
     }
-    if (memcmp(mbuf, E4V2_MAGIC, sizeof E4V2_MAGIC) != 0)
+    if (memcmp(mbuf, E4V2_MAGIC, sizeof(E4V2_MAGIC)) != 0)
     {
         goto err;
     }
 
-    rlen = read(fd, store->id, sizeof store->id);
-    if (rlen != sizeof store->id)
+    rlen = read(fd, store->id, sizeof(store->id));
+    if (rlen != sizeof(store->id))
     {
         goto err;
     }
@@ -104,25 +104,25 @@ int e4c_load(e4storage *store, const char *path)
     e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
 
     /* read in key material */
-    rlen = read(fd, store->privkey, sizeof store->privkey);
-    if (rlen != sizeof store->privkey)
+    rlen = read(fd, store->privkey, sizeof(store->privkey));
+    if (rlen != sizeof(store->privkey))
     {
         goto err;
     }
-    rlen = read(fd, store->pubkey, sizeof store->pubkey);
-    if (rlen != sizeof store->pubkey)
+    rlen = read(fd, store->pubkey, sizeof(store->pubkey));
+    if (rlen != sizeof(store->pubkey))
     {
         goto err;
     }
     
-    rlen = read(fd, store->c2key, sizeof store->c2key);
-    if (rlen != sizeof store->c2key)
+    rlen = read(fd, store->c2key, sizeof(store->c2key));
+    if (rlen != sizeof(store->c2key))
     {
         goto err;
     }
 
-    rlen = read(fd, &store->topiccount, sizeof store->topiccount);
-    if (rlen != sizeof store->topiccount)
+    rlen = read(fd, &store->topiccount, sizeof(store->topiccount));
+    if (rlen != sizeof(store->topiccount))
     {
         goto err;
     }
@@ -145,8 +145,8 @@ int e4c_load(e4storage *store, const char *path)
         }
     }
     
-    rlen = read(fd, &store->devicecount, sizeof store->devicecount);
-    if (rlen != sizeof store->devicecount)
+    rlen = read(fd, &store->devicecount, sizeof(store->devicecount));
+    if (rlen != sizeof(store->devicecount))
     {
         goto err;
     }
@@ -195,28 +195,28 @@ int e4c_sync(e4storage *store)
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    write(fd, E4V2_MAGIC, sizeof E4V2_MAGIC);
-    write(fd, store->id, sizeof store->id);
-    write(fd, store->privkey, sizeof store->privkey);
-    write(fd, store->pubkey, sizeof store->pubkey);
-    write(fd, store->c2key, sizeof store->c2key);
-    write(fd, &store->topiccount, sizeof store->topiccount);
+    write(fd, E4V2_MAGIC, sizeof(E4V2_MAGIC));
+    write(fd, store->id, sizeof(store->id));
+    write(fd, store->privkey, sizeof(store->privkey));
+    write(fd, store->pubkey, sizeof(store->pubkey));
+    write(fd, store->c2key, sizeof(store->c2key));
+    write(fd, &store->topiccount, sizeof(store->topiccount));
 
     for (i = 0; i < store->topiccount; i++)
     {
         topic_key *t = &(store->topics[0]) + i;
 
-        write(fd, t->topic, sizeof t->topic);
-        write(fd, t->key, sizeof t->key);
+        write(fd, t->topic, sizeof(t->topic));
+        write(fd, t->key, sizeof(t->key));
     }
-    write(fd, &store->devicecount, sizeof store->devicecount);
+    write(fd, &store->devicecount, sizeof(store->devicecount));
 
     for (i = 0; i < store->devicecount; i++)
     {
         device_key *d = &(store->devices[0]) + i;
 
-        write(fd, d->id, sizeof d->id);
-        write(fd, d->pubkey, sizeof d->pubkey);
+        write(fd, d->id, sizeof(d->id));
+        write(fd, d->pubkey, sizeof(d->pubkey));
     }
     close(fd);
 
@@ -230,33 +230,33 @@ int e4c_set_id(e4storage *store, const uint8_t *id)
     ZERO(controltopic);
 
     r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, id);
-    if ( r != E4_RESULT_OK ) goto exit;
+    if (r != E4_RESULT_OK) goto exit;
 
     r = e4c_derive_topichash(store->ctrltopic, E4_TOPICHASH_LEN, controltopic);
-    if ( r != E4_RESULT_OK ) {
+    if (r != E4_RESULT_OK) {
         ZERO(store->ctrltopic);
         goto exit;
     }
 
-    memmove(store->id, id, sizeof store->id);
+    memmove(store->id, id, sizeof(store->id));
     r = E4_RESULT_OK;
 exit:
     return r;
 }
 int e4c_set_idseckey(e4storage *store, const uint8_t *key)
 {
-    memmove(store->privkey, key, sizeof store->privkey);
+    memmove(store->privkey, key, sizeof(store->privkey));
     e4c_sync(store);
     return E4_RESULT_OK;
 }
 
 int e4c_get_idseckey(e4storage* store, uint8_t *key) {
-    memcpy(key, store->privkey, sizeof store->privkey);
+    memcpy(key, store->privkey, sizeof(store->privkey));
     return 0;
 }
 
 int e4c_get_idpubkey(e4storage* store, uint8_t *key) {
-    memcpy(key, store->pubkey, sizeof store->pubkey);
+    memcpy(key, store->pubkey, sizeof(store->pubkey));
     return 0;
 }
 
@@ -362,7 +362,7 @@ int e4c_reset_topics(e4storage *store)
     {
         store->topiccount = 0;
     }
-    for ( i=0 ; i < E4_TOPICS_MAX ; i++ ) {
+    for (i=0 ; i < E4_TOPICS_MAX ; i++) {
         ZERO(store->topics[i]);
     }
 
@@ -371,7 +371,7 @@ int e4c_reset_topics(e4storage *store)
 }
 
 int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey) {
-    memmove(store->pubkey, pubkey, sizeof store->pubkey);
+    memmove(store->pubkey, pubkey, sizeof(store->pubkey));
     e4c_sync(store);
     return E4_RESULT_OK;
 }
@@ -460,7 +460,7 @@ int e4c_reset_devices(e4storage* store)
         store->devicecount = 0;
     }
     /* Attempt to zero memory. This may not work depending on the platform */
-    for ( i=0 ; i < E4_DEVICES_MAX ; i++ ) {
+    for (i=0 ; i < E4_DEVICES_MAX ; i++) {
         ZERO(store->devices[i]);
     }
 

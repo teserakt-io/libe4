@@ -97,7 +97,7 @@ int e4c_protect_message(uint8_t *cptr,
     *clen += E4_TIMESTAMP_LEN;
 
     /* safety check */
-    if ( *clen != mlen + E4_MSGHDR_LEN ) {
+    if (*clen != mlen + E4_MSGHDR_LEN) {
         return E4_ERROR_INTERNAL;
     }
 
@@ -186,7 +186,7 @@ int e4c_unprotect_message(uint8_t *mptr,
     }
     else
     {
-        if (!(proto_opts & E4_OPTION_IGNORE_TIMESTAMP )) {   
+        if (!(proto_opts & E4_OPTION_IGNORE_TIMESTAMP)) {   
             if (tstamp >= secs1970)
             {
                 if (tstamp - secs1970 > E4C_TIME_FUTURE)

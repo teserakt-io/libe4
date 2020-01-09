@@ -26,7 +26,7 @@ extern "C" {
 #define ZERO(X)                   \
     do                            \
     {                             \
-        zeroize(&X, sizeof X);    \
+        zeroize(&X, sizeof(X));    \
     } while (0)
 #endif
 
