@@ -1,4 +1,6 @@
 
+OBJS=$(E4_COMMON_OBJS) $(E4_PUB_OBJS)
+
 pub_lib: setup pub_header $(OBJS)
 	mkdir -p $(LIBDIR); \
         cp -rfv $(INCDIR)/* $(OUTINCDIR)/; \
@@ -13,6 +15,9 @@ pub_so: setup pub_header $(OBJS)
 
 $(BUILDDIR)/include/e4config/e4_config.h:
 	echo '#define E4_MODE_PUBKEY 1' > $@
+ifeq ("$(STORE)", "none")
+	echo "#define E4_STORE_NONE 1" >> $@
+endif
 ifeq ("$(STORE)", "mem")
 	echo "#define E4_STORE_MEM 1" >> $@
 endif

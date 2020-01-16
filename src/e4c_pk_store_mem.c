@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+#ifndef E4_STORE_NONE
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -342,4 +344,5 @@ void e4c_debug_print(e4storage *store)
 {
     return;
 }
+#endif
 #endif

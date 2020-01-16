@@ -1,4 +1,4 @@
 
 .PHONY:default
 
-default: setup lib
+default: setup lib postbuild_config_echo

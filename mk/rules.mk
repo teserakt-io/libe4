@@ -29,9 +29,9 @@ clean:
 	rm -rf $(LIBDIR)
 	rm -rf build
 
-testbuild: clean setup lib $(E4TESTS)
+testbuild: clean setup lib $(E4TESTS) postbuild_config_echo
 
-test: testbuild $(E4TESTEXEC)
+test: testbuild $(E4TESTEXEC) postbuild_config_echo
 
 format:
 	clang-format -i src/*.c src/crypto/*.c include/e4/*.h include/e4/crypto/*.h include/e4/internal/*.h

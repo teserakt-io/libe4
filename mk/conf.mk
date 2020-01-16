@@ -23,3 +23,18 @@ DOCDIR  = doc
 LIBNAME = libe4
 
 
+.PHONY postbuild_config_echo: 
+	@echo ""
+	@echo "================================================================================="
+	@echo ""
+	@echo "LibE4 (C) Teserakt AG 2018-2020 has been built."
+	@echo "The compilation options are as follows"
+	@echo ""
+	@echo "CONF=$(CONF)"
+	@echo "CSTD=$(CSTD)"
+	@echo "CC=$(CC)"
+	@echo "LD=$(LD)"
+	@echo "STORE=$(STORE)"
+	@echo "E4_OUTPUT_DIR=$(E4_OUTPUT_DIR)"
+	@echo ""
+	@echo "================================================================================="

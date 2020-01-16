@@ -1,6 +1,7 @@
 
 include mk/first.mk
 include mk/conf.mk
+include mk/objects.mk
 
 CONF ?= symkey
 STORE ?= file
