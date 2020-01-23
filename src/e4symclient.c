@@ -247,7 +247,7 @@ int e4c_protect_message(uint8_t *cptr,
     const char *topic,
     e4storage *storage,
     const uint32_t proto_opts
-) __attribute__((alias ("e4c_symkey_unprotect_message")));
+) __attribute__((alias ("e4c_symkey_protect_message")));
 
 int e4c_unprotect_message(uint8_t *mptr,
     size_t mmax,
