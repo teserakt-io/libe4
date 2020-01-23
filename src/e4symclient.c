@@ -37,7 +37,7 @@ uint64_t secs1970 = 0;
 #define E4C_TIME_TOO_OLD (10 * 60)
 
 /* Protect message */
-int e4c_protect_message(uint8_t *cptr,
+int e4c_symkey_protect_message(uint8_t *cptr,
                         size_t cmax,
                         size_t *clen,
                         const uint8_t *mptr,
@@ -107,7 +107,7 @@ int e4c_protect_message(uint8_t *cptr,
 
 /* Unprotect message */
 
-int e4c_unprotect_message(uint8_t *mptr,
+int e4c_symkey_unprotect_message(uint8_t *mptr,
                           size_t mmax,
                           size_t *mlen,
                           const uint8_t *cptr,
@@ -236,3 +236,29 @@ int e4c_unprotect_message(uint8_t *mptr,
 
     return E4_ERROR_INVALID_COMMAND;
 }
+
+#ifndef E4_MODE_ALL
+
+int e4c_protect_message(uint8_t *cptr,
+    size_t cmax,
+    size_t *clen,
+    const uint8_t *mptr,
+    size_t mlen,
+    const char *topic,
+    e4storage *storage,
+    const uint32_t proto_opts
+) __attribute__((alias ("e4c_symkey_unprotect_message")));
+
+int e4c_unprotect_message(uint8_t *mptr,
+    size_t mmax,
+    size_t *mlen,
+    const uint8_t *cptr,
+    size_t clen,
+    const char *topic,
+    e4storage *storage,
+    const uint32_t proto_opts
+) __attribute__((alias ("e4c_symkey_unprotect_message")));
+
+
+#endif
+
