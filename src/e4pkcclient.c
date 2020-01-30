@@ -23,7 +23,8 @@
 #endif
 
 #include "e4/e4.h"
-
+#include "e4/inline.h"
+#include "e4/util.h"
 
 #include "e4/crypto/aes_siv.h"
 #include "e4/crypto/sha3.h"
@@ -39,6 +40,52 @@ uint64_t secs1970 = 0;
 /* Currently allow 10 min slack in either direction in timestamps */
 #define E4C_TIME_FUTURE (10 * 60)
 #define E4C_TIME_TOO_OLD (10 * 60)
+
+INLINE int e4c_pubkey_c2sharedsecret_derive(uint8_t* key, const size_t keylen, e4storage* storage) {
+
+    int r = E4_RESULT_OK;
+    uint8_t deviceedsk[E4_PK_EDDSA_PRIVKEY_LEN];
+    uint8_t c2pk[E4_PK_X25519_PUBKEY_LEN];
+    uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
+    uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
+
+    if ( keylen != E4_KEY_LEN ) {
+        return E4_ERROR_PARAMETER_INVALID;
+    }
+
+    zeroize(c2pk, sizeof(c2pk));
+    zeroize(devicesk, sizeof(devicesk));
+    zeroize(sharedpoint, sizeof(sharedpoint));
+
+    r = e4c_get_c2_pubkey(storage, c2pk);
+    if (r != E4_RESULT_OK) {
+        return r;
+    }
+    r = e4c_get_idseckey(storage, deviceedsk);
+    if (r != E4_RESULT_OK) {
+        return r;
+    }
+        
+    /* convert our key to X25519 */
+    xed25519_convert_ed2c_private(devicesk, deviceedsk);
+
+    /* key=sha3(X25519(devicesk, c2pk)) */
+
+    curve25519(sharedpoint, devicesk, c2pk);
+    sha3(sharedpoint, E4_PK_X25519_PUBKEY_LEN, key, E4_KEY_LEN); 
+
+    return r;
+}
+
+int e4c_pubkey_c2sharedsecret_derivestore(e4storage* storage) {
+
+    uint8_t sharedkey[E4_KEY_LEN];
+    int r = 0;
+    r = e4c_pubkey_c2sharedsecret_derive(sharedkey, E4_KEY_LEN, storage);
+    if ( r != E4_RESULT_OK ) return r;
+    r = e4c_set_c2sharedsecret(storage, sharedkey);
+    return r;
+}
 
 /* Protect message */
 int e4c_protect_message(uint8_t *cptr,
@@ -176,14 +223,6 @@ int e4c_unprotect_message(uint8_t *mptr,
 
     if (e4c_is_device_ctrltopic(storage, topic) == 0)
     {
-        uint8_t deviceedsk[E4_PK_EDDSA_PRIVKEY_LEN];
-        uint8_t c2pk[E4_PK_X25519_PUBKEY_LEN];
-        uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
-        uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
-
-        memset(c2pk, 0, sizeof(c2pk));
-        memset(devicesk, 0, sizeof(devicesk));
-        memset(sharedpoint, 0, sizeof(sharedpoint));
         /* control topic being used: */
         control = 1;
 
@@ -193,18 +232,9 @@ int e4c_unprotect_message(uint8_t *mptr,
             return E4_ERROR_CIPHERTEXT_TOO_SHORT;
         }
 
-        r = e4c_get_c2_pubkey(storage, c2pk);
-        if (r != E4_RESULT_OK) {
+        if ( (r = e4c_get_c2sharedsecret(storage, key)) != E4_RESULT_OK ) {
             return r;
         }
-        e4c_get_idseckey(storage, deviceedsk);
-        /* convert our key to X25519 */
-        xed25519_convert_ed2c_private(devicesk, deviceedsk);
-
-        /* key=sha3(X25519(devicesk, c2pk)) */
-
-        curve25519(sharedpoint, devicesk, c2pk);
-        sha3(sharedpoint, E4_PK_X25519_PUBKEY_LEN, key, E4_KEY_LEN); 
         /* set things up for symmetric decryption: */
         /* From the C2:        Timestamp (8) | IV (16) | Ciphertext (n) */
         assocdatalen = E4_TIMESTAMP_LEN;

@@ -174,6 +174,9 @@ int e4c_unprotect_message(uint8_t *message,
                           e4storage *storage,
                           const uint32_t proto_opts);
 
+#ifdef E4_MODE_PUBKEY
+int e4c_pubkey_c2sharedsecret_derivestore(e4storage* storage);
+#endif
 
 /* the e4storage type pre-defined above implements these API calls */
 int e4c_init(e4storage *store);
@@ -197,6 +200,11 @@ int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey);
 int e4c_set_idseckey(e4storage *store, const uint8_t *key);
 int e4c_get_idseckey(e4storage* store, uint8_t *key);
 int e4c_get_idpubkey(e4storage* store, uint8_t *key);
+
+/* APIs to store and retrieve the C2 shared secret */
+int e4c_set_c2sharedsecret(e4storage* store, const uint8_t* key);
+int e4c_get_c2sharedsecret(e4storage* store, uint8_t* key);
+
 int e4c_getdeviceindex(e4storage *store, const uint8_t* id);
 int e4c_getdevicekey(uint8_t* key, e4storage *store, const int index);
 int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *key);
