@@ -33,11 +33,9 @@ int main(int argc, char** argv) {
         printf("\n");
         printhex(pkkat[0].c2_montgom_seckey, sizeof(pkkat[0].c2_montgom_seckey));
         printf("\n");
-
-        //return 1;
-    } else {
-        printf("c25519_privkey_convert: OK.\n");
-    }
+        
+        return 1;
+    };
 
     uint8_t c2_c255_pubkey[32] = {0};
 
@@ -52,10 +50,8 @@ int main(int argc, char** argv) {
         printhex(pkkat[0].c2_montgom_pubkey, sizeof(pkkat[0].c2_montgom_pubkey));
         printf("\n");
 
-        //return 1;
-    } else {
-        printf("c25519_pubkey_convert: OK.\n");
-    }
+        return 1;
+    };
 
     // curve25519 variant c2->device:
     
@@ -74,9 +70,7 @@ int main(int argc, char** argv) {
         printhex(pkkat[0].dev_sharedkey, sizeof(pkkat[0].dev_sharedkey));
         printf("\n");
 
-        //return 1;
-    } else {
-        printf("c25519_kex_c2d: OK.\n");
+        return 1;
     }
     
     // curve25519 variant c2->device:
@@ -96,11 +90,11 @@ int main(int argc, char** argv) {
         printhex(pkkat[0].dev_sharedkey, sizeof(pkkat[0].dev_sharedkey));
         printf("\n");
 
-        //return 1;
-    } else {
-        printf("c25519_kex_d2c: OK.\n");
+        return 1;
     }
     }
+
+    printf("Curve25519 tests: OK\n");
 
     return 0;
 }

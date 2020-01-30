@@ -10,33 +10,6 @@
 
 int main(int argc, char** argv, char** envp) {
 
-	printf("LIBE4 AES-SIV Compatibility testing.\n\n");
-
-    /*int aes256_encrypt_siv(uint8_t *ct,
-                       size_t *ctlen, 
-                       const uint8_t *ad,
-                       size_t adlen, 
-                       const uint8_t *pt,
-                       size_t ptlen,  
-                       const uint8_t *key);
-
-      int aes256_decrypt_siv(uint8_t *pt,
-                       size_t *ptlen, 
-                       const uint8_t *ad,
-                       size_t adlen, 
-                       const uint8_t *ct,
-                       size_t ctlen, 
-                       const uint8_t *key);
-
-typedef struct _e4_aessiv_kat {
-    const uint8_t ciphertext[116];
-    const uint8_t plaintext[100];
-    const uint8_t ad[32];
-	const uint8_t key[32];
-} e4_aessiv_kat;
-
-
-    */ 
     size_t failures = 0;
 
     for (int i = 0; i < SIV_KAT_NUM; i++) {
@@ -79,7 +52,7 @@ typedef struct _e4_aessiv_kat {
         }
     }
     printf("\n");
-    printf("SIV test executed %d KATs, with %ld failures\n", SIV_KAT_NUM, failures);
+    printf("SIV test: (executed %d KATs, with %ld divergences) %s\n", SIV_KAT_NUM, failures, failures==0 ? "OK" : "Failed");
 
     return failures > 0 ? 1 : 0;
 }

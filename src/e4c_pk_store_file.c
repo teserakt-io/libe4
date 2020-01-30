@@ -61,6 +61,7 @@ int e4c_set_storagelocation(e4storage *store, const char *path)
 int e4c_load(e4storage *store, const char *path)
 {
     int fd, i, r;
+    size_t devicekeypresent, c2keypresent;
     size_t rlen = 0;
     char mbuf[4];
     char controltopic[E4_CTRLTOPIC_LEN + 1];
@@ -173,7 +174,19 @@ int e4c_load(e4storage *store, const char *path)
 
     close(fd);
     ZERO(store->c2sharedkey);
-    e4c_pubkey_c2sharedsecret_derivestore(store);
+    devicekeypresent = zerocheck(store->privkey, sizeof(store->privkey));
+    c2keypresent= zerocheck(store->c2key, sizeof(store->c2key));
+    if ( c2keypresent != 0 && devicekeypresent != 0 )
+    {
+        /* on load from storage we have both a c2 public key and 
+         * a device key. We can therefore derive the shared secret 
+         * for KEX for control messsages.
+         * If this condition is not triggered, it is because key material 
+         * is missing. Setting both the device key and the C2 public key 
+         * will trigger shared point generation.
+         */
+        e4c_pubkey_c2sharedsecret_derivestore(store);
+    }
     return 0;
 err:
     perror(path);

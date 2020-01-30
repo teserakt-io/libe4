@@ -63,7 +63,7 @@ int main(int argc, char** argv, char** envp) {
         printf("Util tests: OK\n");
     }
     else {
-        printf("Util tests: FAILED\n");
+        printf("Util tests: Failed\n");
     }
     return returncode;
 }

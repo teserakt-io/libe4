@@ -250,6 +250,8 @@ int main(int argc, char** argv, char** envp) {
         }
     }
 
+    printf("e4 pubkey command message tests: OK\n");
+
 exit_close:
     fclose(urand_fd);
 exit:
