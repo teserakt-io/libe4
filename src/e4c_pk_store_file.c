@@ -38,6 +38,7 @@ int e4c_init(e4storage *store)
     ZERO(store->privkey);
     ZERO(store->pubkey);
     ZERO(store->c2key);
+    ZERO(store->c2sharedkey);
     ZERO(store->ctrltopic);
     ZERO(store->topiccount);
     ZERO(store->devicecount);
@@ -60,6 +61,7 @@ int e4c_set_storagelocation(e4storage *store, const char *path)
 int e4c_load(e4storage *store, const char *path)
 {
     int fd, i, r;
+    size_t devicekeypresent, c2keypresent;
     size_t rlen = 0;
     char mbuf[4];
     char controltopic[E4_CTRLTOPIC_LEN + 1];
@@ -171,10 +173,25 @@ int e4c_load(e4storage *store, const char *path)
 #endif
 
     close(fd);
+    ZERO(store->c2sharedkey);
+    devicekeypresent = zerocheck(store->privkey, sizeof(store->privkey));
+    c2keypresent= zerocheck(store->c2key, sizeof(store->c2key));
+    if ( c2keypresent != 0 && devicekeypresent != 0 )
+    {
+        /* on load from storage we have both a c2 public key and 
+         * a device key. We can therefore derive the shared secret 
+         * for KEX for control messsages.
+         * If this condition is not triggered, it is because key material 
+         * is missing. Setting both the device key and the C2 public key 
+         * will trigger shared point generation.
+         */
+        e4c_pubkey_c2sharedsecret_derivestore(store);
+    }
     return 0;
 err:
     perror(path);
     close(fd);
+
     return E4_ERROR_PERSISTENCE_ERROR;
 }
 
@@ -245,8 +262,13 @@ exit:
 }
 int e4c_set_idseckey(e4storage *store, const uint8_t *key)
 {
+    size_t c2keynotempty = 0;
     memmove(store->privkey, key, sizeof(store->privkey));
     e4c_sync(store);
+    c2keynotempty = zerocheck(store->c2key, sizeof(store->c2key));
+    if (c2keynotempty) {
+        e4c_pubkey_c2sharedsecret_derivestore(store);
+    }
     return E4_RESULT_OK;
 }
 
@@ -469,14 +491,37 @@ int e4c_reset_devices(e4storage* store)
 }
 
 int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key) {
+    size_t devicekeynotempty = 0;
     memcpy(store->c2key, key, E4_PK_X25519_PUBKEY_LEN);
     e4c_sync(store);
-    return 0;
+    devicekeynotempty = zerocheck(store->privkey, sizeof(store->privkey));
+    if (devicekeynotempty) {
+        e4c_pubkey_c2sharedsecret_derivestore(store);
+    }
+    return E4_RESULT_OK;
 }
 
 int e4c_get_c2_pubkey(e4storage* store, uint8_t* key) {
+    size_t empty = zerocheck(store->c2key, sizeof(store->c2key));
+    if (empty == 0) {
+        return E4_ERROR_PERSISTENCE_ERROR;
+    }
     memcpy(key, store->c2key, E4_PK_X25519_PUBKEY_LEN);
-    return 0;
+    return E4_RESULT_OK;
+}
+
+int e4c_set_c2sharedsecret(e4storage* store, const uint8_t* key) {
+    memcpy(store->c2sharedkey, key, E4_KEY_LEN);
+    return E4_RESULT_OK;
+}
+
+int e4c_get_c2sharedsecret(e4storage* store, uint8_t* key) {
+    size_t empty = zerocheck(store->c2sharedkey, sizeof(store->c2sharedkey));
+    if (empty == 0) {
+        return E4_ERROR_PERSISTENCE_ERROR;
+    }
+    memcpy(key, store->c2sharedkey, E4_KEY_LEN);
+    return E4_RESULT_OK;
 }
 
 #ifdef DEBUG

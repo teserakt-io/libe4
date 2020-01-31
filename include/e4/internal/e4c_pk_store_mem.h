@@ -32,6 +32,8 @@ struct _e4storage
     uint8_t pubkey[E4_PK_EDDSA_PUBKEY_LEN];
     uint8_t c2key[E4_PK_X25519_PUBKEY_LEN];
 
+    uint8_t c2sharedkey[E4_KEY_LEN];
+
     uint16_t devicecount;
     uint16_t topiccount;
 

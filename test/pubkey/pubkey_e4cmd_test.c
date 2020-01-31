@@ -107,6 +107,26 @@ int main(int argc, char** argv, char** envp) {
             returncode = 1;
             goto exit_close;
         }
+
+
+        /* now we have access to the shared key as a result of the dumb 
+         * optimisation, let's check that vs the KAT as well */
+
+        if ( memcmp(store.c2sharedkey, pkkat[i].c2_sharedkey, sizeof(pkkat[i].c2_sharedkey)) != 0 ) {
+            printf("Failed: libe4 has not derived correct sharedkey;\n");
+            printf("        Further tests are pretty much useless.\n");
+            for ( int j = 0; j < E4_KEY_LEN; j++ ) {
+                printf("0x%02x ", store.c2sharedkey[j]);
+            }
+            printf("\n");
+            for ( int j = 0; j < E4_KEY_LEN; j++ ) {
+                printf("0x%02x ", pkkat[i].c2_sharedkey[j]);
+            }
+            printf("\n");
+            returncode = 1;
+            goto exit_close;
+        }
+
         /* now we are set up, let's try processing those command messages */
 
         memset(messagebuffer, 0, sizeof(messagebuffer));
@@ -229,6 +249,8 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
     }
+
+    printf("e4 pubkey command message tests: OK\n");
 
 exit_close:
     fclose(urand_fd);
