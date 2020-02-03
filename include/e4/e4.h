@@ -39,6 +39,14 @@ extern "C" {
 #include "e4/storage.h"
 
 #ifndef E4_MODE_ALL
+/* If we are not using the "all" mode, we redefine the appropriate 
+ * API for public or private key to match one of these functions
+ *
+ * NOTE: we might want to consider dropping this behaviour entirely and 
+ * using just the symkey or pubkey names, to get rid of the ugly linker trick 
+ * and developers are more than smart enough to figure this stuff out anyway.
+ */
+
 /* e4c_protect_message produces a protected message for onwards
    transmission. 
 
