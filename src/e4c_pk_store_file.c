@@ -130,6 +130,10 @@ int e4c_load(e4storage *store, const char *path)
     {
         goto err;
     }
+    if (store->topiccount > E4_TOPICS_MAX) {
+        /* we must not process more entries than we can handle*/
+        goto err;
+    }
 
     /* TODO: detect if we cannot read everything based on the topiccount */
 
@@ -152,6 +156,10 @@ int e4c_load(e4storage *store, const char *path)
     rlen = read(fd, &store->devicecount, sizeof(store->devicecount));
     if (rlen != sizeof(store->devicecount))
     {
+        goto err;
+    }
+    if (store->devicecount > E4_DEVICES_MAX) {
+        /* we must not process more entries than we can handle*/
         goto err;
     }
     
