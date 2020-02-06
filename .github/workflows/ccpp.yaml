@@ -11,8 +11,6 @@ jobs:
     - uses: actions/checkout@v1
     - name: make clean
       run: CSTD=c89 CONF=symkey make clean
-    - name: make tidy (static analysis)
-      run: CSTD=c89 CONF=symkey make tidy
     - name: make 
       run: CSTD=c89 CONF=symkey make
     - name: make test (ASAN/UBSAN)
@@ -28,8 +26,6 @@ jobs:
     - uses: actions/checkout@v1
     - name: make clean
       run: CSTD=c89 CONF=pubkey make clean
-    - name: make tidy (static analysis)
-      run: CSTD=c89 CONF=pubkey make tidy
     - name: make
       run: CSTD=c89 CONF=pubkey make
     - name: make test (ASAN/UBSAN)
