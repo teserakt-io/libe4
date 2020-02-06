@@ -1,4 +1,5 @@
 
+SRCS=$(E4_COMMON_SRCS) $(E4_PUB_SRCS)
 OBJS=$(E4_COMMON_OBJS) $(E4_PUB_OBJS)
 
 pub_lib: setup pub_header $(OBJS)

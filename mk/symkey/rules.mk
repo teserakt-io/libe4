@@ -1,4 +1,5 @@
 
+SRCS=$(E4_COMMON_SRCS) $(E4_SYM_SRCS)
 OBJS=$(E4_COMMON_OBJS) $(E4_SYM_OBJS)
 
 sym_lib: setup sym_header $(OBJS)

@@ -8,6 +8,8 @@ ARFLAGS  = rcs
 CFLAGS	 = -Wall -Werror -fPIC -std=$(CSTD) $(E4_CFLAGS)
 LDFLAGS	 = -L. $(E4_LDFLAGS)
 
+CONFIG_DEFINES=
+
 O = o
 
 TESTCFLAGS = -Wall -Werror -g -std=c11 $(E4_CFLAGS)
@@ -21,6 +23,16 @@ SRCDIR  = src
 DOCDIR  = doc
 
 LIBNAME = libe4
+
+ifeq ("$(STORE)", "none")
+CONFIG_DEFINES += -DE4_STORE_NONE
+endif
+ifeq ("$(STORE)", "mem")
+CONFIG_DEFINES += -DE4_STORE_MEM
+endif
+ifeq ("$(STORE)", "file")
+CONFIG_DEFINES += -DE4_STORE_FILE
+endif
 
 
 .PHONY postbuild_config_echo: 
