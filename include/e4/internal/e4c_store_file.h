@@ -24,8 +24,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-
+#ifndef E4_TOPICS_MAX
 #define E4_TOPICS_MAX 100
+#endif
+
 #define E4_MAX_PATH 255
 
 /* In memory structures that represent the file. */
