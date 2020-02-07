@@ -38,16 +38,10 @@ extern "C" {
 /* Headers for the storage APIs */
 #include "e4/storage.h"
 
-#ifndef E4_MODE_ALL
-/* If we are not using the "all" mode, we redefine the appropriate 
- * API for public or private key to match one of these functions
+/* If you are using a specific version of the library, the 
+ * following primitives are valid:
  *
- * NOTE: we might want to consider dropping this behaviour entirely and 
- * using just the symkey or pubkey names, to get rid of the ugly linker trick 
- * and developers are more than smart enough to figure this stuff out anyway.
- */
-
-/* e4c_protect_message produces a protected message for onwards
+ * e4c_protect_message produces a protected message for onwards
    transmission. 
 
 Parameters:
@@ -72,14 +66,14 @@ Returns:
    failure.
 
  */
-int e4c_protect_message(uint8_t *ciphertext,
+/*int e4c_protect_message(uint8_t *ciphertext,
                         size_t ciphertext_max_len,
                         size_t *ciphertext_len,
                         const uint8_t *message,
                         size_t message_len,
                         const char *topic_name,
                         e4storage *storage,
-                        const uint32_t proto_opts);
+                        const uint32_t proto_opts);*/
 
 /* e4c_unprotect_message retrieves and authenticates a message that was 
 encrypted by E4.
@@ -105,20 +99,34 @@ Returns:
    E4_ERROR_... on error.
 
 */
-int e4c_unprotect_message(uint8_t *message,
+/*int e4c_unprotect_message(uint8_t *message,
                           size_t message_max_len,
                           size_t *message_len,
                           const uint8_t *ciphertext,
                           size_t ciphertext_len,
                           const char *topic_name,
                           e4storage *storage,
-                          const uint32_t proto_opts);
+                          const uint32_t proto_opts);*/
+
 #ifdef E4_MODE_PUBKEY
-int e4c_pubkey_c2sharedsecret_derivestore(e4storage* storage);
+    #include "e4/e4pubkey.h"
+
+    #define e4c_protect_message e4c_pubkey_protect_message
+    #define e4c_unprotect_message e4c_pubkey_unprotect_message
 #endif
 
-#else
-/* include forward declarations for specific implementations. */
+#ifdef E4_MODE_SYMKEY
+    #include "e4/e4symkey.h"
+
+    #define e4c_protect_message e4c_symkey_protect_message
+    #define e4c_unprotect_message e4c_symkey_unprotect_message
+#endif
+
+#ifdef E4_MODE_ALL
+/* include forward declarations for specific implementations. 
+ *
+ * In this mode, shortcuts e4c_protect/e4c_unprotect are not defined (yet)
+ */
 #include "e4/e4pubkey.h"
 #include "e4/e4symkey.h"
 #endif

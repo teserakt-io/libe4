@@ -440,28 +440,4 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
     return E4_ERROR_INVALID_COMMAND;
 }
 
-#ifndef E4_MODE_ALL
-
-int e4c_protect_message(uint8_t *cptr,
-    size_t cmax,
-    size_t *clen,
-    const uint8_t *mptr,
-    size_t mlen,
-    const char *topic,
-    e4storage *storage,
-    const uint32_t proto_opts
-) __attribute__((alias ("e4c_pubkey_protect_message")));
-
-int e4c_unprotect_message(uint8_t *mptr,
-    size_t mmax,
-    size_t *mlen,
-    const uint8_t *cptr,
-    size_t clen,
-    const char *topic,
-    e4storage *storage,
-    const uint32_t proto_opts
-) __attribute__((alias ("e4c_pubkey_unprotect_message")));
-
-
-#endif
 

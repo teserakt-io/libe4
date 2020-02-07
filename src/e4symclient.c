@@ -51,10 +51,14 @@ int e4c_symkey_protect_message(uint8_t *cptr,
     uint64_t time_now = 0;
 
     if (mlen + E4_MSGHDR_LEN > cmax) /* actually: not enough space */
+    {
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
+    }
     if (mlen + E4_MSGHDR_LEN < mlen) /* overflow */
+    {
         return E4_ERROR_PARAMETER_OVERFLOW;
-    
+    }
+
     if (cptr == NULL ||
         mptr == NULL ||
         topic == NULL ||
@@ -236,29 +240,4 @@ int e4c_symkey_unprotect_message(uint8_t *mptr,
 
     return E4_ERROR_INVALID_COMMAND;
 }
-
-#ifndef E4_MODE_ALL
-
-int e4c_protect_message(uint8_t *cptr,
-    size_t cmax,
-    size_t *clen,
-    const uint8_t *mptr,
-    size_t mlen,
-    const char *topic,
-    e4storage *storage,
-    const uint32_t proto_opts
-) __attribute__((alias ("e4c_symkey_protect_message")));
-
-int e4c_unprotect_message(uint8_t *mptr,
-    size_t mmax,
-    size_t *mlen,
-    const uint8_t *cptr,
-    size_t clen,
-    const char *topic,
-    e4storage *storage,
-    const uint32_t proto_opts
-) __attribute__((alias ("e4c_symkey_unprotect_message")));
-
-
-#endif
 

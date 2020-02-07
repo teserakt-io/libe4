@@ -91,7 +91,13 @@ int e4c_set_idsymkey(e4storage *store, const uint8_t *key)
     return E4_RESULT_OK;
 }
 
-const uint8_t* e4c_set_idsymkey_cached(e4storage *store)
+int e4c_get_idsymkey(e4storage *store, uint8_t *key)
+{
+    memmove(key, store->key, sizeof(store->key));
+    return E4_RESULT_OK;
+}
+
+const uint8_t* e4c_get_idsymkey_cached(e4storage *store)
 {
     return store->key;
 }
