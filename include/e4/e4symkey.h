@@ -1,6 +1,6 @@
 
-#ifndef E4_PUBKEY_H
-#define E4_PUBKEY_H
+#ifndef E4_SYMKEY_H
+#define E4_SYMKEY_H
 
 int e4c_symkey_protect_message(uint8_t *ciphertext,
                         size_t ciphertext_max_len,
