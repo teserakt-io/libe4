@@ -36,17 +36,17 @@ int e4c_init(e4storage *store)
     store->topiccount = 0;
     ZERO(store->topics);
     ZERO(store->filepath);
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_storagelocation(e4storage *store, const char *path)
 {
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_load(e4storage *store, const char *path)
 {
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_sync(e4storage *store)
@@ -76,11 +76,24 @@ exit:
     return r;
 }
 
+int e4c_get_id(e4storage *store, uint8_t* id) {
+    memmove(id, store->id, sizeof(store->id));
+    return E4_RESULT_OK;
+}
 
-int e4c_set_idkey(e4storage *store, const uint8_t *key)
+const uint8_t* e4c_get_id_cached(e4storage* store) {
+    return store->id;
+}
+
+int e4c_set_idsymkey(e4storage *store, const uint8_t *key)
 {
     memmove(store->key, key, sizeof(store->key));
     return E4_RESULT_OK;
+}
+
+const uint8_t* e4c_set_idsymkey_cached(e4storage *store)
+{
+    return store->key;
 }
 
 int e4c_getindex(e4storage *store, const char *topic)
@@ -125,7 +138,7 @@ int e4c_gettopickey(uint8_t *key, e4storage *store, const int index)
 
     memcpy(key, store->topics[index].key, E4_KEY_LEN);
 
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t *key)
@@ -187,7 +200,7 @@ int e4c_reset_topics(e4storage *store)
 
     e4c_sync(store);
 
-    return 0;
+    return E4_RESULT_OK;
 }
 
 #ifdef DEBUG

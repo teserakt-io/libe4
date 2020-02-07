@@ -76,7 +76,7 @@ int e4c_symkey_protect_message(uint8_t *cptr,
             return E4_ERROR_TOPICKEY_MISSING;
         }
         /* control topic being used: */
-        memcpy(key, storage->key, E4_KEY_LEN);
+        e4c_get_idsymkey(storage, key);
     }
 
 #ifdef __AVR__
@@ -155,7 +155,7 @@ int e4c_symkey_unprotect_message(uint8_t *mptr,
             return E4_ERROR_TOPICKEY_MISSING;
         }
         /* control topic being used: */
-        memcpy(key, storage->key, E4_KEY_LEN);
+        e4c_get_idsymkey(storage, key);
         control = 1;
     }
 
@@ -224,7 +224,7 @@ int e4c_symkey_unprotect_message(uint8_t *mptr,
 
     case 0x02: /* SetIdKey(key) */
         if (*mlen != (1 + E4_KEY_LEN)) return E4_ERROR_INVALID_COMMAND;
-        r = e4c_set_idkey(storage, mptr + 1);
+        r = e4c_set_idsymkey(storage, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x03: /* SetTopicKey(topic, key) */

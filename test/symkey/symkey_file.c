@@ -65,7 +65,7 @@ int main(int argc, char** argv, char** envp) {
     }
     
     e4retcode = e4c_set_id(&store, clientid);
-    e4retcode = e4c_set_idkey(&store, clientkey);
+    e4retcode = e4c_set_idsymkey(&store, clientkey);
 
     for (iteration = 0; iteration<NUM_TOPICS; iteration++) {
 

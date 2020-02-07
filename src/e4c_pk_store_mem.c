@@ -36,22 +36,22 @@ int e4c_init(e4storage *store)
     store->topiccount = 0;
     ZERO(store->topics);
     ZERO(store->filepath);
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_storagelocation(e4storage *store, const char *path)
 {
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_load(e4storage *store, const char *path)
 {
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_sync(e4storage *store)
 {
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_id(e4storage *store, const uint8_t *id)
@@ -75,6 +75,15 @@ exit:
     return r;
 }
 
+int e4c_get_id(e4storage *store, uint8_t* id) {
+    memmove(id, store->id, sizeof(store->id));
+    return E4_RESULT_OK;
+}
+
+const uint8_t* e4c_get_id_cached(e4storage* store) {
+    return store->id;
+}
+
 int e4c_set_idseckey(e4storage *store, const uint8_t *key)
 {
     size_t c2keynotempty = 0;
@@ -89,12 +98,20 @@ int e4c_set_idseckey(e4storage *store, const uint8_t *key)
 
 int e4c_get_idseckey(e4storage* store, uint8_t *key) {
     memcpy(key, store->privkey, sizeof(store->privkey));
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_get_idpubkey(e4storage* store, uint8_t *key) {
     memcpy(key, store->pubkey, sizeof(store->pubkey));
-    return 0;
+    return E4_RESULT_OK;
+}
+
+const uint8_t* e4c_get_idseckey_cached(e4storage* store) {
+    return store->privkey;
+}
+
+const uint8_t* e4c_get_idpubkey_cached(e4storage* store) {
+    return store->pubkey;
 }
 
 int e4c_getindex(e4storage *store, const char *topic)
@@ -139,7 +156,7 @@ int e4c_gettopickey(uint8_t *key, e4storage *store, const int index)
 
     memcpy(key, store->topics[index].key, E4_KEY_LEN);
 
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t *key)
@@ -204,7 +221,7 @@ int e4c_reset_topics(e4storage *store)
     }
 
     e4c_sync(store);
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey) {
@@ -237,7 +254,7 @@ int e4c_getdevicekey(uint8_t* pubkey, e4storage *store, const int index)
 
     memcpy(pubkey, store->devices[index].pubkey, E4_PK_EDDSA_PUBKEY_LEN);
 
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *pubkey)
@@ -302,7 +319,7 @@ int e4c_reset_devices(e4storage* store)
     }
 
     e4c_sync(store);
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key) {
@@ -322,12 +339,20 @@ int e4c_get_c2_pubkey(e4storage* store, uint8_t* key) {
         return E4_ERROR_PERSISTENCE_ERROR;
     }
     memcpy(key, store->c2key, E4_PK_X25519_PUBKEY_LEN);
-    return 0;
+    return E4_RESULT_OK;
+}
+
+const uint8_t* e4c_get_c2_pubkey_cached(e4storage* store) {
+    size_t empty = zerocheck(store->c2key, sizeof(store->c2key));
+    if (empty == 0) {
+        return NULL;
+    }
+    return E4_RESULT_OK;
 }
 
 int e4c_set_c2sharedsecret(e4storage* store, const uint8_t* key) {
     memcpy(store->c2sharedkey, key, E4_KEY_LEN);
-    return 0;
+    return E4_RESULT_OK;
 }
 
 int e4c_get_c2sharedsecret(e4storage* store, uint8_t* key) {
@@ -336,7 +361,15 @@ int e4c_get_c2sharedsecret(e4storage* store, uint8_t* key) {
         return E4_ERROR_PERSISTENCE_ERROR;
     }
     memcpy(key, store->c2sharedkey, E4_KEY_LEN);
-    return 0;
+    return E4_RESULT_OK;
+}
+
+const uint8_t* e4c_get_c2sharedsecret_cached(e4storage* store) {
+    size_t empty = zerocheck(store->c2sharedkey, sizeof(store->c2sharedkey));
+    if (empty == 0) {
+        return NULL;
+    }
+    return store->c2sharedkey;
 }
 
 #ifdef DEBUG 

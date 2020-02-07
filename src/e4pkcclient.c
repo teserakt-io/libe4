@@ -97,12 +97,17 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
                         e4storage *storage,
                         const uint32_t proto_opts)
 {
-    int i = 0;
+    int i = 0, r = 0;
     size_t clen_siv = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
     uint8_t* signaturep = NULL;
     size_t signeddatalen=0;
+
+    uint8_t* pubkey;
+    uint8_t* privkey;
+    uint8_t pubkey_buffer[E4_PK_EDDSA_PUBKEY_LEN];
+    uint8_t privkey_buffer[E4_PK_EDDSA_PUBKEY_LEN];
 
     /* pubkey messages are: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
     if (mlen + E4_PK_TOPICMSGHDR_LEN + E4_PK_EDDSA_SIG_LEN > cmax) /* actually: not enough space */
@@ -148,7 +153,8 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
     }
 
     /* set our ID in the output buffer */
-    memcpy(cptr + E4_TIMESTAMP_LEN, storage->id, E4_ID_LEN);
+    /* memcpy(cptr + E4_TIMESTAMP_LEN, storage->id, E4_ID_LEN); */
+    e4c_get_id(storage, (uint8_t*)(cptr+E4_TIMESTAMP_LEN));
 
     /* encrypt */
     clen_siv = 0;
@@ -165,11 +171,25 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
                  const unsigned char *public_key,
                  const unsigned char *private_key);
      */
+    if ((pubkey = (uint8_t*)e4c_get_idpubkey_cached(storage)) == NULL) {
+
+        r = e4c_get_idpubkey(storage, pubkey_buffer);
+        if (r != E4_RESULT_OK) return r;
+        pubkey = pubkey_buffer;
+    }
+    
+    if ((privkey = (uint8_t*)e4c_get_idseckey_cached(storage)) == NULL) {
+
+        r = e4c_get_idseckey(storage, privkey_buffer);
+        if (r != E4_RESULT_OK) return r;
+        privkey = privkey_buffer;
+    }
+    
     ed25519_sign(signaturep,
                  cptr,
                  signeddatalen,
-                 storage->pubkey,
-                 storage->privkey);
+                 pubkey,
+                 privkey);
 
     /* pubkey messages are: Timestamp (8) | id (16) | IV (16) | Ciphertext (n) | sig (64) */
     /* safety check. clen_siv = msglen+E4_TAG_LEN. Therefore adding E4_PK_EDDSA_SIG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN should 
