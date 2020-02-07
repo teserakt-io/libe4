@@ -34,7 +34,7 @@ struct _e4storage;
  defines. */
 typedef struct _e4storage e4storage;
 
-#if defined(__APPLE__) && defined(E4_MODE_ALL)
+#if defined(__APPLE__) || defined(E4_MODE_ALL)
 #define E4LT extern
 #else
 #define E4LT
