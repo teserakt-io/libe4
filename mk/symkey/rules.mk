@@ -12,7 +12,7 @@ sym_so: setup sym_header $(OBJS)
         cp -rfv $(INCDIR)/* $(OUTINCDIR)/; \
 	$(CC) $(LDSOFLAGS) $(OBJS) -o $(LIBSO)
 
-.PHONY sym_header: $(BUILDDIR)/include/e4config/e4_config.h
+sym_header: $(BUILDDIR)/include/e4config/e4_config.h
 
 $(BUILDDIR)/include/e4config/e4_config.h:
 	echo '#define E4_MODE_SYMKEY 1' > $@

@@ -4,7 +4,7 @@
 $(OBJDIR)/%.$O: src/%.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-.PHONY:setup
+.PHONY:setup,checksec,install
 
 setup: 
 	mkdir -p $(OBJDIR); \
@@ -39,10 +39,10 @@ format:
 tidy: setup $(BUILDDIR)/include/e4config/e4_config.h
 	clang-tidy -checks="-*,clang-analyzer-core.*" $(SRCS) -- $(CFLAGS) $(INCLUDES) $(CONFIG_DEFINES)
 
-.PHONY checksec:
+checksec:
 	checksec --format=cli --file=build/all/lib/libe4.so.1.0.0
 
-.PHONY install: 
+install: 
 	@echo "Installing LibE4 to your system."
 	@echo ""
 ifneq ("$(CONF)", "all")
