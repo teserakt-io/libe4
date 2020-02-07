@@ -47,8 +47,8 @@ ifneq ("$(CONF)", "all")
 	$(error Cannot install except when building all)
 endif
 ifneq ("$(PREFIX)", "")
-	cp -rfv $(BUILDDIR)/include $(PREFIX)/include
-	cp -rfv $(BUILDDIR)/lib $(PREFIX)/lib
+	cp -rfv $(BUILDDIR)/include $(PREFIX)/
+	cp -rfv $(BUILDDIR)/lib $(PREFIX)/
 else
 	$(error Please specify a PREFIX variable)
 endif
