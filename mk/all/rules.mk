@@ -15,6 +15,11 @@ all_so: setup all_header all_headercpy $(OBJS)
 	ln -sf $(LIBSO_NAME) $(LIBSO_ABI)
 	ln -sf $(LIBSO_NAME) $(LIBSO_CUR)
 
+all_dylib: setup all_header all_headercpy $(OBJS)
+	$(warn WARNING: producing dylibs on macOS is an unsupported feature.)
+	mkdir -p $(LIBDIR); \
+	$(CC) $(LDDYLIBFLAGS) $(OBJS) -lc -o $(LIBDYLIB)
+
 .PHONY all_header: $(BUILDDIR)/include/e4config/e4_config.h
 
 $(BUILDDIR)/include/e4config/e4_config.h:
