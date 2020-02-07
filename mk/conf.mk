@@ -1,5 +1,6 @@
 
 VERSION=1.0.0
+ABI_VERSION=1
 
 CC       ?= clang
 AR       ?= ar
@@ -35,7 +36,8 @@ CONFIG_DEFINES += -DE4_STORE_FILE
 endif
 
 
-.PHONY postbuild_config_echo: 
+.PHONY postbuild_config_echo:
+	$(info Build Successful)
 	@echo ""
 	@echo "================================================================================="
 	@echo ""
@@ -48,5 +50,9 @@ endif
 	@echo "LD=$(LD)"
 	@echo "STORE=$(STORE)"
 	@echo "E4_OUTPUT_DIR=$(E4_OUTPUT_DIR)"
+ifeq ("$(CONF)", "all")
+	@echo ""
+	@echo "Shared Library: $(LIBSO)"
+endif
 	@echo ""
 	@echo "================================================================================="

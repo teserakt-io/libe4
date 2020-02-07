@@ -22,6 +22,11 @@
 extern "C" {
 #endif
 
+#define E4_STORECAP_SYMKEY 0x1
+#define E4_STORECAP_PUBKEY 0x2
+#define E4_STORECAP_FIPS   0x4
+#define E4_STORECAP_PQ     0x8
+
 struct _e4storage;
 /* This structure represents storage-specific data to be passed to the e4c
  storage functions. It is forward-declared and implemented by the specific
@@ -30,6 +35,7 @@ struct _e4storage;
 typedef struct _e4storage e4storage;
 
 /* the e4storage type pre-defined above implements these API calls */
+uint32_t e4c_get_storage_caps(e4storage* store);
 int e4c_init(e4storage *store);
 int e4c_set_storagelocation(e4storage *store, const char *path);
 int e4c_load(e4storage *store, const char *path);
@@ -45,7 +51,7 @@ int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t
 int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash);
 int e4c_reset_topics(e4storage *store);
 
-#ifdef E4_MODE_SYMKEY
+#if defined(E4_MODE_SYMKEY) || defined(E4_MODE_ALL)
 int e4c_set_idsymkey(e4storage *store, const uint8_t *key);
 /* This function returns a pointer to the symkey if the 
  * underlying storage supports loading that into main memory */
@@ -54,7 +60,7 @@ const uint8_t* e4c_get_idsymkey_cached(e4storage *store);
  * key can be copied out of storage as needed */
 int e4c_get_idsymkey(e4storage* store, uint8_t* key);
 #endif
-#ifdef E4_MODE_PUBKEY 
+#if defined(E4_MODE_PUBKEY) || defined(E4_MODE_ALL)
 /* pubkey storage apis */
 int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey);
 int e4c_set_idseckey(e4storage *store, const uint8_t *key);

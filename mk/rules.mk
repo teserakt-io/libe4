@@ -40,3 +40,18 @@ tidy: setup $(BUILDDIR)/include/e4config/e4_config.h
 	clang-tidy -checks="-*,clang-analyzer-core.*" $(SRCS) -- $(CFLAGS) $(INCLUDES) $(CONFIG_DEFINES)
 
 
+.PHONY install: default
+	@echo "Installing LibE4 to your system."
+	@echo ""
+ifneq ("$(CONF)", "all")
+	$(error Cannot install except when building all)
+endif
+ifneq ("$(PREFIX)", "")
+	cp -rfv $(BUILDDIR)/include $(PREFIX)/include
+	cp -rfv $(BUILDDIR)/lib $(PREFIX)/lib
+else
+	$(error Please specify a PREFIX variable)
+endif
+	@echo "Installed to $(PREFIX)."
+
+

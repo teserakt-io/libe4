@@ -49,6 +49,12 @@ INLINE int e4c_pubkey_c2sharedsecret_derive(uint8_t* key, const size_t keylen, e
     uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
     uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
 
+    uint32_t storagecaps;
+    storagecaps = e4c_get_storage_caps(storage);
+    if (!(storagecaps & E4_STORECAP_PUBKEY)) {
+        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
+    }
+
     if ( keylen != E4_KEY_LEN ) {
         return E4_ERROR_PARAMETER_INVALID;
     }
@@ -211,6 +217,7 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
                           e4storage *storage,
                           const uint32_t proto_opts)
 {
+    uint32_t storagecaps;
     uint8_t control = 0;
     int j = 0, r = 0;
     uint8_t key[E4_KEY_LEN];
@@ -226,6 +233,11 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
     secs1970 = (uint64_t)time(NULL); /* this system has a RTC */
 #endif
     
+    storagecaps = e4c_get_storage_caps(storage);
+    if (!(storagecaps & E4_STORECAP_PUBKEY)) {
+        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
+    }
+
     if (cptr == NULL ||
         mptr == NULL ||
         topic == NULL ||

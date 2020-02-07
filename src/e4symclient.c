@@ -49,6 +49,13 @@ int e4c_symkey_protect_message(uint8_t *cptr,
     int i = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
+    uint32_t storagecaps;
+    
+    storagecaps = e4c_get_storage_caps(storage);
+    if (!(storagecaps & E4_STORECAP_SYMKEY)) {
+        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
+    }
+
 
     if (mlen + E4_MSGHDR_LEN > cmax) /* actually: not enough space */
     {
@@ -124,11 +131,18 @@ int e4c_symkey_unprotect_message(uint8_t *mptr,
     int i = 0, j = 0, r = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
+    uint32_t storagecaps;
 #ifndef __AVR__
     uint64_t secs1970;
 
     secs1970 = (uint64_t)time(NULL); /* this system has a RTC */
 #endif
+    
+    storagecaps = e4c_get_storage_caps(storage);
+    if (!(storagecaps & E4_STORECAP_SYMKEY)) {
+        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
+    }
+
 
     /* bounds checking */
 

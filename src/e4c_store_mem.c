@@ -28,6 +28,10 @@
 
 const char E4V1_MAGIC[4] = "E41P";
 
+uint32_t e4c_get_storage_caps(e4storage* store) {
+    return E4_STORECAP_SYMKEY;
+}
+
 int e4c_init(e4storage *store)
 {
     ZERO(store->id);
