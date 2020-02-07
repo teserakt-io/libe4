@@ -1,7 +1,7 @@
 
 E4_OUTPUT_DIR ?= build/all
 
-LDSOFLAGS = -shared -fPIC -Wl,-soname,libe4.so.1
+LDSOFLAGS = -shared -fPIC -Wl,-soname,libe4.so.$(ABI_VERSION) $(E4_LDFLAGS)
 INCLUDES = -Iinclude/ -I$(E4_OUTPUT_DIR)/include/
 
 # OBJ paths match their src folder equivalents

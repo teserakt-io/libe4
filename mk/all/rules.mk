@@ -10,9 +10,8 @@ all_lib: setup all_header all_headercpy $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
 all_so: setup all_header all_headercpy $(OBJS)
-	PWDB=$(pwd)
 	mkdir -p $(LIBDIR); \
-	$(CC) $(LDSOFLAGS) $(OBJS) -o $(LIBSO)
+	$(CC) $(LDSOFLAGS) $(OBJS) -lc -o $(LIBSO)
 	ln -sf $(LIBSO_NAME) $(LIBSO_ABI)
 	ln -sf $(LIBSO_NAME) $(LIBSO_CUR)
 
