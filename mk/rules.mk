@@ -21,6 +21,16 @@ setup:
 
 lib: setup $(E4LIBS)
 
+
+checkshared:
+ifneq ("$(CONF)", "all")
+	$(error Shared library only supported in the ALL configuration)
+endif
+
+# Everything default does but with a breaking check if shared isn't 
+# supported.
+shared: checkshared setup lib all_dynamic_library postbuild_config_echo
+
 clean:
 	find . -name "*.o" -exec rm -vf {} \;
 	rm -rf $(DISTDIR) 

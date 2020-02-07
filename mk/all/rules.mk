@@ -21,6 +21,6 @@ $(BUILDDIR)/include/e4config/e4_config.h:
 	echo '#define E4_MODE_ALL 1' > $@
 	echo "#define E4_STORE_NONE 1" >> $@
 
-E4LIBS += all_lib all_so
+E4LIBS += all_lib 
 
-
+all_dynamic_library: all_so
