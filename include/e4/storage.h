@@ -29,7 +29,6 @@ extern "C" {
 
 #if defined(E4_STORE_NONE)
 #define E4LT extern
-#error
 #else
 #define E4LT
 #endif /* STORE NONE */

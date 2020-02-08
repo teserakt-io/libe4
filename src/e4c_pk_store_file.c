@@ -214,6 +214,8 @@ int e4c_pubkey_sync(void* s)
 {
     int fd = -1;
     uint16_t i = 0;
+    ssize_t w = 0;
+    int r = E4_RESULT_OK;
     e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     if (strlen(store->filepath) == 0)
@@ -228,32 +230,50 @@ int e4c_pubkey_sync(void* s)
         return E4_ERROR_PERSISTENCE_ERROR;
     }
 
-    write(fd, E4V2_MAGIC, sizeof(E4V2_MAGIC));
-    write(fd, store->id, sizeof(store->id));
-    write(fd, store->privkey, sizeof(store->privkey));
-    write(fd, store->pubkey, sizeof(store->pubkey));
-    write(fd, store->c2key, sizeof(store->c2key));
-    write(fd, &store->topiccount, sizeof(store->topiccount));
+#define CHECKED_WRITE(X) \
+    do { \
+    w = write(fd, X, sizeof(X)); \
+    if (w != sizeof(X)) { \
+        r = E4_ERROR_PERSISTENCE_ERROR; goto close_return; \
+    } \
+} while (0)
+
+#define CHECKED_WRITE_IMMEDIATE(X) \
+    do { \
+    w = write(fd, &X, sizeof(X)); \
+    if (w != sizeof(X)) { \
+        r = E4_ERROR_PERSISTENCE_ERROR; goto close_return; \
+    } \
+} while (0)
+
+
+    CHECKED_WRITE(E4V2_MAGIC);
+    CHECKED_WRITE(store->id);
+    CHECKED_WRITE(store->privkey);
+    CHECKED_WRITE(store->pubkey);
+    CHECKED_WRITE(store->c2key);
+    CHECKED_WRITE_IMMEDIATE(store->topiccount);
 
     for (i = 0; i < store->topiccount; i++)
     {
         topic_key *t = &(store->topics[0]) + i;
 
-        write(fd, t->topic, sizeof(t->topic));
-        write(fd, t->key, sizeof(t->key));
+        CHECKED_WRITE(t->topic);
+        CHECKED_WRITE(t->key);
     }
-    write(fd, &store->devicecount, sizeof(store->devicecount));
+    CHECKED_WRITE_IMMEDIATE(store->devicecount);
 
     for (i = 0; i < store->devicecount; i++)
     {
         device_key *d = &(store->devices[0]) + i;
 
-        write(fd, d->id, sizeof(d->id));
-        write(fd, d->pubkey, sizeof(d->pubkey));
+        CHECKED_WRITE(d->id);
+        CHECKED_WRITE(d->pubkey);
     }
-    close(fd);
 
-    return E4_RESULT_OK;
+close_return:
+    close(fd);
+    return r;
 }
 
 int e4c_pubkey_set_id(void* s, const uint8_t *id)
