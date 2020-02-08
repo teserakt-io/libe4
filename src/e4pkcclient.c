@@ -172,14 +172,12 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
                  const unsigned char *private_key);
      */
     if ((pubkey = (uint8_t*)e4c_pubkey_get_idpubkey_cached(storage)) == NULL) {
-
         r = e4c_pubkey_get_idpubkey(storage, pubkey_buffer);
         if (r != E4_RESULT_OK) return r;
         pubkey = pubkey_buffer;
     }
     
     if ((privkey = (uint8_t*)e4c_pubkey_get_idseckey_cached(storage)) == NULL) {
-
         r = e4c_pubkey_get_idseckey(storage, privkey_buffer);
         if (r != E4_RESULT_OK) return r;
         privkey = privkey_buffer;
