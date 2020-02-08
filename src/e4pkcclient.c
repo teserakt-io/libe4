@@ -41,19 +41,13 @@ uint64_t secs1970 = 0;
 #define E4C_TIME_FUTURE (10 * 60)
 #define E4C_TIME_TOO_OLD (10 * 60)
 
-INLINE int e4c_pubkey_c2sharedsecret_derive(uint8_t* key, const size_t keylen, e4storage* storage) {
+INLINE int e4c_pubkey_c2sharedsecret_derive(uint8_t* key, const size_t keylen, void* storage) {
 
     int r = E4_RESULT_OK;
     uint8_t deviceedsk[E4_PK_EDDSA_PRIVKEY_LEN];
     uint8_t c2pk[E4_PK_X25519_PUBKEY_LEN];
     uint8_t devicesk[E4_PK_X25519_PUBKEY_LEN];
     uint8_t sharedpoint[E4_PK_X25519_PUBKEY_LEN];
-
-    uint32_t storagecaps;
-    storagecaps = e4c_get_storage_caps(storage);
-    if (!(storagecaps & E4_STORECAP_PUBKEY)) {
-        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
-    }
 
     if ( keylen != E4_KEY_LEN ) {
         return E4_ERROR_PARAMETER_INVALID;
@@ -63,11 +57,11 @@ INLINE int e4c_pubkey_c2sharedsecret_derive(uint8_t* key, const size_t keylen, e
     zeroize(devicesk, sizeof(devicesk));
     zeroize(sharedpoint, sizeof(sharedpoint));
 
-    r = e4c_get_c2_pubkey(storage, c2pk);
+    r = e4c_pubkey_get_c2_pubkey(storage, c2pk);
     if (r != E4_RESULT_OK) {
         return r;
     }
-    r = e4c_get_idseckey(storage, deviceedsk);
+    r = e4c_pubkey_get_idseckey(storage, deviceedsk);
     if (r != E4_RESULT_OK) {
         return r;
     }
@@ -83,13 +77,13 @@ INLINE int e4c_pubkey_c2sharedsecret_derive(uint8_t* key, const size_t keylen, e
     return r;
 }
 
-int e4c_pubkey_c2sharedsecret_derivestore(e4storage* storage) {
+int e4c_pubkey_c2sharedsecret_derivestore(void* storage) {
 
     uint8_t sharedkey[E4_KEY_LEN];
     int r = 0;
     r = e4c_pubkey_c2sharedsecret_derive(sharedkey, E4_KEY_LEN, storage);
     if ( r != E4_RESULT_OK ) return r;
-    r = e4c_set_c2sharedsecret(storage, sharedkey);
+    r = e4c_pubkey_set_c2sharedsecret(storage, sharedkey);
     return r;
 }
 
@@ -100,7 +94,7 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
                         const uint8_t *mptr,
                         size_t mlen,
                         const char *topic,
-                        e4storage *storage,
+                        void* storage,
                         const uint32_t proto_opts)
 {
     int i = 0, r = 0;
@@ -135,10 +129,10 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
 
 
     /* get the key */
-    i = e4c_getindex(storage, topic);
+    i = e4c_pubkey_gettopicindex(storage, topic);
     if (i >= 0)
     {
-        e4c_gettopickey(key, storage, i);
+        e4c_pubkey_gettopickey(key, storage, i);
     }
     else
     {
@@ -160,7 +154,7 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
 
     /* set our ID in the output buffer */
     /* memcpy(cptr + E4_TIMESTAMP_LEN, storage->id, E4_ID_LEN); */
-    e4c_get_id(storage, (uint8_t*)(cptr+E4_TIMESTAMP_LEN));
+    e4c_pubkey_get_id(storage, (uint8_t*)(cptr+E4_TIMESTAMP_LEN));
 
     /* encrypt */
     clen_siv = 0;
@@ -177,16 +171,16 @@ int e4c_pubkey_protect_message(uint8_t *cptr,
                  const unsigned char *public_key,
                  const unsigned char *private_key);
      */
-    if ((pubkey = (uint8_t*)e4c_get_idpubkey_cached(storage)) == NULL) {
+    if ((pubkey = (uint8_t*)e4c_pubkey_get_idpubkey_cached(storage)) == NULL) {
 
-        r = e4c_get_idpubkey(storage, pubkey_buffer);
+        r = e4c_pubkey_get_idpubkey(storage, pubkey_buffer);
         if (r != E4_RESULT_OK) return r;
         pubkey = pubkey_buffer;
     }
     
-    if ((privkey = (uint8_t*)e4c_get_idseckey_cached(storage)) == NULL) {
+    if ((privkey = (uint8_t*)e4c_pubkey_get_idseckey_cached(storage)) == NULL) {
 
-        r = e4c_get_idseckey(storage, privkey_buffer);
+        r = e4c_pubkey_get_idseckey(storage, privkey_buffer);
         if (r != E4_RESULT_OK) return r;
         privkey = privkey_buffer;
     }
@@ -214,10 +208,9 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
                           const uint8_t *cptr,
                           size_t clen,
                           const char *topic,
-                          e4storage *storage,
+                          void* storage,
                           const uint32_t proto_opts)
 {
-    uint32_t storagecaps;
     uint8_t control = 0;
     int j = 0, r = 0;
     uint8_t key[E4_KEY_LEN];
@@ -233,11 +226,6 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
     secs1970 = (uint64_t)time(NULL); /* this system has a RTC */
 #endif
     
-    storagecaps = e4c_get_storage_caps(storage);
-    if (!(storagecaps & E4_STORECAP_PUBKEY)) {
-        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
-    }
-
     if (cptr == NULL ||
         mptr == NULL ||
         topic == NULL ||
@@ -253,7 +241,7 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
        From the C2:        Timestamp (8) | IV (16) | Ciphertext (n)
     */
 
-    if (e4c_is_device_ctrltopic(storage, topic) == 0)
+    if (e4c_pubkey_is_device_ctrltopic(storage, topic) == 0)
     {
         /* control topic being used: */
         control = 1;
@@ -264,7 +252,7 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
             return E4_ERROR_CIPHERTEXT_TOO_SHORT;
         }
 
-        if ( (r = e4c_get_c2sharedsecret(storage, key)) != E4_RESULT_OK ) {
+        if ( (r = e4c_pubkey_get_c2sharedsecret(storage, key)) != E4_RESULT_OK ) {
             return r;
         }
         /* set things up for symmetric decryption: */
@@ -294,10 +282,10 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
             return E4_ERROR_CIPHERTEXT_TOO_SHORT;
         }
 
-        i = e4c_getdeviceindex(storage, idptr);
+        i = e4c_pubkey_getdeviceindex(storage, idptr);
         if (i >= 0)
         {
-            e4c_getdevicekey(sender_pk, storage, i);
+            e4c_pubkey_getdevicekey(sender_pk, storage, i);
         
             /* check signature attached to end */
             signverifresult = ed25519_verify(&cptr[clen-E4_PK_EDDSA_SIG_LEN],
@@ -326,10 +314,10 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
         }
 
         /* find the topic key and set it */
-        i = e4c_getindex(storage, topic);
+        i = e4c_pubkey_gettopicindex(storage, topic);
         if (i >= 0)
         {
-            e4c_gettopickey(key, storage, i);
+            e4c_pubkey_gettopickey(key, storage, i);
         }
         else
         {
@@ -412,17 +400,17 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
     switch (mptr[0])
     {
     case 0x00: /* RemoveTopic(topic); */
-        r = e4c_remove_topic(storage, (const uint8_t *)mptr + 1);
+        r = e4c_pubkey_remove_topic(storage, (const uint8_t *)mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x01: /* ResetTopics(); */
         if (*mlen != 1) return E4_ERROR_INVALID_COMMAND;
-        r = e4c_reset_topics(storage);
+        r = e4c_pubkey_reset_topics(storage);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x02: /* SetIdKey(key) */
         if (*mlen != (1 + E4_PK_EDDSA_PRIVKEY_LEN)) return E4_ERROR_INVALID_COMMAND;
-        r = e4c_set_idseckey(storage, mptr + 1);
+        r = e4c_pubkey_set_idseckey(storage, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x03: /* SetTopicKey(topic, key) */
@@ -430,22 +418,22 @@ int e4c_pubkey_unprotect_message(uint8_t *mptr,
         {
             return E4_ERROR_INVALID_COMMAND;
         }
-        r = e4c_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
+        r = e4c_pubkey_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     case 0x04: /* RemovePubKey(id) */
         if (*mlen != (1 + E4_ID_LEN))
-        r = e4c_remove_device(storage, mptr+1);
+        r = e4c_pubkey_remove_device(storage, mptr+1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     case 0x05: /* RemovePubKeys() */
         if (*mlen != 1) return E4_ERROR_INVALID_COMMAND;
-        r = e4c_reset_devices(storage);
+        r = e4c_pubkey_reset_devices(storage);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     case 0x06: /* SetPubKey(pubkey, id) */
         if (*mlen != (1 + E4_ID_LEN + E4_PK_EDDSA_PUBKEY_LEN)) 
         {
             return E4_ERROR_INVALID_COMMAND;
         }
-        r = e4c_set_device_key(storage, mptr+1+E4_PK_EDDSA_PUBKEY_LEN, mptr+1);
+        r = e4c_pubkey_set_device_key(storage, mptr+1+E4_PK_EDDSA_PUBKEY_LEN, mptr+1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     }
 

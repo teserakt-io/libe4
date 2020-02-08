@@ -24,7 +24,15 @@ all_dylib: setup all_header all_headercpy $(OBJS)
 
 $(BUILDDIR)/include/e4config/e4_config.h:
 	echo '#define E4_MODE_ALL 1' > $@
+ifeq ("$(STORE)", "none")
 	echo "#define E4_STORE_NONE 1" >> $@
+endif
+ifeq ("$(STORE)", "mem")
+	echo "#define E4_STORE_MEM 1" >> $@
+endif
+ifeq ("$(STORE)", "file")
+	echo "#define E4_STORE_FILE 1" >> $@
+endif
 
 E4LIBS += all_lib 
 

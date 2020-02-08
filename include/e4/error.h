@@ -36,4 +36,4 @@
 /* Incompatible storage type */
 #define E4_ERROR_PERSISTENCE_INCOMPATIBLE -113
 
-#endif
+#endif /* include guard */

@@ -27,6 +27,6 @@ LIBDYLIB      = $(LIBDIR)/$(LIBDYLIB_NAME)
 
 CONFIG_DEFINES += -DE4_MODE_ALL
 
-ifneq ("$(STORE)", "none")
-$(error E4 configuration type ALL cannot be defined with any storage type other than NONE)
+ifeq ("$(STORE)", "mem")
+$(error E4 configuration type ALL must be used with NONE or FILE storage types)
 endif

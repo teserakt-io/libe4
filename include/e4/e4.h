@@ -21,7 +21,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* C++ */
 
 #include <stddef.h>
 #include <stdint.h>
@@ -113,14 +113,14 @@ Returns:
 
     #define e4c_protect_message e4c_pubkey_protect_message
     #define e4c_unprotect_message e4c_pubkey_unprotect_message
-#endif
+#endif /* E4_MODE_PUBKEY */
 
 #ifdef E4_MODE_SYMKEY
     #include "e4/e4symkey.h"
 
     #define e4c_protect_message e4c_symkey_protect_message
     #define e4c_unprotect_message e4c_symkey_unprotect_message
-#endif
+#endif /* E4_MODE_SYMKEY */
 
 #ifdef E4_MODE_ALL
 /* include forward declarations for specific implementations. 
@@ -129,12 +129,12 @@ Returns:
  */
 #include "e4/e4pubkey.h"
 #include "e4/e4symkey.h"
-#endif
+#endif /* E4_MODE_ALL */
 
 
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* C++ */
 
-#endif
+#endif /* include guard */

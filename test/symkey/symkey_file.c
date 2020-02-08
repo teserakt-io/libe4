@@ -20,7 +20,7 @@ int main(int argc, char** argv, char** envp) {
     int iteration = 0;
     size_t bytes_read = 0;
     FILE* urand_fd = NULL;
-    e4storage store;
+    e4storage_symkey store;
 
     unsigned char clientid[E4_ID_LEN];
     unsigned char clientkey[E4_KEY_LEN];
@@ -41,14 +41,14 @@ int main(int argc, char** argv, char** envp) {
         goto exit;
     }
 
-    e4retcode = e4c_init(&store);
+    e4retcode = e4c_symkey_init(&store);
     if (e4retcode != 0) {
         printf("Failed: unable to init e4store\n");
         returncode = 1;
         goto exit_close;
     }
     
-    e4c_set_storagelocation(&store, "/tmp/unittests.e4c");
+    e4c_symkey_configure_storage(&store, (void*)"/tmp/unittests.e4c");
 
     /* set the identity key */
     bytes_read = fread(&clientid, 1, sizeof(clientid), urand_fd);
@@ -64,8 +64,8 @@ int main(int argc, char** argv, char** envp) {
         goto exit_close;
     }
     
-    e4retcode = e4c_set_id(&store, clientid);
-    e4retcode = e4c_set_idsymkey(&store, clientkey);
+    e4retcode = e4c_symkey_set_id(&store, clientid);
+    e4retcode = e4c_symkey_set_idkey(&store, clientkey);
 
     for (iteration = 0; iteration<NUM_TOPICS; iteration++) {
 
@@ -99,15 +99,15 @@ int main(int argc, char** argv, char** envp) {
         }
 
         e4c_derive_topichash(topichash, E4_TOPICHASH_LEN, topicname_current);
-        e4c_set_topic_key(&store, topichash, topickey_current); 
+        e4c_symkey_set_topic_key(&store, topichash, topickey_current); 
     }
 
     /* test sync and reload from file-based storage */
-    e4c_sync(&store);
+    e4c_symkey_sync(&store);
 #ifdef E4_STORE_FILE
     memset(&store, 0, sizeof(store));
 #endif
-    e4c_load(&store, "/tmp/unittests.e4c");
+    e4c_symkey_load(&store, "/tmp/unittests.e4c");
 
     /* TODO: test control messages have their intended effect. */
 
@@ -145,7 +145,7 @@ int main(int argc, char** argv, char** envp) {
             goto exit_close;
         }
 
-        e4retcode = e4c_protect_message(ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, &ciphertext_len,
+        e4retcode = e4c_symkey_protect_message(ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, &ciphertext_len,
             plaintext_buffer, PT_MAX, topicname, &store, 0);
 
         if (e4retcode != E4_RESULT_OK) {
@@ -163,7 +163,7 @@ int main(int argc, char** argv, char** envp) {
 		/* e4c_unprotect_message zero-pads the output buffer. Perhaps we should 
            get rid of this functionality and leave it to the user. For now, 
            we fix it by passing the correct length of the recovered buffer. */
-        e4retcode = e4c_unprotect_message(recovered_buffer, PT_MAX, &recovered_len,
+        e4retcode = e4c_symkey_unprotect_message(recovered_buffer, PT_MAX, &recovered_len,
             ciphertext_buffer, PT_MAX+E4_MSGHDR_LEN, topicname, &store, 0);
 
         if (e4retcode != E4_RESULT_OK) {

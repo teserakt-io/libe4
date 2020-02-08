@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 
-#ifndef E4_STORE_NONE
-
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,13 +31,14 @@
 
 const char E4V2_MAGIC[4] = "E42P";
 
-uint32_t e4c_get_storage_caps(e4storage* store) {
+uint32_t e4c_pubkey_get_storage_caps(void* s) {
     return E4_STORECAP_PUBKEY;
 }
 
-int e4c_init(e4storage *store)
+int e4c_pubkey_init(void* s)
 {
-    zeroize((void*)store, sizeof(struct _e4storage));
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
+    zeroize((void*)store, sizeof(e4storage_pubkey));
     ZERO(store->id);
     ZERO(store->privkey);
     ZERO(store->pubkey);
@@ -52,9 +51,10 @@ int e4c_init(e4storage *store)
     ZERO(store->filepath);
     return E4_RESULT_OK;
 }
-
-int e4c_set_storagelocation(e4storage *store, const char *path)
+int e4c_pubkey_configure_storage(void* s, const void* params)
 {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
+    char* path = (char*) params;
     size_t pathlen = strlen(path);
     size_t copied_bytes = strlcpy(store->filepath, path, E4_MAX_PATH);
     if (pathlen >= copied_bytes)
@@ -64,10 +64,11 @@ int e4c_set_storagelocation(e4storage *store, const char *path)
     return E4_RESULT_OK;
 }
 
-int e4c_load(e4storage *store, const char *path)
+int e4c_pubkey_load(void* s, const char *path)
 {
     int fd, i, r;
     size_t devicekeypresent, c2keypresent;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     size_t rlen = 0;
     char mbuf[4];
     char controltopic[E4_CTRLTOPIC_LEN + 1];
@@ -75,7 +76,7 @@ int e4c_load(e4storage *store, const char *path)
 
     if (path == NULL) path = "/tmp/persistence.e4p";
 
-    e4c_set_storagelocation(store, path);
+    e4c_pubkey_configure_storage(store, path);
 
     fd = open(store->filepath, O_RDONLY);
     if (fd < 0)
@@ -183,7 +184,7 @@ int e4c_load(e4storage *store, const char *path)
     }
 
 #ifdef DEBUG
-    e4c_debug_print(store);
+    e4c_pubkey_debug_print(store);
 #endif
 
     close(fd);
@@ -209,10 +210,11 @@ err:
     return E4_ERROR_PERSISTENCE_ERROR;
 }
 
-int e4c_sync(e4storage *store)
+int e4c_pubkey_sync(void* s)
 {
     int fd = -1;
     uint16_t i = 0;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     if (strlen(store->filepath) == 0)
     {
@@ -254,8 +256,9 @@ int e4c_sync(e4storage *store)
     return E4_RESULT_OK;
 }
 
-int e4c_set_id(e4storage *store, const uint8_t *id)
+int e4c_pubkey_set_id(void* s, const uint8_t *id)
 {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     int r = E4_RESULT_OK;
     char controltopic[E4_CTRLTOPIC_LEN+1];
     ZERO(controltopic);
@@ -275,20 +278,23 @@ exit:
     return r;
 }
 
-int e4c_get_id(e4storage *store, uint8_t* id) {
+int e4c_pubkey_get_id(void* s, uint8_t* id) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     memmove(id, store->id, sizeof(store->id));
     return E4_RESULT_OK;
 }
 
-const uint8_t* e4c_get_id_cached(e4storage* store) {
+const uint8_t* e4c_pubkey_get_id_cached(void* s) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     return store->id;
 }
 
-int e4c_set_idseckey(e4storage *store, const uint8_t *key)
+int e4c_pubkey_set_idseckey(void* s, const uint8_t *key)
 {
     size_t c2keynotempty = 0;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     memmove(store->privkey, key, sizeof(store->privkey));
-    e4c_sync(store);
+    e4c_pubkey_sync(store);
     c2keynotempty = zerocheck(store->c2key, sizeof(store->c2key));
     if (c2keynotempty) {
         e4c_pubkey_c2sharedsecret_derivestore(store);
@@ -296,28 +302,33 @@ int e4c_set_idseckey(e4storage *store, const uint8_t *key)
     return E4_RESULT_OK;
 }
 
-int e4c_get_idseckey(e4storage* store, uint8_t *key) {
+int e4c_pubkey_get_idseckey(void* s, uint8_t *key) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     memcpy(key, store->privkey, sizeof(store->privkey));
     return E4_RESULT_OK;
 }
 
-int e4c_get_idpubkey(e4storage* store, uint8_t *key) {
+int e4c_pubkey_get_idpubkey(void* s, uint8_t *key) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     memcpy(key, store->pubkey, sizeof(store->pubkey));
     return E4_RESULT_OK;
 }
 
-const uint8_t* e4c_get_idseckey_cached(e4storage* store) {
+const uint8_t* e4c_pubkey_get_idseckey_cached(void* s) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     return store->privkey;
 }
 
-const uint8_t* e4c_get_idpubkey_cached(e4storage* store) {
+const uint8_t* e4c_pubkey_get_idpubkey_cached(void* s) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     return store->pubkey;
 }
 
-int e4c_getindex(e4storage *store, const char *topic)
+int e4c_pubkey_gettopicindex(void* s, const char *topic)
 {
     int i;
     uint8_t hash[E4_TOPICHASH_LEN];
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     /* hash the topic */
     if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
@@ -336,9 +347,10 @@ int e4c_getindex(e4storage *store, const char *topic)
     return i;
 }
 
-int e4c_is_device_ctrltopic(e4storage *store, const char *topic)
+int e4c_pubkey_is_device_ctrltopic(void* s, const char *topic)
 {
     uint8_t hash[E4_TOPICHASH_LEN];
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     /* hash the topic */
     if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
@@ -348,8 +360,9 @@ int e4c_is_device_ctrltopic(e4storage *store, const char *topic)
     return memcmp(store->ctrltopic, hash, E4_TOPICHASH_LEN);
 }
 
-int e4c_gettopickey(uint8_t *key, e4storage *store, const int index)
+int e4c_pubkey_gettopickey(uint8_t *key, void* s, const int index)
 {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     if (index < 0 || index >= store->topiccount)
         return E4_ERROR_TOPICKEY_MISSING;
@@ -359,9 +372,10 @@ int e4c_gettopickey(uint8_t *key, e4storage *store, const int index)
     return E4_RESULT_OK;
 }
 
-int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t *key)
+int e4c_pubkey_set_topic_key(void* s, const uint8_t *topic_hash, const uint8_t *key)
 {
     int i;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     for (i = 0; i < store->topiccount; i++)
     {
@@ -380,12 +394,13 @@ int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t
         store->topiccount++;
     }
 
-    return e4c_sync(store);
+    return e4c_pubkey_sync(store);
 }
 
-int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash)
+int e4c_pubkey_remove_topic(void* s, const uint8_t *topic_hash)
 {
     int i, j;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     topic_key *topic_keys = store->topics;
 
     for (i = 0; i < store->topiccount; i++)
@@ -401,16 +416,17 @@ int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash)
             ZERO(topic_keys[store->topiccount]);
             store->topiccount--;
 
-            return e4c_sync(store);
+            return e4c_pubkey_sync(store);
         }
     }
 
     return E4_ERROR_TOPICKEY_MISSING;
 }
 
-int e4c_reset_topics(e4storage *store)
+int e4c_pubkey_reset_topics(void* s)
 {
     int i = 0;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     if (store->topiccount > 0)
     {
@@ -420,19 +436,21 @@ int e4c_reset_topics(e4storage *store)
         ZERO(store->topics[i]);
     }
 
-    e4c_sync(store);
+    e4c_pubkey_sync(store);
     return E4_RESULT_OK;
 }
 
-int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey) {
+int e4c_pubkey_set_idpubkey(void* s, const uint8_t *pubkey) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     memmove(store->pubkey, pubkey, sizeof(store->pubkey));
-    e4c_sync(store);
+    e4c_pubkey_sync(store);
     return E4_RESULT_OK;
 }
 
-int e4c_getdeviceindex(e4storage *store, const uint8_t* id) 
+int e4c_pubkey_getdeviceindex(void* s, const uint8_t* id) 
 {
     int i;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     /* look for it */
     for (i = 0; i < store->devicecount; i++)
@@ -447,8 +465,9 @@ int e4c_getdeviceindex(e4storage *store, const uint8_t* id)
     return i;
 }
 
-int e4c_getdevicekey(uint8_t* pubkey, e4storage *store, const int index)
+int e4c_pubkey_getdevicekey(uint8_t* pubkey, void* s, const int index)
 {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     if (index < 0 || index >= store->devicecount)
         return E4_ERROR_TOPICKEY_MISSING;
 
@@ -457,9 +476,10 @@ int e4c_getdevicekey(uint8_t* pubkey, e4storage *store, const int index)
     return E4_RESULT_OK;
 }
 
-int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *pubkey)
+int e4c_pubkey_set_device_key(void* s, const uint8_t *id, const uint8_t *pubkey)
 {
     int i;
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     for (i = 0; i < store->devicecount; i++)
     {
@@ -478,12 +498,14 @@ int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *pubke
         store->devicecount++;
     }
 
-    return e4c_sync(store);
+    return e4c_pubkey_sync(store);
 }
 
-int e4c_remove_device(e4storage* store, const uint8_t* id)
+int e4c_pubkey_remove_device(void* s, const uint8_t* id)
 {
     int i, j;
+
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     device_key *devicekeys = store->devices;
 
     for (i = 0; i < store->devicecount; i++)
@@ -499,15 +521,16 @@ int e4c_remove_device(e4storage* store, const uint8_t* id)
             ZERO(devicekeys[store->devicecount]);
             store->devicecount--;
 
-            return e4c_sync(store);
+            return e4c_pubkey_sync(store);
         }
     }
 
     return E4_ERROR_DEVICEPK_MISSING;
 }
 
-int e4c_reset_devices(e4storage* store)
+int e4c_pubkey_reset_devices(void* s)
 {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     int i = 0;
     if (store->devicecount > 0)
     {
@@ -518,14 +541,15 @@ int e4c_reset_devices(e4storage* store)
         ZERO(store->devices[i]);
     }
 
-    e4c_sync(store);
+    e4c_pubkey_sync(store);
     return E4_RESULT_OK;
 }
 
-int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key) {
+int e4c_pubkey_set_c2_pubkey(void* s, const uint8_t* key) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     size_t devicekeynotempty = 0;
     memcpy(store->c2key, key, E4_PK_X25519_PUBKEY_LEN);
-    e4c_sync(store);
+    e4c_pubkey_sync(store);
     devicekeynotempty = zerocheck(store->privkey, sizeof(store->privkey));
     if (devicekeynotempty) {
         e4c_pubkey_c2sharedsecret_derivestore(store);
@@ -533,7 +557,8 @@ int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key) {
     return E4_RESULT_OK;
 }
 
-int e4c_get_c2_pubkey(e4storage* store, uint8_t* key) {
+int e4c_pubkey_get_c2_pubkey(void* s, uint8_t* key) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     size_t empty = zerocheck(store->c2key, sizeof(store->c2key));
     if (empty == 0) {
         return E4_ERROR_PERSISTENCE_ERROR;
@@ -542,7 +567,8 @@ int e4c_get_c2_pubkey(e4storage* store, uint8_t* key) {
     return E4_RESULT_OK;
 }
 
-const uint8_t* e4c_get_c2_pubkey_cached(e4storage* store) {
+const uint8_t* e4c_pubkey_get_c2_pubkey_cached(void* s) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     size_t empty = zerocheck(store->c2key, sizeof(store->c2key));
     if (empty == 0) {
         return NULL;
@@ -550,12 +576,14 @@ const uint8_t* e4c_get_c2_pubkey_cached(e4storage* store) {
     return store->c2key;
 }
 
-int e4c_set_c2sharedsecret(e4storage* store, const uint8_t* key) {
+int e4c_pubkey_set_c2sharedsecret(void* s, const uint8_t* key) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     memcpy(store->c2sharedkey, key, E4_KEY_LEN);
     return E4_RESULT_OK;
 }
 
-int e4c_get_c2sharedsecret(e4storage* store, uint8_t* key) {
+int e4c_pubkey_get_c2sharedsecret(void* s, uint8_t* key) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     size_t empty = zerocheck(store->c2sharedkey, sizeof(store->c2sharedkey));
     if (empty == 0) {
         return E4_ERROR_PERSISTENCE_ERROR;
@@ -564,7 +592,8 @@ int e4c_get_c2sharedsecret(e4storage* store, uint8_t* key) {
     return E4_RESULT_OK;
 }
 
-const uint8_t* e4c_get_c2sharedsecret_cached(e4storage* store) {
+const uint8_t* e4c_pubkey_get_c2sharedsecret_cached(void* s) {
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
     size_t empty = zerocheck(store->c2sharedkey, sizeof(store->c2sharedkey));
     if (empty == 0) {
         return NULL; 
@@ -573,10 +602,11 @@ const uint8_t* e4c_get_c2sharedsecret_cached(e4storage* store) {
 }
 
 #ifdef DEBUG
-void e4c_debug_print(e4storage *store)
+void e4c_pubkey_debug_print(void* s)
 {
     int i, j;
     char controltopic[E4_CTRLTOPIC_LEN + 1];
+    e4storage_pubkey* store = (e4storage_pubkey*)s;
 
     printf("Client\n");
     printf("  ID=");
@@ -636,5 +666,4 @@ void e4c_debug_print(e4storage *store)
         printf("\n");
     }
 }
-#endif
 #endif

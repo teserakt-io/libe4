@@ -43,20 +43,13 @@ int e4c_symkey_protect_message(uint8_t *cptr,
                         const uint8_t *mptr,
                         size_t mlen,
                         const char *topic,
-                        e4storage *storage,
+                        void* storage,
                         const uint32_t proto_opts)
 {
     int i = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t time_now = 0;
-    uint32_t storagecaps;
     
-    storagecaps = e4c_get_storage_caps(storage);
-    if (!(storagecaps & E4_STORECAP_SYMKEY)) {
-        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
-    }
-
-
     if (mlen + E4_MSGHDR_LEN > cmax) /* actually: not enough space */
     {
         return E4_ERROR_CIPHERTEXT_TOO_SHORT;
@@ -75,19 +68,19 @@ int e4c_symkey_protect_message(uint8_t *cptr,
     }
 
     /* get the key */
-    i = e4c_getindex(storage, topic);
+    i = e4c_symkey_gettopicindex(storage, topic);
     if (i >= 0)
     {
-        e4c_gettopickey(key, storage, i);
+        e4c_symkey_gettopickey(key, storage, i);
     }
     else
     {
-        if (e4c_is_device_ctrltopic(storage, topic) != 0)
+        if (e4c_symkey_is_device_ctrltopic(storage, topic) != 0)
         {
             return E4_ERROR_TOPICKEY_MISSING;
         }
         /* control topic being used: */
-        e4c_get_idsymkey(storage, key);
+        e4c_symkey_get_idkey(storage, key);
     }
 
 #ifdef __AVR__
@@ -124,26 +117,19 @@ int e4c_symkey_unprotect_message(uint8_t *mptr,
                           const uint8_t *cptr,
                           size_t clen,
                           const char *topic,
-                          e4storage *storage,
+                          void* storage,
                           const uint32_t proto_opts)
 {
     uint8_t control = 0;
     int i = 0, j = 0, r = 0;
     uint8_t key[E4_KEY_LEN];
     uint64_t tstamp;
-    uint32_t storagecaps;
 #ifndef __AVR__
     uint64_t secs1970;
 
     secs1970 = (uint64_t)time(NULL); /* this system has a RTC */
 #endif
     
-    storagecaps = e4c_get_storage_caps(storage);
-    if (!(storagecaps & E4_STORECAP_SYMKEY)) {
-        return E4_ERROR_PERSISTENCE_INCOMPATIBLE;
-    }
-
-
     /* bounds checking */
 
     if (clen < E4_MSGHDR_LEN || mmax < clen - E4_MSGHDR_LEN)
@@ -161,19 +147,19 @@ int e4c_symkey_unprotect_message(uint8_t *mptr,
 
 
     /* get the key */
-    i = e4c_getindex(storage, topic);
+    i = e4c_symkey_gettopicindex(storage, topic);
     if (i >= 0)
     {
-        e4c_gettopickey(key, storage, i);
+        e4c_symkey_gettopickey(key, storage, i);
     }
     else
     {
-        if (e4c_is_device_ctrltopic(storage, topic) != 0)
+        if (e4c_symkey_is_device_ctrltopic(storage, topic) != 0)
         {
             return E4_ERROR_TOPICKEY_MISSING;
         }
         /* control topic being used: */
-        e4c_get_idsymkey(storage, key);
+        e4c_symkey_get_idkey(storage, key);
         control = 1;
     }
 
@@ -232,23 +218,23 @@ int e4c_symkey_unprotect_message(uint8_t *mptr,
     switch (mptr[0])
     {
     case 0x00: /* RemoveTopic(topic); */
-        r = e4c_remove_topic(storage, (const uint8_t *)mptr + 1);
+        r = e4c_symkey_remove_topic(storage, (const uint8_t *)mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x01: /* ResetTopics(); */
         if (*mlen != 1) return E4_ERROR_INVALID_COMMAND;
-        r = e4c_reset_topics(storage);
+        r = e4c_symkey_reset_topics(storage);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x02: /* SetIdKey(key) */
         if (*mlen != (1 + E4_KEY_LEN)) return E4_ERROR_INVALID_COMMAND;
-        r = e4c_set_idsymkey(storage, mptr + 1);
+        r = e4c_symkey_set_idkey(storage, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
 
     case 0x03: /* SetTopicKey(topic, key) */
         if (*mlen != (1 + E4_KEY_LEN + E4_TOPICHASH_LEN))
             return E4_ERROR_INVALID_COMMAND;
-        r = e4c_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
+        r = e4c_symkey_set_topic_key(storage, (const uint8_t *)mptr + E4_KEY_LEN + 1, mptr + 1);
         return r == 0 ? E4_RESULT_OK_CONTROL : r;
     }
 

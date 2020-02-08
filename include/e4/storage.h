@@ -27,91 +27,91 @@ extern "C" {
 #define E4_STORECAP_FIPS   0x4
 #define E4_STORECAP_PQ     0x8
 
-struct _e4storage;
-/* This structure represents storage-specific data to be passed to the e4c
- storage functions. It is forward-declared and implemented by the specific
- choice of storage to be supported, which is chosen based on the configurable
- defines. */
-typedef struct _e4storage e4storage;
-
-#if defined(__APPLE__) || defined(E4_MODE_ALL)
+#if defined(E4_STORE_NONE)
 #define E4LT extern
+#error
 #else
 #define E4LT
-#endif
+#endif /* STORE NONE */
 
-/* the e4storage type pre-defined above implements these API calls */
-E4LT uint32_t e4c_get_storage_caps(e4storage* store);
-E4LT int e4c_init(e4storage *store);
-E4LT int e4c_set_storagelocation(e4storage *store, const char *path);
-E4LT int e4c_load(e4storage *store, const char *path);
-E4LT int e4c_sync(e4storage *store);
-E4LT int e4c_set_id(e4storage *store, const uint8_t *id);
-E4LT int e4c_get_id(e4storage *store, uint8_t* id);
-E4LT const uint8_t* e4c_get_id_cached(e4storage* store);
 
-E4LT int e4c_is_device_ctrltopic(e4storage *store, const char *topic);
-E4LT int e4c_getindex(e4storage *store, const char *topic);
-E4LT int e4c_gettopickey(uint8_t *key, e4storage *store, const int index);
-E4LT int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t *key);
-E4LT int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash);
-E4LT int e4c_reset_topics(e4storage *store);
 
 #if defined(E4_MODE_SYMKEY) || defined(E4_MODE_ALL)
-E4LT int e4c_set_idsymkey(e4storage *store, const uint8_t *key);
+E4LT int e4c_symkey_init(void* store);
+E4LT int e4c_symkey_configure_storage(void* store, const void* params);
+
+E4LT int e4c_symkey_set_id(void* store, const uint8_t *id);
+E4LT int e4c_symkey_get_id(void* store, uint8_t* id);
+E4LT const uint8_t* e4c_symkey_get_id_cached(void* store);
+
+E4LT int e4c_symkey_is_device_ctrltopic(void* store, const char *topic);
+E4LT int e4c_symkey_gettopicindex(void* store, const char *topic);
+E4LT int e4c_symkey_gettopickey(uint8_t *key, void* store, const int index);
+E4LT int e4c_symkey_set_topic_key(void* store, const uint8_t *topic_hash, const uint8_t *key);
+E4LT int e4c_symkey_remove_topic(void* store, const uint8_t *topic_hash);
+E4LT int e4c_symkey_reset_topics(void* store);
+E4LT int e4c_symkey_load(void* store, const char *path);
+E4LT int e4c_symkey_sync(void* store);
+E4LT int e4c_symkey_set_idkey(void* store, const uint8_t *key);
 /* This function returns a pointer to the symkey if the 
  * underlying storage supports loading that into main memory */
-E4LT const uint8_t* e4c_get_idsymkey_cached(e4storage *store);
+E4LT const uint8_t* e4c_symkey_get_idkey_cached(void* store);
 /* If the above function returns NULL, then the 
  * key can be copied out of storage as needed */
-E4LT int e4c_get_idsymkey(e4storage* store, uint8_t* key);
-#endif
+E4LT int e4c_symkey_get_idkey(void* store, uint8_t* key);
+#endif /* symkey or all */
+
 #if defined(E4_MODE_PUBKEY) || defined(E4_MODE_ALL)
 /* pubkey storage apis */
-E4LT int e4c_set_idpubkey(e4storage *store, const uint8_t *pubkey);
-E4LT int e4c_set_idseckey(e4storage *store, const uint8_t *key);
-E4LT int e4c_get_idseckey(e4storage* store, uint8_t *key);
-E4LT int e4c_get_idpubkey(e4storage* store, uint8_t *key);
+E4LT int e4c_pubkey_init(void* store);
+E4LT int e4c_pubkey_configure_storage(void* store, const void* params);
+
+E4LT int e4c_pubkey_set_id(void* store, const uint8_t *id);
+E4LT int e4c_pubkey_get_id(void* store, uint8_t* id);
+E4LT const uint8_t* e4c_pubkey_get_id_cached(void* store);
+
+E4LT int e4c_pubkey_is_device_ctrltopic(void* store, const char *topic);
+E4LT int e4c_pubkey_gettopicindex(void* store, const char *topic);
+E4LT int e4c_pubkey_gettopickey(uint8_t *key, void* store, const int index);
+E4LT int e4c_pubkey_set_topic_key(void* store, const uint8_t *topic_hash, const uint8_t *key);
+E4LT int e4c_pubkey_remove_topic(void* store, const uint8_t *topic_hash);
+E4LT int e4c_pubkey_reset_topics(void* store);
+E4LT int e4c_pubkey_load(void* store, const char *path);
+E4LT int e4c_pubkey_sync(void* store);
+E4LT int e4c_pubkey_set_idpubkey(void* store, const uint8_t *pubkey);
+E4LT int e4c_pubkey_set_idseckey(void* store, const uint8_t *key);
+E4LT int e4c_pubkey_get_idseckey(void* store, uint8_t *key);
+E4LT int e4c_pubkey_get_idpubkey(void* store, uint8_t *key);
 
 /* As with the symmetric key mode, these functions will return a 
  * pointer to the key if available and return NULL if not */
-E4LT const uint8_t* e4c_get_idseckey_cached(e4storage* store);
-E4LT const uint8_t* e4c_get_idpubkey_cached(e4storage* store);
+E4LT const uint8_t* e4c_pubkey_get_idseckey_cached(void* store);
+E4LT const uint8_t* e4c_pubkey_get_idpubkey_cached(void* store);
 
 /* APIs to store and retrieve the C2 shared secret */
-E4LT int e4c_set_c2sharedsecret(e4storage* store, const uint8_t* key);
-E4LT int e4c_get_c2sharedsecret(e4storage* store, uint8_t* key);
-E4LT const uint8_t* e4c_get_c2sharedsecret_cached(e4storage* store);
+E4LT int e4c_pubkey_set_c2sharedsecret(void* store, const uint8_t* key);
+E4LT int e4c_pubkey_get_c2sharedsecret(void* store, uint8_t* key);
+E4LT const uint8_t* e4c_pubkey_get_c2sharedsecret_cached(void* store);
 
-E4LT int e4c_getdeviceindex(e4storage *store, const uint8_t* id);
-E4LT int e4c_getdevicekey(uint8_t* key, e4storage *store, const int index);
-E4LT int e4c_set_device_key(e4storage *store, const uint8_t *id, const uint8_t *key);
-E4LT int e4c_remove_device(e4storage* store, const uint8_t* id);
-E4LT int e4c_reset_devices(e4storage* store);
-E4LT int e4c_set_c2_pubkey(e4storage* store, const uint8_t* key);
-E4LT int e4c_get_c2_pubkey(e4storage* store, uint8_t* key);
-E4LT const uint8_t* e4c_get_c2_pubkey_cached(e4storage* store);
-#endif
+E4LT int e4c_pubkey_getdeviceindex(void* store, const uint8_t* id);
+E4LT int e4c_pubkey_getdevicekey(uint8_t* key, void* store, const int index);
+E4LT int e4c_pubkey_set_device_key(void* store, const uint8_t *id, const uint8_t *key);
+E4LT int e4c_pubkey_remove_device(void* store, const uint8_t* id);
+E4LT int e4c_pubkey_reset_devices(void* store);
+E4LT int e4c_pubkey_set_c2_pubkey(void* store, const uint8_t* key);
+E4LT int e4c_pubkey_get_c2_pubkey(void* store, uint8_t* key);
+E4LT const uint8_t* e4c_pubkey_get_c2_pubkey_cached(void* store);
+#endif /* pubkey or all */
 
-#ifdef E4_STORE_FILE
-  #ifdef E4_MODE_PUBKEY
-    #include "e4/internal/e4c_pk_store_file.h"
-  #else
-    #include "e4/internal/e4c_store_file.h"
-  #endif
-#endif
-
-#ifdef E4_STORE_MEM
-  #ifdef E4_MODE_PUBKEY
-    #include "e4/internal/e4c_pk_store_mem.h"
-  #else
-    #include "e4/internal/e4c_store_mem.h"
-  #endif
-
-#endif
+#if defined(E4_MODE_PUBKEY) || defined(E4_MODE_ALL)
+  #include "e4/internal/e4c_pk_store_file.h"
+#endif /* pubkey or all */
+#if defined(E4_MODE_SYMKEY) || defined(E4_MODE_ALL)
+  #include "e4/internal/e4c_sym_store_file.h"
+#endif /* symkey or all */
 
 #ifdef __cplusplus
 }
-#endif
-#endif
+#endif /* C++ */
+#endif /* include guard */
 

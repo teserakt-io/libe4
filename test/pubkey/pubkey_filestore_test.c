@@ -22,7 +22,7 @@ int main(int argc, char** argv, char** envp) {
     int iteration = 0;
     size_t bytes_read = 0;
     FILE* urand_fd = NULL;
-    e4storage store;
+    e4storage_pubkey store;
 
     unsigned char topickey_current[E4_KEY_LEN]; 
     unsigned char topicname_tmp[SIZE_TOPICNAME/2];
@@ -40,35 +40,35 @@ int main(int argc, char** argv, char** envp) {
         goto exit;
     }
 
-    e4retcode = e4c_init(&store);
+    e4retcode = e4c_pubkey_init(&store);
     if (e4retcode != 0) {
         printf("Failed: unable to init e4store\n");
         returncode = 1;
         goto exit_close;
     }
     
-    e4c_set_storagelocation(&store, "/tmp/unittestspk.e4c");
+    e4c_pubkey_configure_storage(&store, "/tmp/unittestspk.e4c");
 
-    e4retcode = e4c_set_id(&store, pkkat[0].deviceid);
+    e4retcode = e4c_pubkey_set_id(&store, pkkat[0].deviceid);
     if (e4retcode != 0) {
         printf("Failed: unable to set id\n");
         returncode = 1;
         goto exit_close;
     }
     
-    e4retcode = e4c_set_idseckey(&store, pkkat[0].dev_edwards_seckey);
+    e4retcode = e4c_pubkey_set_idseckey(&store, pkkat[0].dev_edwards_seckey);
     if (e4retcode != 0) {
         printf("Failed: unable to set idseckey\n");
         returncode = 1;
         goto exit_close;
     }
-    e4retcode = e4c_set_idpubkey(&store, pkkat[0].dev_edwards_pubkey);
+    e4retcode = e4c_pubkey_set_idpubkey(&store, pkkat[0].dev_edwards_pubkey);
     if (e4retcode != 0) {
         printf("Failed: unable to set idpubkey\n");
         returncode = 1;
         goto exit_close;
     }
-    e4retcode = e4c_set_c2_pubkey(&store, pkkat[0].c2_edwards_pubkey);
+    e4retcode = e4c_pubkey_set_c2_pubkey(&store, pkkat[0].c2_edwards_pubkey);
     if (e4retcode != 0) {
         printf("Failed: unable to set c2 pubkey\n");
         returncode = 1;
@@ -107,7 +107,7 @@ int main(int argc, char** argv, char** envp) {
         }
 
         e4c_derive_topichash(topichash, E4_TOPICHASH_LEN, topicname_current);
-        e4c_set_topic_key(&store, topichash, topickey_current); 
+        e4c_pubkey_set_topic_key(&store, topichash, topickey_current); 
     }
 
     /*
@@ -121,21 +121,21 @@ int main(int argc, char** argv, char** envp) {
 
     /* set some device keys */
     for (iteration=0; iteration < NUM_PKCATS; iteration++) { 
-        e4c_set_device_key(&store, pkkat[iteration].otherdeviceid, pkkat[iteration].otherdevicepk);
+        e4c_pubkey_set_device_key(&store, pkkat[iteration].otherdeviceid, pkkat[iteration].otherdevicepk);
     }
 
     /* test sync and reload from file-based storage */
-    e4c_sync(&store);
+    e4c_pubkey_sync(&store);
 #ifdef E4_STORE_FILE
     memset(&store, 0, sizeof(store));
 #endif
-    e4c_load(&store, "/tmp/unittestspk.e4c");
+    e4c_pubkey_load(&store, "/tmp/unittestspk.e4c");
 
     /* let's make use of the read API to check things are working: */
 
     uint8_t c2_pubkey_reread[32];
 
-    e4retcode = e4c_get_c2_pubkey(&store, c2_pubkey_reread);
+    e4retcode = e4c_pubkey_get_c2_pubkey(&store, c2_pubkey_reread);
     if (e4retcode != 0) {
         printf("Failed: unable to get c2 pubkey\n");
         returncode = 1;
