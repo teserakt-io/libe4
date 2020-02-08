@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef _E4C_STORE_COMMON_H_
-#define _E4C_STORE_COMMON_H_
+#ifndef E4C_STORE_COMMON_H
+#define E4C_STORE_COMMON_H
 
 typedef struct _e4_topic_key
 {
@@ -25,5 +25,5 @@ typedef struct _e4_topic_key
     uint8_t key[E4_KEY_LEN];
 } topic_key;
 
-#endif
+#endif /* E4C_STORE_COMMON_H */
 

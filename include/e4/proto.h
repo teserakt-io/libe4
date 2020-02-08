@@ -46,4 +46,4 @@
 
 #define E4_PK_TOPICMSGHDR_LEN (E4_TAG_LEN + E4_TIMESTAMP_LEN + E4_ID_LEN)
 
-#endif
+#endif /* E4_PROTO_H */

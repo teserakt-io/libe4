@@ -18,8 +18,8 @@
 
 
 
-#ifndef _E4C_STORE_FILE_H_
-#define _E4C_STORE_FILE_H_
+#ifndef E4C_STORE_FILE_H
+#define E4C_STORE_FILE_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -47,4 +47,4 @@ typedef struct _e4storage_symkey
     uint8_t ctrltopic[E4_TOPICHASH_LEN];
 } e4storage_symkey;
 
-#endif
+#endif /* E4C_STORE_FILE_H */

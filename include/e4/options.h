@@ -31,4 +31,4 @@
  * their keys. */
 #define E4_OPTION_IGNORE_MISSING_PUBKEY    0x02
 
-#endif
+#endif /* E4_OPTIONS_H */

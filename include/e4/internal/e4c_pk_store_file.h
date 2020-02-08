@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef _E4C_STORE_PK_FILE_H_
-#define _E4C_STORE_PK_FILE_H_
+#ifndef E4C_STORE_PK_FILE_H
+#define E4C_STORE_PK_FILE_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -64,4 +64,4 @@ typedef struct _e4storage_pubkey
     uint8_t ctrltopic[E4_TOPICHASH_LEN];
 } e4storage_pubkey;
 
-#endif
+#endif /* E4C_STORE_PK_FILE_H */
