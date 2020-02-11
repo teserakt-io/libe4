@@ -16,27 +16,25 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
-#ifndef _E4C_STORE_MEM_H_
-#define _E4C_STORE_MEM_H_
+
+
+#ifndef E4C_STORE_FILE_H
+#define E4C_STORE_FILE_H
 
 #include <stddef.h>
 #include <stdint.h>
+#include <fcntl.h>
 
-
+#ifndef E4_TOPICS_MAX
 #define E4_TOPICS_MAX 100
+#endif
+
 #define E4_MAX_PATH 255
 
 /* In memory structures that represent the file. */
+#include "e4c_common_storage.h"
 
-typedef struct
-{
-    uint8_t topic[E4_TOPICHASH_LEN];
-    uint8_t key[E4_KEY_LEN];
-} topic_key;
-
-
-struct _e4storage
+typedef struct _e4storage_symkey
 {
     /* These fields are persisted by the sync command */
     uint8_t id[E4_ID_LEN];
@@ -47,6 +45,6 @@ struct _e4storage
     /* These fields are set at run time only */
     char filepath[E4_MAX_PATH + 1];
     uint8_t ctrltopic[E4_TOPICHASH_LEN];
-};
+} e4storage_symkey;
 
-#endif
+#endif /* E4C_STORE_FILE_H */

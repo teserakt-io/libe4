@@ -16,38 +16,19 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
+#ifndef E4_OPTIONS_H
+#define E4_OPTIONS_H
 
-#ifndef _E4C_STORE_FILE_H_
-#define _E4C_STORE_FILE_H_
+/* Options bits for e4c crypto functions: */
 
-#include <stddef.h>
-#include <stdint.h>
+/* Disable checks on message timestamp within acceptable window 
+ * Packet timestamps are still covered by authenticated encryption, 
+ * but older messages are allowed */
+#define E4_OPTION_IGNORE_TIMESTAMP         0x01
+/* Disable failure if we do not have a client public key to validate 
+ * signatures. Corrupt signatures will ALWAYS fail, this is only 
+ * for the case where too many clients exist for us to store all of 
+ * their keys. */
+#define E4_OPTION_IGNORE_MISSING_PUBKEY    0x02
 
-
-#define E4_TOPICS_MAX 100
-#define E4_MAX_PATH 255
-
-/* In memory structures that represent the file. */
-
-typedef struct
-{
-    uint8_t topic[E4_TOPICHASH_LEN];
-    uint8_t key[E4_KEY_LEN];
-} topic_key;
-
-
-struct _e4storage
-{
-    /* These fields are persisted by the sync command */
-    uint8_t id[E4_ID_LEN];
-    uint8_t key[E4_KEY_LEN];
-    uint16_t topiccount;
-    topic_key topics[E4_TOPICS_MAX];
-
-    /* These fields are set at run time only */
-    char filepath[E4_MAX_PATH + 1];
-    uint8_t ctrltopic[E4_TOPICHASH_LEN];
-};
-
-#endif
+#endif /* E4_OPTIONS_H */

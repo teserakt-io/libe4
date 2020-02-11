@@ -32,3 +32,18 @@ jobs:
       run: CC=clang LD=clang E4_OUTPUT_DIR=qa/aubsan/pubkey E4_CFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" E4_LDFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" CSTD=c89 CONF=pubkey make test
     - name: make test (MEMSAN)
       run: CC=clang LD=clang E4_OUTPUT_DIR=qa/memsan/pubkey E4_CFLAGS="-fsanitize=memory -fno-omit-frame-pointer" E4_LDFLAGS="-fsanitize=memory -fno-omit-frame-pointer" CSTD=c89 CONF=pubkey make test
+  
+  all:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: make clean
+      run: CSTD=c89 CONF=all make clean
+    - name: make
+      run: CSTD=c89 CONF=all make
+    - name: make test (ASAN/UBSAN)
+      run: CC=clang LD=clang E4_OUTPUT_DIR=qa/aubsan/all E4_CFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" E4_LDFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" CSTD=c89 CONF=all make test
+    - name: make test (MEMSAN)
+      run: CC=clang LD=clang E4_OUTPUT_DIR=qa/memsan/all E4_CFLAGS="-fsanitize=memory -fno-omit-frame-pointer" E4_LDFLAGS="-fsanitize=memory -fno-omit-frame-pointer" CSTD=c89 CONF=all make test

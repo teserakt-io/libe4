@@ -1,13 +1,17 @@
 
-OBJS = \
-       $(OBJDIR)/e4util.$O                \
-       $(OBJDIR)/crypto/aes_siv.$O        \
-       $(OBJDIR)/crypto/aes256enc_ref.$O  \
-       $(OBJDIR)/crypto/sha3.$O           \
-       $(OBJDIR)/crypto/keccakf1600.$O    \
-       $(OBJDIR)/crypto/test_aes_siv.$O   \
-       $(OBJDIR)/crypto/test_sha3.$O      \
-       $(OBJDIR)/strlcpy.$O               \
+E4_PUB_SRCS = \
+       $(SRCDIR)/crypto/curve25519/curve25519-donna.c \
+       $(SRCDIR)/crypto/ed25519/add_scalar.c \
+       $(SRCDIR)/crypto/ed25519/fe.c \
+       $(SRCDIR)/crypto/ed25519/ge.c \
+       $(SRCDIR)/crypto/ed25519/sc.c \
+       $(SRCDIR)/crypto/ed25519/sign.c \
+       $(SRCDIR)/crypto/ed25519/verify.c \
+       $(SRCDIR)/crypto/sha512.c \
+       $(SRCDIR)/crypto/xed25519.c \
+       $(SRCDIR)/e4pkcclient.c
+
+E4_PUB_OBJS = \
        $(OBJDIR)/crypto/curve25519/curve25519-donna.$O \
        $(OBJDIR)/crypto/ed25519/add_scalar.$O \
        $(OBJDIR)/crypto/ed25519/fe.$O \
@@ -20,10 +24,12 @@ OBJS = \
        $(OBJDIR)/e4pkcclient.$O
 
 ifeq ("$(STORE)", "file")
-OBJS := $(OBJS) $(OBJDIR)/e4c_pk_store_file.$O 
+E4_PUB_SRCS := $(E4_PUB_SRCS) $(SRCDIR)/e4c_pk_store_file.c 
+E4_PUB_OBJS := $(E4_PUB_OBJS) $(OBJDIR)/e4c_pk_store_file.$O 
 endif
 
 ifeq ("$(STORE)", "mem")
-OBJS := $(OBJS) $(OBJDIR)/e4c_pk_store_mem.$O
+E4_PUB_SRCS := $(E4_PUB_SRCS) $(SRCDIR)/e4c_pk_store_mem.c
+E4_PUB_OBJS := $(E4_PUB_OBJS) $(OBJDIR)/e4c_pk_store_mem.$O
 endif
 

@@ -20,43 +20,49 @@
 #include <string.h>
 
 #include "e4/e4.h"
-#include "e4/internal/e4c_store_mem.h"
+#include "e4/internal/e4c_sym_store_file.h"
 #include "e4/strlcpy.h"
 #include "e4/util.h"
 
 const char E4V1_MAGIC[4] = "E41P";
 
-int e4c_init(e4storage *store)
+uint32_t e4c_symkey_get_storage_caps(void* s) {
+    return E4_STORECAP_SYMKEY;
+}
+
+int e4c_symkey_init(void* s)
 {
+    e4storage_symkey* store = (e4storage_symkey*)s;
     ZERO(store->id);
     ZERO(store->key);
     ZERO(store->ctrltopic);
     store->topiccount = 0;
     ZERO(store->topics);
     ZERO(store->filepath);
-    return 0;
+    return E4_RESULT_OK;
 }
 
-int e4c_set_storagelocation(e4storage *store, const char *path)
+int e4c_symkey_configure_storage(void* s, const void* params)
 {
-    return 0;
+    return E4_RESULT_OK;
 }
 
-int e4c_load(e4storage *store, const char *path)
+int e4c_symkey_load(void* s, const char *path)
 {
-    return 0;
+    return E4_RESULT_OK;
 }
 
-int e4c_sync(e4storage *store)
+int e4c_symkey_sync(void* s)
 {
     return E4_RESULT_OK;
 }
 
 
-int e4c_set_id(e4storage *store, const uint8_t *id)
+int e4c_symkey_set_id(void* s, const uint8_t *id)
 {
     int r = E4_RESULT_OK;
     char controltopic[E4_CTRLTOPIC_LEN+1];
+    e4storage_symkey* store = (e4storage_symkey*)s;
     ZERO(controltopic);
 
     r = e4c_derive_control_topic(controltopic, E4_CTRLTOPIC_LEN + 1, id);
@@ -74,17 +80,42 @@ exit:
     return r;
 }
 
+int e4c_symkey_get_id(void* s, uint8_t* id) {
+    e4storage_symkey* store = (e4storage_symkey*)s;
+    memmove(id, store->id, sizeof(store->id));
+    return E4_RESULT_OK;
+}
 
-int e4c_set_idkey(e4storage *store, const uint8_t *key)
+const uint8_t* e4c_symkey_get_id_cached(void* s) {
+    e4storage_symkey* store = (e4storage_symkey*)s;
+    return store->id;
+}
+
+int e4c_symkey_set_idkey(void* s, const uint8_t *key)
 {
+    e4storage_symkey* store = (e4storage_symkey*)s;
     memmove(store->key, key, sizeof(store->key));
     return E4_RESULT_OK;
 }
 
-int e4c_getindex(e4storage *store, const char *topic)
+int e4c_symkey_get_idkey(void* s, uint8_t *key)
+{
+    e4storage_symkey* store = (e4storage_symkey*)s;
+    memmove(key, store->key, sizeof(store->key));
+    return E4_RESULT_OK;
+}
+
+const uint8_t* e4c_symkey_get_idkey_cached(void* s)
+{
+    e4storage_symkey* store = (e4storage_symkey*)s;
+    return store->key;
+}
+
+int e4c_symkey_gettopicindex(void* s, const char *topic)
 {
     int i;
     uint8_t hash[E4_TOPICHASH_LEN];
+    e4storage_symkey* store = (e4storage_symkey*)s;
 
     /* hash the topic */
     if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
@@ -103,9 +134,10 @@ int e4c_getindex(e4storage *store, const char *topic)
     return i;
 }
 
-int e4c_is_device_ctrltopic(e4storage *store, const char *topic)
+int e4c_symkey_is_device_ctrltopic(void* s, const char *topic)
 {
     uint8_t hash[E4_TOPICHASH_LEN];
+    e4storage_symkey* store = (e4storage_symkey*)s;
 
     /* hash the topic */
     if (e4c_derive_topichash(hash, E4_TOPICHASH_LEN, topic) != 0) {
@@ -115,20 +147,22 @@ int e4c_is_device_ctrltopic(e4storage *store, const char *topic)
     return memcmp(store->ctrltopic, hash, E4_TOPICHASH_LEN);
 }
 
-int e4c_gettopickey(uint8_t *key, e4storage *store, const int index)
+int e4c_symkey_gettopickey(uint8_t *key, void* s, const int index)
 {
+    e4storage_symkey* store = (e4storage_symkey*)s;
 
     if (index < 0 || index >= store->topiccount)
         return E4_ERROR_TOPICKEY_MISSING;
 
     memcpy(key, store->topics[index].key, E4_KEY_LEN);
 
-    return 0;
+    return E4_RESULT_OK;
 }
 
-int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t *key)
+int e4c_symkey_set_topic_key(void* s, const uint8_t *topic_hash, const uint8_t *key)
 {
     int i;
+    e4storage_symkey* store = (e4storage_symkey*)s;
 
     for (i = 0; i < store->topiccount; i++)
     {
@@ -147,12 +181,13 @@ int e4c_set_topic_key(e4storage *store, const uint8_t *topic_hash, const uint8_t
         store->topiccount++;
     }
 
-    return e4c_sync(store);
+    return e4c_symkey_sync(store);
 }
 
-int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash)
+int e4c_symkey_remove_topic(void* s, const uint8_t *topic_hash)
 {
     int i, j;
+    e4storage_symkey* store = (e4storage_symkey*)s;
     topic_key *topic_keys = store->topics;
 
     for (i = 0; i < store->topiccount; i++)
@@ -168,31 +203,32 @@ int e4c_remove_topic(e4storage *store, const uint8_t *topic_hash)
             ZERO(topic_keys[store->topiccount]);
             store->topiccount--;
 
-            return e4c_sync(store);
+            return e4c_symkey_sync(store);
         }
     }
 
     return E4_ERROR_TOPICKEY_MISSING;
 }
 
-int e4c_reset_topics(e4storage *store)
+int e4c_symkey_reset_topics(void* s)
 {
+    e4storage_symkey* store = (e4storage_symkey*)s;
 
     if (store->topiccount > 0)
     {
         store->topiccount = 0;
     }
 
-    e4c_sync(store);
+    e4c_symkey_sync(store);
 
-    return 0;
+    return E4_RESULT_OK;
 }
 
-/*#ifdef DEBUG */
+#ifdef DEBUG
 
-void e4c_debug_print(e4storage *store)
+void e4c_symkey_debug_print(void* s)
 {
     return;
 }
 
-/*#endif*/
+#endif

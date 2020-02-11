@@ -1,4 +1,7 @@
 
+SRCS=$(E4_COMMON_SRCS) $(E4_SYM_SRCS)
+OBJS=$(E4_COMMON_OBJS) $(E4_SYM_OBJS)
+
 sym_lib: setup sym_header $(OBJS)
 	mkdir -p $(LIBDIR); \
         cp -rfv $(INCDIR)/* $(OUTINCDIR)/; \
@@ -9,10 +12,13 @@ sym_so: setup sym_header $(OBJS)
         cp -rfv $(INCDIR)/* $(OUTINCDIR)/; \
 	$(CC) $(LDSOFLAGS) $(OBJS) -o $(LIBSO)
 
-.PHONY sym_header: $(BUILDDIR)/include/e4config/e4_config.h
+sym_header: $(BUILDDIR)/include/e4config/e4_config.h
 
 $(BUILDDIR)/include/e4config/e4_config.h:
 	echo '#define E4_MODE_SYMKEY 1' > $@
+ifeq ("$(STORE)", "none")
+	echo "#define E4_STORE_NONE 1" >> $@
+endif
 ifeq ("$(STORE)", "mem")
 	echo "#define E4_STORE_MEM 1" >> $@
 endif

@@ -1,16 +1,9 @@
 
-E4TESTOBJS = $(TESTOBJDIR)/util.$O \
-             $(TESTOBJDIR)/crypto.$O \
-	     $(TESTOBJDIR)/pubkey_file.$O 
+E4TESTOBJS_PK = $(TESTOBJDIR)/util.$O \
+                $(TESTOBJDIR)/crypto.$O \
+	        $(TESTOBJDIR)/pubkey_file.$O 
 
-$(TESTOBJDIR)/util.$O: test/util.c
-	$(CC) $(TESTCFLAGS) $(INCLUDES) -c $< -o $@
-
-$(TESTOBJDIR)/crypto.$O: test/crypto.c
-	$(CC) $(TESTCFLAGS) $(INCLUDES) -c $< -o $@
-
-$(TESTOBJDIR)/siv.$O: test/siv.c
-	$(CC) $(TESTCFLAGS) $(INCLUDES) -c $< -o $@
+E4TESTOBJS += $(E4TESTOBJS_PK)
 
 $(TESTOBJDIR)/pubkey_file.$O: test/pubkey/pubkey_filestore_test.c
 	$(CC) $(TESTCFLAGS) $(INCLUDES) -c $< -o $@
@@ -33,9 +26,6 @@ $(TESTDIR)/util: $(TESTOBJDIR)/util.$O
 $(TESTDIR)/crypto: $(TESTOBJDIR)/crypto.$O
 	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
 
-$(TESTDIR)/siv_kat: $(TESTOBJDIR)/siv.$O
-	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
-
 $(TESTDIR)/pubkey_file: $(TESTOBJDIR)/pubkey_file.$O
 	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
 
@@ -52,24 +42,18 @@ $(TESTDIR)/ed25519_test: $(TESTOBJDIR)/ed25519_test.$O
 	$(CC) $(TESTLDFLAGS) $< $(LIB) -o $@
 
 PUBKEY_TESTS = \
-    $(TESTDIR)/util                  \
-    $(TESTDIR)/crypto                \
-    $(TESTDIR)/siv_kat  \
     $(TESTDIR)/pubkey_file           \
     $(TESTDIR)/pubkey_e4cmd          \
     $(TESTDIR)/pubkey_e4topicmsg     \
     $(TESTDIR)/pubkey_crypto_test
 
-E4TESTS += $(PUBKEY_TESTS)
+E4TESTS = $(COMMON_TESTS) $(PUBKEY_TESTS)
 
 testexec_pk:
-	./$(TESTDIR)/util
-	./$(TESTDIR)/crypto
-	./$(TESTDIR)/siv_kat
 	./$(TESTDIR)/pubkey_file
 	./$(TESTDIR)/pubkey_e4cmd
 	./$(TESTDIR)/pubkey_e4topicmsg
 	./$(TESTDIR)/pubkey_crypto_test
 
-E4TESTEXEC += testexec_pk
+E4TESTEXEC = testexec_common testexec_pk
 

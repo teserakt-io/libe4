@@ -35,6 +35,6 @@ extern "C" {
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* C++ */
 
-#endif
+#endif /* E4_INLINE_H */

@@ -28,5 +28,5 @@ size_t strlcpy(char *dst, const char *src, size_t siz);
 
 #ifdef __cplusplus
 }
-#endif
-#endif
+#endif /* C++ */
+#endif /* include guard */

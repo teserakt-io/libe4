@@ -16,20 +16,14 @@
  * limitations under the License.
  */
 
-#ifndef E4_STDINT_H
-#define E4_STDINT_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef E4C_STORE_COMMON_H
+#define E4C_STORE_COMMON_H
 
-#if __STDC_VERSION__ >= 199901L
-   #include <stddef.h>
-   #include <stdint.h>
-#else
-   #include "e4/pstdint.h"
-#endif
+typedef struct _e4_topic_key
+{
+    uint8_t topic[E4_TOPICHASH_LEN];
+    uint8_t key[E4_KEY_LEN];
+} topic_key;
 
-#ifdef __cplusplus
-}
-#endif /* C++ */
-#endif /* E4_STDINT_H */
+#endif /* E4C_STORE_COMMON_H */
+

@@ -56,5 +56,5 @@ int e4c_derive_control_topic(char *topic, const size_t topiclen, const uint8_t *
 int e4c_hex_decode(char *bytes, const size_t byteslen, const char *hexstring, const size_t hexstringlen);
 #ifdef __cplusplus
 }
-#endif
-#endif
+#endif /* C++ */
+#endif /* E4UTIL_H */
