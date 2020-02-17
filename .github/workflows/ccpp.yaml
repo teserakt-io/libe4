@@ -3,6 +3,19 @@ name: C/C++ CI
 on: [push]
 
 jobs:
+
+  spa:
+    runs-on: ubuntu-latest
+    container: diagprov/clang-build:latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: clang-tidy (c89/symkey)
+      run: CC=clang LD=clang E4_OUTPUT_DIR=qa/tidy/symkey CSTD=c89 CONF=symkey make tidy
+    - name: clang-tidy (c89/pubkey)
+      run: CC=clang LD=clang E4_OUTPUT_DIR=qa/tidy/pubkey CSTD=c89 CONF=pubkey make tidy
+    - name: clang-tidy (c11/all)
+      run: CC=clang LD=clang E4_OUTPUT_DIR=qa/tidy/all CSTD=c11 CONF=all make tidy
+
   symkey:
 
     runs-on: ubuntu-latest
