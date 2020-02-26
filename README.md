@@ -3,6 +3,8 @@
 
 # libe4
 
+![C/C++ CI](https://github.com/teserakt-io/libe4/workflows/C/C++%20CI/badge.svg?branch=develop&event=push)
+
   * [Introduction](#introduction)
   * [When to use](#when-to-use)
   * [Building](#building)
