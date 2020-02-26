@@ -47,7 +47,7 @@ format:
 	clang-format -i src/*.c src/crypto/*.c include/e4/*.h include/e4/crypto/*.h include/e4/internal/*.h
 
 tidy: setup $(BUILDDIR)/include/e4config/e4_config.h
-	clang-tidy -checks="-*,clang-analyzer-core.*" $(SRCS) -- $(CFLAGS) $(INCLUDES) $(CONFIG_DEFINES)
+	$(CLANGTIDY) -checks="-*,clang-analyzer-core.*" $(SRCS) -- $(CFLAGS) $(INCLUDES) $(CONFIG_DEFINES)
 
 checksec:
 	checksec --format=cli --file=build/all/lib/libe4.so.1.0.0
