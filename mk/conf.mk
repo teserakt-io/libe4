@@ -34,9 +34,18 @@ ifeq ("$(STORE)", "file")
 CONFIG_DEFINES += -DE4_STORE_FILE
 endif
 
+# tools for specific workflows (so their location can be custom)
+CLANGTIDY ?= clang-tidy
+
+codesize: lib
+	@$(eval CODESIZE=`wc -c < "$(LIB)"`)
+	@echo "Code size in current configuration:"
+	@echo "$(CODESIZE)"
+
 
 .PHONY postbuild_config_echo:
 	$(info Build Successful)
+	@$(eval CODESIZE=`wc -c < "$(LIB)"`)
 	@echo ""
 	@echo "================================================================================="
 	@echo ""
@@ -54,4 +63,8 @@ ifeq ("$(CONF)", "all")
 	@echo "Shared Library: $(LIBSO)"
 endif
 	@echo ""
+	@echo "*** Code Size (static lib) in bytes: $(CODESIZE) ***"
+	@echo ""
 	@echo "================================================================================="
+
+
