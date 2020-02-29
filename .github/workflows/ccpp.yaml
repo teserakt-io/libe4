@@ -6,7 +6,7 @@ jobs:
 
   spa:
     runs-on: ubuntu-latest
-    container: diagprov/clang-build:latest
+    container: diagprov/buildenv-clang-tidy:latest
     steps:
     - uses: actions/checkout@v1
     - name: clang-tidy (c89/symkey)
